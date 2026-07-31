@@ -523,10 +523,13 @@ def parse_html_page(html_content, url):
         if desc:
             metadata["description"] = desc
     
-    # --- EMBED ---
+    # --- EMBED - FIX: Tambahkan https:// jika URL dimulai dengan // ---
     iframe = soup.find('iframe')
     if iframe and iframe.get('src'):
         embed_url = iframe['src'].strip()
+        # Fix: Jika URL dimulai dengan //, tambahkan https:
+        if embed_url.startswith('//'):
+            embed_url = 'https:' + embed_url
         metadata["embed_url"] = embed_url
         parsed = urlparse(embed_url)
         metadata["embed_platform"] = parsed.netloc
@@ -536,6 +539,8 @@ def parse_html_page(html_content, url):
             source = video.find('source')
             if source and source.get('src'):
                 embed_url = source['src'].strip()
+                if embed_url.startswith('//'):
+                    embed_url = 'https:' + embed_url
                 metadata["embed_url"] = embed_url
                 parsed = urlparse(embed_url)
                 metadata["embed_platform"] = parsed.netloc
@@ -543,8 +548,11 @@ def parse_html_page(html_content, url):
             for a in soup.find_all('a', href=True):
                 href = a['href']
                 if any(x in href for x in ['dailymotion', 'youtube', 'ok.ru', 'vimeo']):
-                    metadata["embed_url"] = href
-                    parsed = urlparse(href)
+                    embed_url = href.strip()
+                    if embed_url.startswith('//'):
+                        embed_url = 'https:' + embed_url
+                    metadata["embed_url"] = embed_url
+                    parsed = urlparse(embed_url)
                     metadata["embed_platform"] = parsed.netloc
                     break
     
@@ -618,6 +626,8 @@ def parse_html_with_regex(html_content, url):
         match = re.search(r'<iframe[^>]+src="([^"]+)"', html_content, re.IGNORECASE)
         if match:
             embed_url = match.group(1).strip()
+            if embed_url.startswith('//'):
+                embed_url = 'https:' + embed_url
             metadata["embed_url"] = embed_url
             parsed = urlparse(embed_url)
             metadata["embed_platform"] = parsed.netloc
@@ -625,6 +635,8 @@ def parse_html_with_regex(html_content, url):
             match = re.search(r'<video[^>]*>.*?<source[^>]+src="([^"]+)"', html_content, re.IGNORECASE | re.DOTALL)
             if match:
                 embed_url = match.group(1).strip()
+                if embed_url.startswith('//'):
+                    embed_url = 'https:' + embed_url
                 metadata["embed_url"] = embed_url
                 parsed = urlparse(embed_url)
                 metadata["embed_platform"] = parsed.netloc
@@ -632,6 +644,8 @@ def parse_html_with_regex(html_content, url):
                 match = re.search(r'href="([^"]*(?:dailymotion|youtube|ok\.ru|vimeo)[^"]*)"', html_content, re.IGNORECASE)
                 if match:
                     embed_url = match.group(1).strip()
+                    if embed_url.startswith('//'):
+                        embed_url = 'https:' + embed_url
                     metadata["embed_url"] = embed_url
                     parsed = urlparse(embed_url)
                     metadata["embed_platform"] = parsed.netloc

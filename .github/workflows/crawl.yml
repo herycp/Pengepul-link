@@ -21,25 +21,43 @@ jobs:
   crawl:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install requests cloudscraper beautifulsoup4 lxml
+          
       - name: Run crawler
+        id: crawler
         run: |
           if [ "${{ github.event.inputs.force_download }}" == "true" ]; then
             python crawl_9tsu.py --download
           else
             python crawl_9tsu.py
           fi
+          
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+          
       - name: Commit and push changes
+        if: steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: update database and json [skip ci]'
@@ -47,3 +65,8 @@ jobs:
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+          push_options: '--force'
+          
+      - name: No changes
+        if: steps.check_changes.outputs.changes == 'false'
+        run: echo "✅ Tidak ada perubahan, skip commit"

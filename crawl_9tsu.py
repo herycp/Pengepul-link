@@ -5,6 +5,7 @@ import re
 import time
 from datetime import datetime
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 # ============================================================
 # 1. KONFIGURASI
@@ -30,128 +31,12 @@ HEADERS = {
 
 
 # ============================================================
-# 2. EKSTRAKSI SEASON & EPISODE DARI HTML
+# 2. EKSTRAKSI METADATA DENGAN BEAUTIFULSOUP
 # ============================================================
 
-def extract_season_episode(html_content):
+def extract_metadata_with_bs4(url, html_content, save_debug=False):
     """
-    Ekstrak season dan episode dari konten HTML
-    """
-    season = None
-    episode = None
-    
-    # Pola 1: "Season11　第10話" atau "Season 11 第10話"
-    pattern1 = r'Season\s*(\d+)\s*[　]?\s*第(\d+)話'
-    match = re.search(pattern1, html_content, re.IGNORECASE)
-    if match:
-        return int(match.group(1)), int(match.group(2))
-    
-    # Pola 2: "第3話" (hanya episode) -> season default = 1
-    pattern2 = r'第(\d+)話'
-    match = re.search(pattern2, html_content)
-    if match:
-        return 1, int(match.group(1))
-    
-    # Pola 3: "S02E05" atau "S2E5"
-    pattern3 = r'[sS](\d+)[eE](\d+)'
-    match = re.search(pattern3, html_content)
-    if match:
-        return int(match.group(1)), int(match.group(2))
-    
-    return season, episode
-
-
-# ============================================================
-# 3. EKSTRAKSI TITLE BERSIH DARI HTML
-# ============================================================
-
-def extract_cleaned_title(html_content):
-    """
-    Ekstrak title bersih (tanpa season/episode/nama situs)
-    Prioritas: article:section > og:title > title
-    """
-    
-    # 1. Coba dari article:section (paling bersih)
-    match = re.search(r'<meta\s+property="article:section"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-    if match:
-        title = match.group(1).strip()
-        if title:
-            return title
-    
-    # 2. Coba dari og:title
-    match = re.search(r'<meta\s+property="og:title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-    if match:
-        title = match.group(1).strip()
-        # Bersihkan dari teks tambahan
-        title = re.sub(r'\s*第\d+話\s*', '', title)
-        title = re.sub(r'\s*Season\s*\d+\s*', '', title, flags=re.IGNORECASE)
-        title = re.sub(r'\s*[-|]\s*9tsu.*$', '', title)
-        title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', title)
-        title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', title)
-        title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', title)
-        title = title.strip()
-        if title:
-            return title
-    
-    # 3. Coba dari <title>
-    match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
-    if match:
-        title = match.group(1).strip()
-        title = re.sub(r'\s*第\d+話\s*', '', title)
-        title = re.sub(r'\s*Season\s*\d+\s*', '', title, flags=re.IGNORECASE)
-        title = re.sub(r'\s*[-|]\s*9tsu.*$', '', title)
-        title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', title)
-        title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', title)
-        title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', title)
-        title = title.strip()
-        if title:
-            return title
-    
-    return None
-
-
-# ============================================================
-# 4. EKSTRAKSI ORIGINAL TITLE (MENTAH)
-# ============================================================
-
-def extract_original_title(html_content):
-    """
-    Ekstrak original title (mentah dari halaman)
-    """
-    # Coba dari og:title
-    match = re.search(r'<meta\s+property="og:title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-    if match:
-        return match.group(1).strip()
-    
-    # Coba dari <title>
-    match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
-    if match:
-        return match.group(1).strip()
-    
-    return None
-
-
-# ============================================================
-# 5. EKSTRAKSI IMAGE
-# ============================================================
-
-def extract_image(html_content):
-    """
-    Ekstrak URL gambar dari meta og:image
-    """
-    match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-    if match:
-        return match.group(1).strip()
-    return None
-
-
-# ============================================================
-# 6. EKSTRAKSI METADATA LENGKAP
-# ============================================================
-
-def extract_metadata(url, html_content):
-    """
-    Ekstrak semua metadata dari halaman
+    Ekstrak metadata menggunakan BeautifulSoup
     """
     metadata = {
         "url": url,
@@ -163,42 +48,112 @@ def extract_metadata(url, html_content):
         "source_page": BASE_URL
     }
     
-    # Original title
-    metadata["original_title"] = extract_original_title(html_content)
+    soup = BeautifulSoup(html_content, 'html.parser')
     
-    # Title bersih
-    metadata["title"] = extract_cleaned_title(html_content)
+    # --- 1. ORIGINAL TITLE ---
+    # Coba dari meta property="og:title"
+    og_title = soup.find('meta', property='og:title')
+    if og_title and og_title.get('content'):
+        metadata["original_title"] = og_title['content'].strip()
+    else:
+        # Coba dari <title>
+        title_tag = soup.find('title')
+        if title_tag:
+            metadata["original_title"] = title_tag.get_text(strip=True)
     
-    # Jika title masih None, gunakan original_title yang sudah dibersihkan
-    if not metadata["title"] and metadata["original_title"]:
-        metadata["title"] = metadata["original_title"]
-        metadata["title"] = re.sub(r'\s*第\d+話\s*', '', metadata["title"])
-        metadata["title"] = re.sub(r'\s*Season\s*\d+\s*', '', metadata["title"], flags=re.IGNORECASE)
-        metadata["title"] = re.sub(r'\s*[-|]\s*9tsu.*$', '', metadata["title"])
-        metadata["title"] = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', metadata["title"])
-        metadata["title"] = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', metadata["title"])
-        metadata["title"] = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', metadata["title"])
-        metadata["title"] = metadata["title"].strip()
+    # --- 2. TITLE BERSIH ---
+    # Prioritas: article:section > og:title > h1 > title
+    cleaned_title = None
     
-    # Season & Episode
-    season, episode = extract_season_episode(html_content)
-    metadata["season"] = season
-    metadata["episode"] = episode
+    # 2a. Coba dari meta property="article:section"
+    article_section = soup.find('meta', property='article:section')
+    if article_section and article_section.get('content'):
+        cleaned_title = article_section['content'].strip()
     
-    # Image
-    metadata["image"] = extract_image(html_content)
+    # 2b. Jika tidak ada, coba dari og:title
+    if not cleaned_title and og_title and og_title.get('content'):
+        cleaned_title = og_title['content'].strip()
+        # Bersihkan
+        cleaned_title = re.sub(r'\s*第\d+話\s*', '', cleaned_title)
+        cleaned_title = re.sub(r'\s*Season\s*\d+\s*', '', cleaned_title, flags=re.IGNORECASE)
+        cleaned_title = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned_title)
+        cleaned_title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned_title)
+        cleaned_title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned_title)
+        cleaned_title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned_title)
+        cleaned_title = cleaned_title.strip()
+    
+    # 2c. Coba dari <h1>
+    if not cleaned_title:
+        h1 = soup.find('h1')
+        if h1:
+            cleaned_title = h1.get_text(strip=True)
+            cleaned_title = re.sub(r'\s*第\d+話\s*', '', cleaned_title)
+            cleaned_title = re.sub(r'\s*Season\s*\d+\s*', '', cleaned_title, flags=re.IGNORECASE)
+            cleaned_title = cleaned_title.strip()
+    
+    # 2d. Coba dari <title> (fallback)
+    if not cleaned_title:
+        title_tag = soup.find('title')
+        if title_tag:
+            cleaned_title = title_tag.get_text(strip=True)
+            cleaned_title = re.sub(r'\s*第\d+話\s*', '', cleaned_title)
+            cleaned_title = re.sub(r'\s*Season\s*\d+\s*', '', cleaned_title, flags=re.IGNORECASE)
+            cleaned_title = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned_title)
+            cleaned_title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned_title)
+            cleaned_title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned_title)
+            cleaned_title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned_title)
+            cleaned_title = cleaned_title.strip()
+    
+    metadata["title"] = cleaned_title
+    
+    # --- 3. SEASON & EPISODE ---
+    # Cari di seluruh teks HTML
+    html_text = soup.get_text()
+    
+    # Pola 1: "Season11　第10話"
+    pattern1 = r'Season\s*(\d+)\s*[　]?\s*第(\d+)話'
+    match = re.search(pattern1, html_text, re.IGNORECASE)
+    if match:
+        metadata["season"] = int(match.group(1))
+        metadata["episode"] = int(match.group(2))
+    else:
+        # Pola 2: "第3話" -> season = 1
+        pattern2 = r'第(\d+)話'
+        match = re.search(pattern2, html_text)
+        if match:
+            metadata["season"] = 1
+            metadata["episode"] = int(match.group(1))
+        else:
+            # Pola 3: "S02E05"
+            pattern3 = r'[sS](\d+)[eE](\d+)'
+            match = re.search(pattern3, html_text)
+            if match:
+                metadata["season"] = int(match.group(1))
+                metadata["episode"] = int(match.group(2))
+    
+    # --- 4. IMAGE ---
+    og_image = soup.find('meta', property='og:image')
+    if og_image and og_image.get('content'):
+        metadata["image"] = og_image['content'].strip()
+    
+    # --- DEBUG: Simpan HTML sampel jika diminta ---
+    if save_debug:
+        debug_filename = f"debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+        with open(debug_filename, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        print(f"   📄 Debug HTML disimpan: {debug_filename}")
     
     return metadata
 
 
 # ============================================================
-# 7. AMBIL URL DARI SITEMAP (HANYA POST-SITEMAP)
+# 3. AMBIL URL DARI SITEMAP (HANYA POST-SITEMAP)
 # ============================================================
 
 def get_all_article_urls():
     """
     Ambil semua URL artikel dari sitemap_index.xml
-    HANYA dari post-sitemap (bukan page-sitemap, category-sitemap, dll)
+    HANYA dari post-sitemap
     """
     try:
         print(f"📡 Mengambil sitemap index: {SITEMAP_INDEX}")
@@ -255,13 +210,14 @@ def extract_urls_from_sitemap(sitemap_url):
 
 
 # ============================================================
-# 8. FUNGSI UTAMA CRAWL & INDEX
+# 4. FUNGSI UTAMA CRAWL & INDEX
 # ============================================================
 
-def crawl_and_index(max_pages=None):
+def crawl_and_index(max_pages=None, save_debug_first=False):
     """
     Fungsi utama crawling dan indexing
     max_pages: batas maksimum halaman (untuk testing)
+    save_debug_first: simpan HTML halaman pertama untuk debug
     """
     urls = get_all_article_urls()
     
@@ -286,14 +242,17 @@ def crawl_and_index(max_pages=None):
             response = scraper.get(url, timeout=60)
             
             if response.status_code == 200:
-                metadata = extract_metadata(url, response.text)
+                # Simpan debug untuk halaman pertama
+                save_debug = (save_debug_first and i == 0)
+                metadata = extract_metadata_with_bs4(url, response.text, save_debug)
                 results.append(metadata)
                 print(f"   ✅ Title: {metadata['title']}")
+                print(f"      Original: {metadata['original_title']}")
                 print(f"      Season: {metadata['season']}, Episode: {metadata['episode']}")
+                print(f"      Image: {metadata['image']}")
             else:
                 print(f"   ❌ Status: {response.status_code}")
             
-            # Jeda antar request
             time.sleep(1)
             
         except Exception as e:
@@ -317,22 +276,26 @@ def crawl_and_index(max_pages=None):
 
 
 # ============================================================
-# 9. EKSEKUSI
+# 5. EKSEKUSI
 # ============================================================
 
 if __name__ == "__main__":
     import sys
     
     max_pages = None
+    save_debug = False
+    
     if len(sys.argv) > 1:
         try:
             max_pages = int(sys.argv[1])
             print(f"🔧 Argumen: hanya {max_pages} halaman")
         except ValueError:
-            print("⚠️ Argumen harus berupa angka. Menggunakan semua halaman.")
+            if sys.argv[1].lower() == '--debug':
+                save_debug = True
+                print("🔧 Mode debug: HTML pertama akan disimpan")
     
     print("=" * 50)
-    print("🚀 PENGEPUL-LINK - Crawler & Scraper 9tsu.in")
+    print("🚀 PENGEPUL-LINK - Crawler & Scraper 9tsu.in (BS4)")
     print("=" * 50)
     
-    crawl_and_index(max_pages)
+    crawl_and_index(max_pages, save_debug)

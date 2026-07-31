@@ -4,10 +4,18 @@ import json
 import re
 import time
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urljoin
 
 # ============================================================
-# 1. HEADERS - Seperti Browser Nyata
+# 1. KONFIGURASI DOMAIN
+# ============================================================
+
+BASE_URL = "https://9tsu.in"
+SITEMAP_INDEX = f"{BASE_URL}/sitemap_index.xml"
+HOMEPAGE = BASE_URL
+
+# ============================================================
+# 2. HEADERS - Seperti Browser Nyata
 # ============================================================
 
 HEADERS = {
@@ -22,12 +30,12 @@ HEADERS = {
     "Sec-Fetch-Site": "none",
     "Sec-Fetch-User": "?1",
     "Cache-Control": "max-age=0",
-    "Referer": "https://9tsu.vip/"
+    "Referer": BASE_URL
 }
 
 
 # ============================================================
-# 2. FUNGSI PARSING TITLE, SEASON, EPISODE
+# 3. FUNGSI PARSING TITLE, SEASON, EPISODE
 # ============================================================
 
 def parse_title_season_episode(original_title):
@@ -79,41 +87,75 @@ def parse_title_season_episode(original_title):
 
 
 # ============================================================
-# 3. FUNGSI EKSTRAK URL DARI SITEMAP
+# 4. FUNGSI EKSTRAK TITLE DARI HTML (FLEKSIBEL)
+# ============================================================
+
+def extract_title_from_html(html_content):
+    """
+    Mencoba berbagai cara untuk mengekstrak judul dari HTML
+    """
+    # 1. Coba dari <title>
+    match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
+    if match:
+        raw = match.group(1).strip()
+        # Bersihkan dari teks tambahan
+        raw = re.sub(r'\s*[-|]\s*9tsu.*$', '', raw).strip()
+        raw = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', raw).strip()
+        raw = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', raw).strip()
+        if raw:
+            return raw
+    
+    # 2. Coba dari <h1> atau <h2> dengan class tertentu
+    match = re.search(r'<h1[^>]*>(.*?)</h1>', html_content, re.IGNORECASE | re.DOTALL)
+    if match:
+        raw = re.sub(r'<[^>]+>', '', match.group(1)).strip()
+        if raw:
+            return raw
+    
+    # 3. Coba dari meta property="og:title"
+    match = re.search(r'<meta\s+property="og:title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+    if match:
+        raw = match.group(1).strip()
+        if raw:
+            return raw
+    
+    # 4. Coba dari meta name="title"
+    match = re.search(r'<meta\s+name="title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+    if match:
+        raw = match.group(1).strip()
+        if raw:
+            return raw
+    
+    return None
+
+
+# ============================================================
+# 5. FUNGSI EKSTRAK URL DARI SITEMAP
 # ============================================================
 
 def get_all_article_urls():
     """
     Ambil semua URL artikel dari sitemap_index.xml
-    Menggunakan cloudscraper untuk melewati Cloudflare/anti-bot
     """
-    sitemap_index_url = "https://9tsu.vip/sitemap_index.xml"
-    
     try:
-        print("📡 Mengambil daftar URL dari sitemap...")
+        print(f"📡 Mengambil daftar URL dari sitemap: {SITEMAP_INDEX}")
         
-        # Buat scraper dengan cloudscraper
         scraper = cloudscraper.create_scraper()
-        
-        # Tambahkan headers
         scraper.headers.update(HEADERS)
         
-        response = scraper.get(sitemap_index_url, timeout=60)
+        response = scraper.get(SITEMAP_INDEX, timeout=60)
         response.raise_for_status()
         
-        # Parse XML sitemap index
         root = ET.fromstring(response.content)
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
         
         all_urls = []
-        # Cari semua tag <loc> di dalam <sitemap>
         for loc in root.findall('.//ns:loc', ns):
             sitemap_url = loc.text
             if sitemap_url:
-                # Ambil URL dari setiap sitemap
                 urls = extract_urls_from_sitemap(sitemap_url)
                 all_urls.extend(urls)
-                time.sleep(0.5)  # Jeda antar sitemap
+                time.sleep(0.5)
         
         return all_urls
     except Exception as e:
@@ -139,7 +181,6 @@ def extract_urls_from_sitemap(sitemap_url):
         for loc in root.findall('.//ns:loc', ns):
             url = loc.text
             if url:
-                # Filter: hanya URL artikel (biasanya .html atau /drama/)
                 if '/drama/' in url or url.endswith('.html'):
                     urls.append(url)
         return urls
@@ -149,7 +190,7 @@ def extract_urls_from_sitemap(sitemap_url):
 
 
 # ============================================================
-# 4. FUNGSI EKSTRAK METADATA DARI HALAMAN
+# 6. FUNGSI EKSTRAK METADATA (DENGAN TITLE BARU)
 # ============================================================
 
 def extract_metadata(url, html_content):
@@ -166,48 +207,39 @@ def extract_metadata(url, html_content):
         "source_page": None
     }
     
-    # Ambil judul dari tag <title>
-    title_match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
-    if title_match:
-        raw_title = title_match.group(1).strip()
-        # Bersihkan judul dari teks tambahan
-        raw_title = re.sub(r'\s*[-|]\s*9tsu.*$', '', raw_title).strip()
-        raw_title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', raw_title).strip()
-        raw_title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', raw_title).strip()
-        
+    # Ekstrak title dengan fungsi baru
+    raw_title = extract_title_from_html(html_content)
+    
+    if raw_title:
         metadata["original_title"] = raw_title
-        
-        # Parsing title, season, episode dari original_title
         title, season, episode = parse_title_season_episode(raw_title)
         metadata["title"] = title
         metadata["season"] = season
         metadata["episode"] = episode
+    else:
+        # Fallback: gunakan URL sebagai title jika tidak ditemukan
+        metadata["title"] = url.split('/')[-1] or url
+        metadata["original_title"] = metadata["title"]
     
     # Ambil gambar dari meta og:image
     img_match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
     if img_match:
         metadata["image"] = img_match.group(1)
     else:
-        # Fallback: cari gambar dari tag img
         img_match2 = re.search(r'<img[^>]+src="([^"]+\.(jpg|jpeg|png|gif))"', html_content, re.IGNORECASE)
         if img_match2:
             metadata["image"] = img_match2.group(1)
     
-    metadata["source_page"] = "https://9tsu.vip/"
+    metadata["source_page"] = BASE_URL
     
     return metadata
 
 
 # ============================================================
-# 5. FUNGSI UTAMA CRAWL & INDEX
+# 7. FUNGSI UTAMA CRAWL & INDEX
 # ============================================================
 
 def crawl_and_index(max_pages=None):
-    """
-    Fungsi utama crawling dan indexing
-    max_pages: batas maksimum halaman yang diproses (untuk testing)
-    """
-    # Ambil semua URL dari sitemap
     urls = get_all_article_urls()
     
     if not urls:
@@ -218,7 +250,6 @@ def crawl_and_index(max_pages=None):
         print("❌ Tidak ada URL yang ditemukan.")
         return None
     
-    # Batasi jumlah untuk testing
     if max_pages:
         urls = urls[:max_pages]
     
@@ -243,20 +274,17 @@ def crawl_and_index(max_pages=None):
                 else:
                     print(f"   ⚠️ Tidak ada title yang ditemukan")
             
-            # Jeda antar request untuk menghormati server
             time.sleep(1.5)
             
         except Exception as e:
             print(f"❌ Error pada {url}: {e}")
     
-    # Buat output JSON
     output = {
         "timestamp": datetime.now().isoformat(),
         "total": len(results),
         "links": results
     }
     
-    # Simpan ke file
     with open("links.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
@@ -267,28 +295,24 @@ def crawl_and_index(max_pages=None):
 
 
 # ============================================================
-# 6. FUNGSI FALLBACK (jika sitemap gagal)
+# 8. FUNGSI FALLBACK
 # ============================================================
 
 def get_urls_from_homepage():
-    """
-    Fallback: scraping dari homepage jika sitemap tidak tersedia
-    """
     urls = []
     try:
         scraper = cloudscraper.create_scraper()
         scraper.headers.update(HEADERS)
         
-        print("📥 Mencoba fallback dari homepage...")
-        response = scraper.get("https://9tsu.vip/", timeout=60)
+        print(f"📥 Mencoba fallback dari homepage: {HOMEPAGE}")
+        response = scraper.get(HOMEPAGE, timeout=60)
         response.raise_for_status()
         
-        # Cari semua link menuju artikel
         pattern = r'href="(/\d+\.html)"'
         matches = re.findall(pattern, response.text)
         
         for match in matches:
-            full_url = f"https://9tsu.vip{match}"
+            full_url = urljoin(BASE_URL, match)
             if full_url not in urls:
                 urls.append(full_url)
         
@@ -301,7 +325,7 @@ def get_urls_from_homepage():
 
 
 # ============================================================
-# 7. EKSEKUSI
+# 9. EKSEKUSI
 # ============================================================
 
 if __name__ == "__main__":
@@ -316,7 +340,7 @@ if __name__ == "__main__":
             print("⚠️ Argumen harus berupa angka. Menggunakan semua halaman.")
     
     print("=" * 50)
-    print("🚀 PENGEPUL-LINK - Crawler & Indexer 9tsu.vip")
+    print("🚀 PENGEPUL-LINK - Crawler & Indexer 9tsu.in")
     print("=" * 50)
     
     crawl_and_index(max_pages)

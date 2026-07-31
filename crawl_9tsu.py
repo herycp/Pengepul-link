@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import json
 import re
 import time
+import os
 from datetime import datetime
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -13,6 +14,7 @@ from bs4 import BeautifulSoup
 
 BASE_URL = "https://9tsu.in"
 SITEMAP_INDEX = f"{BASE_URL}/sitemap_index.xml"
+HTML_DIR = "html_pages"  # Direktori untuk menyimpan HTML
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -31,12 +33,64 @@ HEADERS = {
 
 
 # ============================================================
-# 2. EKSTRAKSI METADATA DENGAN BEAUTIFULSOUP
+# 2. FUNGSI MEMBUAT DIREKTORI
 # ============================================================
 
-def extract_metadata_with_bs4(url, html_content, save_debug=False):
+def create_directory():
+    """Buat direktori untuk menyimpan HTML jika belum ada"""
+    if not os.path.exists(HTML_DIR):
+        os.makedirs(HTML_DIR)
+        print(f"📁 Direktori dibuat: {HTML_DIR}")
+    return HTML_DIR
+
+
+# ============================================================
+# 3. DOWNLOAD DAN SIMPAN HTML
+# ============================================================
+
+def download_and_save_html(url, scraper, save_html=True):
     """
-    Ekstrak metadata menggunakan BeautifulSoup
+    Download HTML dari URL dan simpan ke file
+    Returns: (html_content, filename, status_code)
+    """
+    try:
+        response = scraper.get(url, timeout=60)
+        
+        if response.status_code == 200:
+            html_content = response.text
+            
+            if save_html:
+                # Buat nama file dari URL
+                parsed = urlparse(url)
+                path = parsed.path.strip('/')
+                if not path:
+                    path = 'index'
+                # Ganti karakter tidak valid untuk nama file
+                filename = path.replace('/', '_') + '.html'
+                filepath = os.path.join(HTML_DIR, filename)
+                
+                # Simpan HTML
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(html_content)
+                
+                return html_content, filepath, 200
+            else:
+                return html_content, None, 200
+        else:
+            return None, None, response.status_code
+            
+    except Exception as e:
+        print(f"   ❌ Download error: {e}")
+        return None, None, 0
+
+
+# ============================================================
+# 4. PARSE HTML DENGAN BEAUTIFULSOUP
+# ============================================================
+
+def parse_html_page(html_content, url):
+    """
+    Parse HTML untuk mengekstrak metadata
     """
     metadata = {
         "url": url,
@@ -45,8 +99,12 @@ def extract_metadata_with_bs4(url, html_content, save_debug=False):
         "season": None,
         "episode": None,
         "image": None,
-        "source_page": BASE_URL
+        "source_page": BASE_URL,
+        "html_file": None
     }
+    
+    if not html_content:
+        return metadata
     
     soup = BeautifulSoup(html_content, 'html.parser')
     
@@ -62,7 +120,6 @@ def extract_metadata_with_bs4(url, html_content, save_debug=False):
             metadata["original_title"] = title_tag.get_text(strip=True)
     
     # --- 2. TITLE BERSIH ---
-    # Prioritas: article:section > og:title > h1 > title
     cleaned_title = None
     
     # 2a. Coba dari meta property="article:section"
@@ -73,7 +130,6 @@ def extract_metadata_with_bs4(url, html_content, save_debug=False):
     # 2b. Jika tidak ada, coba dari og:title
     if not cleaned_title and og_title and og_title.get('content'):
         cleaned_title = og_title['content'].strip()
-        # Bersihkan
         cleaned_title = re.sub(r'\s*第\d+話\s*', '', cleaned_title)
         cleaned_title = re.sub(r'\s*Season\s*\d+\s*', '', cleaned_title, flags=re.IGNORECASE)
         cleaned_title = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned_title)
@@ -136,18 +192,11 @@ def extract_metadata_with_bs4(url, html_content, save_debug=False):
     if og_image and og_image.get('content'):
         metadata["image"] = og_image['content'].strip()
     
-    # --- DEBUG: Simpan HTML sampel jika diminta ---
-    if save_debug:
-        debug_filename = f"debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
-        with open(debug_filename, 'w', encoding='utf-8') as f:
-            f.write(html_content)
-        print(f"   📄 Debug HTML disimpan: {debug_filename}")
-    
     return metadata
 
 
 # ============================================================
-# 3. AMBIL URL DARI SITEMAP (HANYA POST-SITEMAP)
+# 5. AMBIL URL DARI SITEMAP (HANYA POST-SITEMAP)
 # ============================================================
 
 def get_all_article_urls():
@@ -210,15 +259,22 @@ def extract_urls_from_sitemap(sitemap_url):
 
 
 # ============================================================
-# 4. FUNGSI UTAMA CRAWL & INDEX
+# 6. FUNGSI UTAMA CRAWL & INDEX
 # ============================================================
 
-def crawl_and_index(max_pages=None, save_debug_first=False):
+def crawl_and_index(max_pages=None):
     """
     Fungsi utama crawling dan indexing
-    max_pages: batas maksimum halaman (untuk testing)
-    save_debug_first: simpan HTML halaman pertama untuk debug
+    1. Ambil URL dari sitemap
+    2. Download HTML setiap halaman
+    3. Simpan HTML ke direktori
+    4. Parse HTML untuk ekstrak metadata
+    5. Simpan hasil ke links.json
     """
+    # Buat direktori HTML
+    create_directory()
+    
+    # Ambil URL dari sitemap
     urls = get_all_article_urls()
     
     if not urls:
@@ -236,66 +292,91 @@ def crawl_and_index(max_pages=None, save_debug_first=False):
     scraper.headers.update(HEADERS)
     
     for i, url in enumerate(urls):
-        try:
-            print(f"🔄 [{i+1}/{len(urls)}] {url}")
+        print(f"\n🔄 [{i+1}/{len(urls)}] {url}")
+        print("-" * 60)
+        
+        # 1. Download HTML
+        html_content, html_file, status = download_and_save_html(url, scraper, save_html=True)
+        
+        if status == 200 and html_content:
+            print(f"   ✅ HTML berhasil di-download")
+            print(f"   📄 Disimpan di: {html_file}")
             
-            response = scraper.get(url, timeout=60)
+            # 2. Parse HTML
+            metadata = parse_html_page(html_content, url)
+            metadata["html_file"] = html_file
             
-            if response.status_code == 200:
-                # Simpan debug untuk halaman pertama
-                save_debug = (save_debug_first and i == 0)
-                metadata = extract_metadata_with_bs4(url, response.text, save_debug)
-                results.append(metadata)
-                print(f"   ✅ Title: {metadata['title']}")
-                print(f"      Original: {metadata['original_title']}")
-                print(f"      Season: {metadata['season']}, Episode: {metadata['episode']}")
-                print(f"      Image: {metadata['image']}")
-            else:
-                print(f"   ❌ Status: {response.status_code}")
+            # 3. Tampilkan hasil parsing
+            print(f"   📝 Hasil parsing:")
+            print(f"      - Title: {metadata['title']}")
+            print(f"      - Original: {metadata['original_title']}")
+            print(f"      - Season: {metadata['season']}")
+            print(f"      - Episode: {metadata['episode']}")
+            print(f"      - Image: {metadata['image']}")
             
-            time.sleep(1)
-            
-        except Exception as e:
-            print(f"   ❌ Error: {e}")
+            results.append(metadata)
+        else:
+            print(f"   ❌ Gagal download HTML (status: {status})")
+            # Tetap tambahkan URL sebagai metadata minimal
+            metadata = {
+                "url": url,
+                "title": None,
+                "original_title": None,
+                "season": None,
+                "episode": None,
+                "image": None,
+                "source_page": BASE_URL,
+                "html_file": None,
+                "error": f"HTTP {status}"
+            }
+            results.append(metadata)
+        
+        # Jeda antar request
+        time.sleep(1)
     
-    # Buat output JSON
+    # 4. Buat output JSON
     output = {
         "timestamp": datetime.now().isoformat(),
         "total": len(results),
         "links": results
     }
     
-    # Simpan ke file
+    # 5. Simpan links.json
     with open("links.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
-    print(f"\n✅ Selesai! {len(results)} link berhasil di-index")
-    print(f"📁 File disimpan sebagai: links.json")
+    # 6. Buat report
+    successful = sum(1 for r in results if r.get('title'))
+    print("\n" + "=" * 60)
+    print(f"✅ Selesai!")
+    print(f"📊 Total: {len(results)} link diproses")
+    print(f"✅ Berhasil parsing: {successful}")
+    print(f"❌ Gagal: {len(results) - successful}")
+    print(f"📁 HTML disimpan di: {HTML_DIR}/")
+    print(f"📁 JSON disimpan di: links.json")
+    print("=" * 60)
     
     return output
 
 
 # ============================================================
-# 5. EKSEKUSI
+# 7. EKSEKUSI
 # ============================================================
 
 if __name__ == "__main__":
     import sys
     
     max_pages = None
-    save_debug = False
-    
     if len(sys.argv) > 1:
         try:
             max_pages = int(sys.argv[1])
             print(f"🔧 Argumen: hanya {max_pages} halaman")
         except ValueError:
-            if sys.argv[1].lower() == '--debug':
-                save_debug = True
-                print("🔧 Mode debug: HTML pertama akan disimpan")
+            print("⚠️ Argumen harus berupa angka. Menggunakan semua halaman.")
     
-    print("=" * 50)
-    print("🚀 PENGEPUL-LINK - Crawler & Scraper 9tsu.in (BS4)")
-    print("=" * 50)
+    print("=" * 60)
+    print("🚀 PENGEPUL-LINK - Crawler & Scraper 9tsu.in")
+    print("📌 Mode: Download HTML + Parse + Save")
+    print("=" * 60)
     
-    crawl_and_index(max_pages, save_debug)
+    crawl_and_index(max_pages)

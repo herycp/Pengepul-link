@@ -20,6 +20,9 @@ DB_FILE = "links.db"
 JSON_FILE = "links.json"
 SITEMAP_DIR = "sitemaps"
 
+# Daftar domain alternatif jika primary domain 403
+ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
@@ -178,24 +181,80 @@ def create_sitemap_dir():
         os.makedirs(SITEMAP_DIR)
         print(f"📁 Direktori sitemap dibuat: {SITEMAP_DIR}")
 
+def get_sitemap_from_alternative_domains():
+    """
+    Coba akses sitemap dari domain alternatif jika primary domain 403
+    """
+    for domain in ALTERNATIVE_DOMAINS:
+        try:
+            sitemap_url = f"{domain}/sitemap_index.xml"
+            print(f"🔄 Mencoba domain alternatif: {sitemap_url}")
+            scraper = cloudscraper.create_scraper()
+            scraper.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+                "Accept-Language": "id-ID,id;q=0.9",
+            })
+            response = scraper.get(sitemap_url, timeout=60)
+            if response.status_code == 200:
+                print(f"✅ Berhasil menggunakan domain: {domain}")
+                return response.content, domain
+        except Exception as e:
+            print(f"   ❌ Gagal: {e}")
+            continue
+    return None, None
+
 def download_all_sitemaps():
-    """Download semua post-sitemap dari online ke folder lokal"""
+    """
+    Download semua post-sitemap dari online ke folder lokal.
+    Gunakan cloudscraper untuk melewati Cloudflare.
+    Jika primary domain 403, coba domain alternatif.
+    """
     create_sitemap_dir()
+    
     try:
         print(f"📡 Mengambil daftar sitemap dari: {SITEMAP_INDEX}")
-        scraper = cloudscraper.create_scraper()
-        scraper.headers.update({"User-Agent": "Mozilla/5.0"})
-        response = scraper.get(SITEMAP_INDEX, timeout=60)
-        response.raise_for_status()
         
-        root = ET.fromstring(response.content)
+        # Gunakan cloudscraper (bisa melewati Cloudflare)
+        scraper = cloudscraper.create_scraper()
+        scraper.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Cache-Control": "max-age=0",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1"
+        })
+        
+        response = scraper.get(SITEMAP_INDEX, timeout=60)
+        
+        # Jika 403, coba domain alternatif
+        if response.status_code == 403:
+            print("⚠️ Primary domain 403 Forbidden. Mencoba domain alternatif...")
+            content, domain = get_sitemap_from_alternative_domains()
+            if content is None:
+                print("❌ Semua domain alternatif gagal.")
+                return
+            response_content = content
+            used_domain = domain
+        else:
+            response.raise_for_status()
+            response_content = response.content
+            used_domain = BASE_URL
+        
+        root = ET.fromstring(response_content)
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
         sitemap_urls = []
         for loc in root.findall('.//ns:loc', ns):
             url = loc.text
             if url and 'post-sitemap' in url.lower():
                 sitemap_urls.append(url)
-        print(f"✅ Ditemukan {len(sitemap_urls)} post-sitemap")
+        print(f"✅ Ditemukan {len(sitemap_urls)} post-sitemap dari {used_domain}")
 
         for idx, url in enumerate(sitemap_urls, 1):
             filename = url.split('/')[-1]
@@ -204,7 +263,14 @@ def download_all_sitemaps():
                 print(f"⏭️  {filename} sudah ada, dilewati")
                 continue
             print(f"⬇️  Download {filename} ({idx}/{len(sitemap_urls)})")
-            resp = requests.get(url, timeout=60)
+            
+            # Gunakan cloudscraper untuk download setiap sitemap
+            sitemap_scraper = cloudscraper.create_scraper()
+            sitemap_scraper.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+            })
+            resp = sitemap_scraper.get(url, timeout=60)
             if resp.status_code == 200:
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(resp.text)
@@ -512,10 +578,15 @@ def crawl_one_sitemap(force_download=False):
     """Proses 1 sitemap belum diproses (terkecil/terbaru)"""
     init_database()
     
-    if force_download or not os.path.exists(SITEMAP_DIR) or not os.listdir(SITEMAP_DIR):
+    # Cek sitemap lokal yang sudah ada
+    sitemap_files = get_sitemap_files()
+    
+    if force_download or not sitemap_files:
         download_all_sitemaps()
+        # Refresh daftar setelah download
+        sitemap_files = get_sitemap_files()
     else:
-        print("📂 Menggunakan sitemap lokal yang sudah ada")
+        print(f"📂 Menggunakan {len(sitemap_files)} sitemap lokal yang sudah ada")
     
     next_sitemap = get_next_unprocessed_sitemap()
     if not next_sitemap:

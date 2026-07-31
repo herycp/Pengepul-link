@@ -1,4 +1,4 @@
-name: Crawl 9tsu Links (incremental sitemap)
+name: Crawl 9tsu Links (Batch 500)
 
 on:
   schedule:
@@ -27,6 +27,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          
+      - name: Create sitemaps directory if missing
+        run: |
+          mkdir -p sitemaps
+          touch sitemaps/.gitkeep
           
       - name: Setup Python
         uses: actions/setup-python@v5

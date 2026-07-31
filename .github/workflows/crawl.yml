@@ -1,15 +1,18 @@
-name: Crawl 9tsu Links
+name: Crawl 9tsu Links (incremental sitemap)
 
 on:
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
-      max_pages:
-        description: 'Jumlah halaman (kosong = semua)'
+      force_download:
+        description: 'Download ulang semua sitemap (true/false)'
         required: false
-        default: '10'
-        type: string
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 permissions:
   contents: write
@@ -18,34 +21,29 @@ jobs:
   crawl:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install requests cloudscraper beautifulsoup4 lxml
-
       - name: Run crawler
         run: |
-          if [ -z "${{ github.event.inputs.max_pages }}" ]; then
-            python crawl_9tsu.py
+          if [ "${{ github.event.inputs.force_download }}" == "true" ]; then
+            python crawl_9tsu.py --download
           else
-            python crawl_9tsu.py ${{ github.event.inputs.max_pages }}
+            python crawl_9tsu.py
           fi
-
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: update links.json and html pages [skip ci]'
-          file_pattern: '*.json html_pages/*'
+          commit_message: 'chore: update database and json [skip ci]'
+          file_pattern: '*.db *.json sitemaps/*'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

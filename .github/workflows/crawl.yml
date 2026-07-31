@@ -44,8 +44,8 @@ jobs:
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: update links.json [skip ci]'
-          file_pattern: links.json
+          commit_message: 'chore: update links.json and html pages [skip ci]'
+          file_pattern: '*.json html_pages/*'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

@@ -21,21 +21,6 @@ SITEMAP_DIR = "sitemaps"
 
 ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-    "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-    "Cache-Control": "max-age=0",
-    "Referer": BASE_URL
-}
-
 # ============================================================
 # 2. DATABASE SQLITE
 # ============================================================
@@ -179,7 +164,10 @@ def create_sitemap_dir():
 def download_sitemap_with_cloudscraper(url, retry=3):
     for attempt in range(retry):
         try:
-            scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
+            scraper = cloudscraper.create_scraper(
+                browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
+                delay=True
+            )
             scraper.headers.update({
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
@@ -213,7 +201,10 @@ def get_sitemap_index_content():
             sitemap_url = f"{domain}/sitemap_index.xml"
             print(f"🔄 Mencoba: {sitemap_url}")
             
-            scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
+            scraper = cloudscraper.create_scraper(
+                browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
+                delay=True
+            )
             scraper.headers.update({
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
@@ -326,39 +317,92 @@ def get_urls_from_local_sitemap(sitemap_filename):
         return []
 
 # ============================================================
-# 🔥 5. DOWNLOAD HTML DENGAN CLOUDSCRAPER (LEWATI CLOUDFLARE)
+# 🔥 5. DOWNLOAD HTML - CLOUDSCRAPER OPTIMIZED
 # ============================================================
 
-def download_html_page(url):
-    """Download HTML menggunakan cloudscraper dengan header lengkap"""
-    try:
-        scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
-        scraper.headers.update(HEADERS)
-        response = scraper.get(url, timeout=60)
-        
-        if response.status_code == 200:
-            # Cek apakah halaman "Just a moment..." (Cloudflare)
-            if 'Just a moment...' in response.text:
-                print("   ⚠️ Cloudflare challenge terdeteksi, mencoba ulang...")
-                time.sleep(3)
-                # Coba sekali lagi
-                response = scraper.get(url, timeout=60)
-                if response.status_code == 200 and 'Just a moment...' not in response.text:
-                    response.encoding = 'utf-8'
-                    return response.text, 200
-                else:
-                    return None, 403
-            else:
+def download_html_page(url, retry=5):
+    """
+    Download HTML menggunakan cloudscraper dengan konfigurasi optimal
+    dan deteksi halaman challenge.
+    """
+    for attempt in range(retry):
+        try:
+            # Buat scraper dengan konfigurasi browser
+            scraper = cloudscraper.create_scraper(
+                browser={
+                    'browser': 'chrome',
+                    'platform': 'windows',
+                    'mobile': False,
+                    'desktop': True
+                },
+                delay=True,
+                interpreter='nodejs'  # Lebih kuat untuk challenge
+            )
+            
+            # Header lengkap seperti browser
+            scraper.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+                "Cache-Control": "max-age=0",
+                "Referer": BASE_URL
+            })
+            
+            # Ambil response
+            response = scraper.get(url, timeout=60)
+            
+            if response.status_code == 200:
+                # Cek apakah halaman challenge (Just a moment...)
+                if 'Just a moment...' in response.text[:200]:
+                    print(f"   ⚠️ Detected Cloudflare challenge, retrying ({attempt+1}/{retry})...")
+                    if attempt < retry - 1:
+                        # Tunggu lebih lama untuk challenge
+                        time.sleep(5 + (attempt * 2))
+                        continue
+                    else:
+                        # Coba dengan domain alternatif
+                        for alt_domain in ALTERNATIVE_DOMAINS:
+                            alt_url = url.replace(BASE_URL, alt_domain)
+                            print(f"   🔄 Mencoba domain alternatif: {alt_domain}")
+                            alt_scraper = cloudscraper.create_scraper(
+                                browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
+                                delay=True
+                            )
+                            alt_scraper.headers.update(scraper.headers)
+                            alt_response = alt_scraper.get(alt_url, timeout=60)
+                            if alt_response.status_code == 200 and 'Just a moment...' not in alt_response.text[:200]:
+                                alt_response.encoding = 'utf-8'
+                                return alt_response.text, 200
+                        return None, 403
+                
+                # Sukses dapat konten
                 response.encoding = 'utf-8'
                 return response.text, 200
-        else:
-            return None, response.status_code
-    except Exception as e:
-        print(f"   ❌ Download error: {e}")
-        return None, 0
+            else:
+                print(f"   ⚠️ Attempt {attempt+1}/{retry} - Status: {response.status_code}")
+                if attempt < retry - 1:
+                    time.sleep(2)
+                else:
+                    return None, response.status_code
+                
+        except Exception as e:
+            print(f"   ⚠️ Attempt {attempt+1}/{retry} - Error: {e}")
+            if attempt < retry - 1:
+                time.sleep(2)
+            else:
+                return None, 0
+    
+    return None, 0
 
 # ============================================================
-# 6. PARSING HTML
+# 6. PARSING HTML (DIPERBAIKI)
 # ============================================================
 
 def parse_html_page(html_content, url):
@@ -380,15 +424,15 @@ def parse_html_page(html_content, url):
         soup = BeautifulSoup(html_content, 'html.parser')
     except Exception as e:
         print(f"   ⚠️ BeautifulSoup error: {e}")
-        return metadata
+        return parse_html_with_regex(html_content, url)
     
     # --- TITLE ---
-    # 1. Coba dari article:section
+    # 1. article:section
     article_section = soup.find('meta', property='article:section')
     if article_section and article_section.get('content'):
         metadata["title"] = article_section['content'].strip()
     else:
-        # 2. Coba dari og:title
+        # 2. og:title
         og_title = soup.find('meta', property='og:title')
         if og_title and og_title.get('content'):
             raw = og_title['content'].strip()
@@ -400,7 +444,7 @@ def parse_html_page(html_content, url):
             cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
             metadata["title"] = cleaned.strip()
         else:
-            # 3. Coba dari h1
+            # 3. h1
             h1 = soup.find('h1')
             if h1:
                 raw = h1.get_text(strip=True)
@@ -408,7 +452,7 @@ def parse_html_page(html_content, url):
                 cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
                 metadata["title"] = cleaned.strip()
             else:
-                # 4. Coba dari title
+                # 4. title
                 title_tag = soup.find('title')
                 if title_tag:
                     raw = title_tag.get_text(strip=True)
@@ -470,6 +514,95 @@ def parse_html_page(html_content, url):
     
     return metadata
 
+def parse_html_with_regex(html_content, url):
+    metadata = {
+        "url": url,
+        "title": None,
+        "season": None,
+        "episode": None,
+        "image": None,
+        "description": None,
+        "embed_url": None,
+        "embed_platform": None
+    }
+    
+    try:
+        # Title
+        match = re.search(r'<meta\s+property="article:section"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+        if match:
+            metadata["title"] = match.group(1).strip()
+        else:
+            match = re.search(r'<meta\s+property="og:title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+            if match:
+                raw = match.group(1).strip()
+                cleaned = re.sub(r'\s*第\d+話\s*', '', raw)
+                cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
+                cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
+                metadata["title"] = cleaned.strip()
+            else:
+                match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
+                if match:
+                    raw = match.group(1).strip()
+                    cleaned = re.sub(r'\s*第\d+話\s*', '', raw)
+                    cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
+                    cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
+                    cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
+                    cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
+                    cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
+                    metadata["title"] = cleaned.strip()
+        
+        # Season & Episode
+        match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', html_content, re.IGNORECASE)
+        if match:
+            metadata["season"] = int(match.group(1))
+            metadata["episode"] = int(match.group(2))
+        else:
+            match = re.search(r'第(\d+)話', html_content)
+            if match:
+                metadata["season"] = 1
+                metadata["episode"] = int(match.group(1))
+        
+        # Image
+        match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+        if match:
+            metadata["image"] = match.group(1).strip()
+        
+        # Description
+        match = re.search(r'<div\s+class="body-content[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
+        if match:
+            desc = re.sub(r'<[^>]+>', '', match.group(1)).strip()
+            if desc:
+                metadata["description"] = desc
+        else:
+            match = re.search(r'<div\s+class="hidden-content[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
+            if match:
+                desc = re.sub(r'<[^>]+>', '', match.group(1)).strip()
+                if desc:
+                    metadata["description"] = desc
+        
+        # Embed
+        match = re.search(r'<iframe[^>]+src="([^"]+)"', html_content, re.IGNORECASE)
+        if match:
+            embed_url = match.group(1).strip()
+            metadata["embed_url"] = embed_url
+            parsed = urlparse(embed_url)
+            metadata["embed_platform"] = parsed.netloc
+        else:
+            match = re.search(r'<video[^>]*>.*?<source[^>]+src="([^"]+)"', html_content, re.IGNORECASE | re.DOTALL)
+            if match:
+                embed_url = match.group(1).strip()
+                metadata["embed_url"] = embed_url
+                parsed = urlparse(embed_url)
+                metadata["embed_platform"] = parsed.netloc
+    
+    except Exception as e:
+        print(f"   ❌ Regex fallback error: {e}")
+    
+    return metadata
+
 # ============================================================
 # 7. FUNGSI UTAMA
 # ============================================================
@@ -518,7 +651,6 @@ def crawl_one_sitemap(force_download=False):
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
             
-            # Preview 100 karakter pertama
             preview = html_content[:100].replace('\n', ' ').replace('\r', ' ')
             print(f"   🔍 Preview: {preview}...")
             
@@ -574,7 +706,7 @@ if __name__ == "__main__":
     
     print("=" * 60)
     print("🚀 PENGEPUL-LINK - Crawler 9tsu.in")
-    print("📌 Mode: 1 sitemap terbaru per siklus (Cloudscraper)")
+    print("📌 Mode: 1 sitemap terbaru per siklus (Cloudscraper Optimized)")
     print("=" * 60)
     
     crawl_one_sitemap(force_download)

@@ -1,11 +1,11 @@
 name: Crawl 9tsu Links
 
 on:
-  # 1. Jadwal: jalan setiap hari jam 00:00 UTC
+  # Jadwal: jalan setiap hari jam 00:00 UTC (sekitar 07:00 WIB)
   schedule:
     - cron: '0 0 * * *'
   
-  # 2. Manual: bisa dijalankan dari tab Actions
+  # Manual: bisa dijalankan dari tab Actions
   workflow_dispatch:
     inputs:
       max_pages:
@@ -14,14 +14,13 @@ on:
         default: ''
         type: string
 
-# Izin untuk menulis ke repository (push)
 permissions:
   contents: write
 
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Batas waktu, mencegah loop tak berujung
+    timeout-minutes: 30
 
     steps:
       # 1. Checkout kode repository
@@ -38,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install requests
+          pip install requests cloudscraper
 
       # 4. Jalankan crawler
       - name: Run crawler

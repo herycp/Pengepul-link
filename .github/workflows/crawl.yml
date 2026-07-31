@@ -1,17 +1,14 @@
 name: Crawl 9tsu Links
 
 on:
-  # Jadwal: jalan setiap hari jam 00:00 UTC (sekitar 07:00 WIB)
   schedule:
     - cron: '0 0 * * *'
-  
-  # Manual: bisa dijalankan dari tab Actions
   workflow_dispatch:
     inputs:
       max_pages:
         description: 'Jumlah halaman (kosong = semua)'
         required: false
-        default: ''
+        default: '10'
         type: string
 
 permissions:
@@ -23,23 +20,19 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # 1. Checkout kode repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install requests cloudscraper
+          pip install requests cloudscraper beautifulsoup4 lxml
 
-      # 4. Jalankan crawler
       - name: Run crawler
         run: |
           if [ -z "${{ github.event.inputs.max_pages }}" ]; then
@@ -48,7 +41,6 @@ jobs:
             python crawl_9tsu.py ${{ github.event.inputs.max_pages }}
           fi
 
-      # 5. Commit dan push hasil (jika ada perubahan)
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

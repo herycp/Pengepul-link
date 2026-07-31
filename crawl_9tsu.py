@@ -6,6 +6,7 @@ import sqlite3
 import re
 import time
 import os
+import gzip
 from datetime import datetime
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -178,10 +179,6 @@ def create_sitemap_dir():
         os.makedirs(SITEMAP_DIR)
         print(f"📁 Direktori sitemap dibuat: {SITEMAP_DIR}")
 
-# ============================================================
-# 🔥 PERUBAHAN: DOWNLOAD SITEMAP DENGAN CLOUDSCRAPER
-# ============================================================
-
 def download_sitemap_with_cloudscraper(url, retry=3):
     """Download sitemap menggunakan cloudscraper dengan retry"""
     for attempt in range(retry):
@@ -216,10 +213,6 @@ def download_sitemap_with_cloudscraper(url, retry=3):
             else:
                 return None, 0
     return None, 0
-
-# ============================================================
-# 🔥 PERUBAHAN: DOWNLOAD ALL SITEMAPS (DENGAN FALLBACK DOMAIN)
-# ============================================================
 
 def get_sitemap_index_content():
     """Coba dapatkan sitemap index dari berbagai domain"""
@@ -358,56 +351,67 @@ def get_urls_from_local_sitemap(sitemap_filename):
         return []
 
 # ============================================================
-# 5. DOWNLOAD HTML PAGE
+# 5. DOWNLOAD HTML PAGE (DENGAN GZIP DETECTION)
 # ============================================================
 
 def download_html_page(url, retry=3):
-    """Download HTML halaman artikel menggunakan cloudscraper"""
+    """
+    Download HTML dengan handling kompresi dan encoding yang lebih baik.
+    """
     for attempt in range(retry):
         try:
-            scraper = cloudscraper.create_scraper()
-            scraper.headers.update({
+            # Gunakan requests biasa dengan header yang tepat
+            headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
                 "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Encoding": "identity",  # 🔥 Kunci: tolak kompresi
                 "Connection": "keep-alive",
                 "Upgrade-Insecure-Requests": "1",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "none",
-                "Sec-Fetch-User": "?1",
                 "Cache-Control": "max-age=0",
                 "Referer": BASE_URL
-            })
-            
-            response = scraper.get(url, timeout=60)
+            }
+            response = requests.get(url, headers=headers, timeout=60, stream=True)
             
             if response.status_code == 200:
-                if response.encoding is None or response.encoding.lower() in ['iso-8859-1', 'windows-1252']:
-                    response.encoding = 'utf-8'
+                # Baca raw content
+                raw_content = response.content
                 
+                # 🔥 Cek apakah gzip (2 byte pertama: 1F 8B)
+                if len(raw_content) >= 2 and raw_content[0] == 0x1F and raw_content[1] == 0x8B:
+                    try:
+                        raw_content = gzip.decompress(raw_content)
+                        print("   🔓 Decompressed gzip")
+                    except:
+                        pass
+                
+                # Coba decode dengan UTF-8
                 try:
-                    html_content = response.text
-                except:
-                    html_content = response.content.decode('utf-8', errors='ignore')
+                    html_content = raw_content.decode('utf-8')
+                except UnicodeDecodeError:
+                    # Coba dengan latin-1
+                    html_content = raw_content.decode('latin-1', errors='ignore')
                 
+                # Jika masih ada banyak karakter aneh, coba encoding lain
                 if not html_content or len(html_content) < 100 or not any(tag in html_content[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
-                    for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
+                    for encoding in ['cp1252', 'iso-8859-1']:
                         try:
-                            decoded = response.content.decode(encoding, errors='ignore')
+                            decoded = raw_content.decode(encoding, errors='ignore')
                             if decoded and len(decoded) > len(html_content) and any(tag in decoded[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
                                 html_content = decoded
                                 break
                         except:
                             continue
                 
+                # Bersihkan karakter kontrol
                 html_content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', html_content)
                 
-                if not html_content or len(html_content) < 50:
-                    html_content = response.content.decode('utf-8', errors='ignore')
-                
-                return html_content, 200
+                if html_content and len(html_content) > 100 and any(tag in html_content[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                    return html_content, 200
+                else:
+                    # 🔥 Fallback: coba dengan cloudscraper
+                    print("   🔄 Fallback ke cloudscraper...")
+                    return download_html_page_cloudscraper(url)
             else:
                 print(f"   ⚠️ Attempt {attempt+1}/{retry} - Status: {response.status_code}")
                 if attempt < retry - 1:
@@ -423,6 +427,36 @@ def download_html_page(url, retry=3):
                 return None, 0
     
     return None, 0
+
+def download_html_page_cloudscraper(url):
+    """Fallback: download dengan cloudscraper"""
+    try:
+        scraper = cloudscraper.create_scraper()
+        scraper.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+            "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Encoding": "identity",
+            "Connection": "keep-alive",
+            "Cache-Control": "max-age=0",
+            "Referer": BASE_URL
+        })
+        response = scraper.get(url, timeout=60)
+        if response.status_code == 200:
+            response.encoding = 'utf-8'
+            html_content = response.text
+            # Jika masih binary, coba decode manual
+            if not html_content or len(html_content) < 100 or not any(tag in html_content[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                try:
+                    html_content = response.content.decode('utf-8', errors='ignore')
+                except:
+                    html_content = response.content.decode('latin-1', errors='ignore')
+            return html_content, 200
+        else:
+            return None, response.status_code
+    except Exception as e:
+        print(f"   ❌ Cloudscraper fallback error: {e}")
+        return None, 0
 
 # ============================================================
 # 6. FUNGSI PARSING HTML

@@ -7,6 +7,8 @@ import re
 import time
 import os
 import gzip
+import subprocess
+import tempfile
 from datetime import datetime
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -21,14 +23,13 @@ DB_FILE = "links.db"
 JSON_FILE = "links.json"
 SITEMAP_DIR = "sitemaps"
 
-# Domain alternatif jika primary domain 403
 ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
     "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Accept-Encoding": "identity",
+    "Accept-Encoding": "gzip, deflate, br",
     "Connection": "keep-alive",
     "Upgrade-Insecure-Requests": "1",
     "Sec-Fetch-Dest": "document",
@@ -180,22 +181,16 @@ def create_sitemap_dir():
         print(f"📁 Direktori sitemap dibuat: {SITEMAP_DIR}")
 
 def download_sitemap_with_cloudscraper(url, retry=3):
-    """Download sitemap menggunakan cloudscraper dengan retry"""
     for attempt in range(retry):
         try:
-            scraper = cloudscraper.create_scraper()
+            scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
             scraper.headers.update({
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
                 "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
                 "Accept-Encoding": "gzip, deflate, br",
                 "Connection": "keep-alive",
                 "Cache-Control": "max-age=0",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "none",
-                "Sec-Fetch-User": "?1",
-                "Upgrade-Insecure-Requests": "1"
             })
             response = scraper.get(url, timeout=60)
             if response.status_code == 200:
@@ -215,7 +210,6 @@ def download_sitemap_with_cloudscraper(url, retry=3):
     return None, 0
 
 def get_sitemap_index_content():
-    """Coba dapatkan sitemap index dari berbagai domain"""
     domains_to_try = [BASE_URL] + ALTERNATIVE_DOMAINS
     
     for domain in domains_to_try:
@@ -223,19 +217,14 @@ def get_sitemap_index_content():
             sitemap_url = f"{domain}/sitemap_index.xml"
             print(f"🔄 Mencoba: {sitemap_url}")
             
-            scraper = cloudscraper.create_scraper()
+            scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
             scraper.headers.update({
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
                 "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
                 "Accept-Encoding": "gzip, deflate, br",
                 "Connection": "keep-alive",
                 "Cache-Control": "max-age=0",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "none",
-                "Sec-Fetch-User": "?1",
-                "Upgrade-Insecure-Requests": "1"
             })
             response = scraper.get(sitemap_url, timeout=60)
             if response.status_code == 200:
@@ -250,19 +239,13 @@ def get_sitemap_index_content():
     return None, None
 
 def download_all_sitemaps():
-    """
-    Download semua post-sitemap menggunakan cloudscraper
-    dengan fallback ke domain alternatif jika 403
-    """
     create_sitemap_dir()
     
-    # 1. Dapatkan sitemap index
     index_content, used_domain = get_sitemap_index_content()
     if index_content is None:
         print("❌ Gagal mengakses sitemap index dari semua domain.")
         return
     
-    # 2. Parse sitemap index
     try:
         root = ET.fromstring(index_content)
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -276,7 +259,6 @@ def download_all_sitemaps():
         print(f"❌ Error parsing sitemap index: {e}")
         return
     
-    # 3. Download setiap sitemap
     for idx, url in enumerate(sitemap_urls, 1):
         filename = url.split('/')[-1]
         filepath = os.path.join(SITEMAP_DIR, filename)
@@ -286,8 +268,6 @@ def download_all_sitemaps():
             continue
         
         print(f"⬇️  Download {filename} ({idx}/{len(sitemap_urls)})")
-        
-        # Gunakan cloudscraper untuk download sitemap
         content, status = download_sitemap_with_cloudscraper(url)
         
         if status == 200 and content:
@@ -296,7 +276,6 @@ def download_all_sitemaps():
             print(f"   ✅ Tersimpan: {filepath}")
         else:
             print(f"   ❌ Gagal download (status {status})")
-            # Coba dengan domain alternatif
             for alt_domain in ALTERNATIVE_DOMAINS:
                 alt_url = url.replace(BASE_URL, alt_domain)
                 print(f"   🔄 Mencoba alternatif: {alt_url}")
@@ -351,115 +330,112 @@ def get_urls_from_local_sitemap(sitemap_filename):
         return []
 
 # ============================================================
-# 5. DOWNLOAD HTML PAGE (DENGAN GZIP DETECTION)
+# 🔥 PERUBAHAN UTAMA: 5. DOWNLOAD HTML (DENGAN CURL FALLBACK)
 # ============================================================
+
+def download_with_curl(url):
+    """Download menggunakan curl (sering berhasil di GitHub Actions)"""
+    try:
+        cmd = [
+            'curl', '-s', '-L',
+            '-H', f'User-Agent: {HEADERS["User-Agent"]}',
+            '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9',
+            '-H', 'Accept-Language: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+            '-H', 'Accept-Encoding: gzip, deflate, br',
+            '-H', 'Connection: keep-alive',
+            '-H', 'Upgrade-Insecure-Requests: 1',
+            '-H', f'Referer: {BASE_URL}',
+            '--compressed',
+            '--max-time', '30',
+            url
+        ]
+        result = subprocess.run(cmd, capture_output=True, timeout=35)
+        if result.returncode == 0:
+            content = result.stdout
+            # Cek apakah gzip
+            if len(content) >= 2 and content[0] == 0x1F and content[1] == 0x8B:
+                try:
+                    content = gzip.decompress(content)
+                except:
+                    pass
+            try:
+                html = content.decode('utf-8')
+            except:
+                html = content.decode('latin-1', errors='ignore')
+            return html, 200
+        else:
+            return None, result.returncode
+    except Exception as e:
+        print(f"   ❌ Curl error: {e}")
+        return None, 0
 
 def download_html_page(url, retry=3):
     """
-    Download HTML dengan handling kompresi dan encoding yang lebih baik.
+    Download HTML dengan multiple methods:
+    1. Cloudscraper (simulasi browser)
+    2. Requests biasa dengan session
+    3. Curl (fallback)
     """
+    # Method 1: Cloudscraper
     for attempt in range(retry):
         try:
-            # Gunakan requests biasa dengan header yang tepat
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-                "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Accept-Encoding": "identity",  # 🔥 Kunci: tolak kompresi
-                "Connection": "keep-alive",
-                "Upgrade-Insecure-Requests": "1",
-                "Cache-Control": "max-age=0",
-                "Referer": BASE_URL
-            }
-            response = requests.get(url, headers=headers, timeout=60, stream=True)
-            
+            scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
+            scraper.headers.update(HEADERS)
+            response = scraper.get(url, timeout=60)
             if response.status_code == 200:
-                # Baca raw content
-                raw_content = response.content
-                
-                # 🔥 Cek apakah gzip (2 byte pertama: 1F 8B)
-                if len(raw_content) >= 2 and raw_content[0] == 0x1F and raw_content[1] == 0x8B:
+                response.encoding = 'utf-8'
+                html = response.text
+                if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                    return html, 200
+                else:
+                    # Coba decode manual
                     try:
-                        raw_content = gzip.decompress(raw_content)
-                        print("   🔓 Decompressed gzip")
+                        html = response.content.decode('utf-8', errors='ignore')
+                        if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                            return html, 200
                     except:
                         pass
-                
-                # Coba decode dengan UTF-8
-                try:
-                    html_content = raw_content.decode('utf-8')
-                except UnicodeDecodeError:
-                    # Coba dengan latin-1
-                    html_content = raw_content.decode('latin-1', errors='ignore')
-                
-                # Jika masih ada banyak karakter aneh, coba encoding lain
-                if not html_content or len(html_content) < 100 or not any(tag in html_content[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
-                    for encoding in ['cp1252', 'iso-8859-1']:
-                        try:
-                            decoded = raw_content.decode(encoding, errors='ignore')
-                            if decoded and len(decoded) > len(html_content) and any(tag in decoded[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
-                                html_content = decoded
-                                break
-                        except:
-                            continue
-                
-                # Bersihkan karakter kontrol
-                html_content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', html_content)
-                
-                if html_content and len(html_content) > 100 and any(tag in html_content[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
-                    return html_content, 200
-                else:
-                    # 🔥 Fallback: coba dengan cloudscraper
-                    print("   🔄 Fallback ke cloudscraper...")
-                    return download_html_page_cloudscraper(url)
-            else:
-                print(f"   ⚠️ Attempt {attempt+1}/{retry} - Status: {response.status_code}")
-                if attempt < retry - 1:
-                    time.sleep(2)
-                else:
-                    return None, response.status_code
-                
-        except Exception as e:
-            print(f"   ⚠️ Attempt {attempt+1}/{retry} - Error: {e}")
+            print(f"   ⚠️ Cloudscraper attempt {attempt+1}/{retry} - Status: {response.status_code}")
             if attempt < retry - 1:
                 time.sleep(2)
-            else:
-                return None, 0
+        except Exception as e:
+            print(f"   ⚠️ Cloudscraper attempt {attempt+1}/{retry} - Error: {e}")
+            if attempt < retry - 1:
+                time.sleep(2)
     
-    return None, 0
-
-def download_html_page_cloudscraper(url):
-    """Fallback: download dengan cloudscraper"""
+    # Method 2: Requests dengan session
     try:
-        scraper = cloudscraper.create_scraper()
-        scraper.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-            "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Accept-Encoding": "identity",
-            "Connection": "keep-alive",
-            "Cache-Control": "max-age=0",
-            "Referer": BASE_URL
-        })
-        response = scraper.get(url, timeout=60)
+        session = requests.Session()
+        session.headers.update(HEADERS)
+        response = session.get(url, timeout=60)
         if response.status_code == 200:
             response.encoding = 'utf-8'
-            html_content = response.text
-            # Jika masih binary, coba decode manual
-            if not html_content or len(html_content) < 100 or not any(tag in html_content[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+            html = response.text
+            if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                return html, 200
+            else:
                 try:
-                    html_content = response.content.decode('utf-8', errors='ignore')
+                    html = response.content.decode('utf-8', errors='ignore')
+                    if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                        return html, 200
                 except:
-                    html_content = response.content.decode('latin-1', errors='ignore')
-            return html_content, 200
-        else:
-            return None, response.status_code
+                    pass
+        print(f"   ⚠️ Requests session - Status: {response.status_code}")
     except Exception as e:
-        print(f"   ❌ Cloudscraper fallback error: {e}")
-        return None, 0
+        print(f"   ⚠️ Requests session error: {e}")
+    
+    # Method 3: Curl fallback
+    print("   🔄 Curl fallback...")
+    html, status = download_with_curl(url)
+    if status == 200 and html:
+        return html, 200
+    else:
+        print(f"   ❌ Curl fallback gagal (status {status})")
+    
+    return None, 403
 
 # ============================================================
-# 6. FUNGSI PARSING HTML
+# 6. FUNGSI PARSING HTML (Sama seperti sebelumnya)
 # ============================================================
 
 def extract_description(html_content):
@@ -684,7 +660,6 @@ def parse_html_with_regex(html_content, url):
 # ============================================================
 
 def crawl_one_sitemap(force_download=False):
-    """Proses 1 sitemap belum diproses (terkecil/terbaru)"""
     init_database()
     
     sitemap_files = get_sitemap_files()
@@ -728,7 +703,6 @@ def crawl_one_sitemap(force_download=False):
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
             
-            # Debug preview
             preview = html_content[:200].replace('\n', ' ').replace('\r', ' ')
             print(f"   🔍 Preview: {preview}...")
             

@@ -26,9 +26,15 @@ ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-    "Accept-Language": "id-ID,id;q=0.9",
+    "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
     "Accept-Encoding": "identity",
     "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Cache-Control": "max-age=0",
     "Referer": BASE_URL
 }
 
@@ -182,9 +188,7 @@ def create_sitemap_dir():
         print(f"📁 Direktori sitemap dibuat: {SITEMAP_DIR}")
 
 def get_sitemap_from_alternative_domains():
-    """
-    Coba akses sitemap dari domain alternatif jika primary domain 403
-    """
+    """Coba akses sitemap dari domain alternatif jika primary domain 403"""
     for domain in ALTERNATIVE_DOMAINS:
         try:
             sitemap_url = f"{domain}/sitemap_index.xml"
@@ -205,17 +209,12 @@ def get_sitemap_from_alternative_domains():
     return None, None
 
 def download_all_sitemaps():
-    """
-    Download semua post-sitemap dari online ke folder lokal.
-    Gunakan cloudscraper untuk melewati Cloudflare.
-    Jika primary domain 403, coba domain alternatif.
-    """
+    """Download semua post-sitemap dari online ke folder lokal"""
     create_sitemap_dir()
     
     try:
         print(f"📡 Mengambil daftar sitemap dari: {SITEMAP_INDEX}")
         
-        # Gunakan cloudscraper (bisa melewati Cloudflare)
         scraper = cloudscraper.create_scraper()
         scraper.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -233,7 +232,6 @@ def download_all_sitemaps():
         
         response = scraper.get(SITEMAP_INDEX, timeout=60)
         
-        # Jika 403, coba domain alternatif
         if response.status_code == 403:
             print("⚠️ Primary domain 403 Forbidden. Mencoba domain alternatif...")
             content, domain = get_sitemap_from_alternative_domains()
@@ -241,11 +239,9 @@ def download_all_sitemaps():
                 print("❌ Semua domain alternatif gagal.")
                 return
             response_content = content
-            used_domain = domain
         else:
             response.raise_for_status()
             response_content = response.content
-            used_domain = BASE_URL
         
         root = ET.fromstring(response_content)
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -254,7 +250,7 @@ def download_all_sitemaps():
             url = loc.text
             if url and 'post-sitemap' in url.lower():
                 sitemap_urls.append(url)
-        print(f"✅ Ditemukan {len(sitemap_urls)} post-sitemap dari {used_domain}")
+        print(f"✅ Ditemukan {len(sitemap_urls)} post-sitemap")
 
         for idx, url in enumerate(sitemap_urls, 1):
             filename = url.split('/')[-1]
@@ -264,7 +260,6 @@ def download_all_sitemaps():
                 continue
             print(f"⬇️  Download {filename} ({idx}/{len(sitemap_urls)})")
             
-            # Gunakan cloudscraper untuk download setiap sitemap
             sitemap_scraper = cloudscraper.create_scraper()
             sitemap_scraper.headers.update({
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -323,7 +318,62 @@ def get_urls_from_local_sitemap(sitemap_filename):
         return []
 
 # ============================================================
-# 5. FUNGSI PARSING HTML
+# 5. DOWNLOAD HTML PAGE (DENGAN CLOUDSCRAPER)
+# ============================================================
+
+def download_html_page(url, retry=3):
+    """
+    Download HTML halaman artikel menggunakan cloudscraper
+    untuk melewati Cloudflare / anti-bot.
+    Retry jika gagal.
+    """
+    for attempt in range(retry):
+        try:
+            scraper = cloudscraper.create_scraper()
+            scraper.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+                "Cache-Control": "max-age=0",
+                "Referer": BASE_URL
+            })
+            
+            response = scraper.get(url, timeout=60)
+            
+            if response.status_code == 200:
+                response.encoding = 'utf-8'
+                html_content = response.text
+                if not html_content or not html_content.strip().startswith(('<', '<!DOCTYPE', '<html')):
+                    try:
+                        html_content = response.content.decode('utf-8', errors='ignore')
+                    except:
+                        html_content = response.content.decode('latin-1', errors='ignore')
+                return html_content, 200
+            else:
+                print(f"   ⚠️ Attempt {attempt+1}/{retry} - Status: {response.status_code}")
+                if attempt < retry - 1:
+                    time.sleep(2)  # Tunggu sebelum retry
+                else:
+                    return None, response.status_code
+                
+        except Exception as e:
+            print(f"   ⚠️ Attempt {attempt+1}/{retry} - Error: {e}")
+            if attempt < retry - 1:
+                time.sleep(2)
+            else:
+                return None, 0
+    
+    return None, 0
+
+# ============================================================
+# 6. FUNGSI PARSING HTML
 # ============================================================
 
 def extract_description(html_content):
@@ -548,29 +598,6 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 6. DOWNLOAD HTML
-# ============================================================
-
-def download_html(url):
-    """Download HTML tanpa menyimpan file"""
-    try:
-        response = requests.get(url, headers=HEADERS, timeout=60)
-        if response.status_code == 200:
-            response.encoding = 'utf-8'
-            html_content = response.text
-            if not html_content or not html_content.strip().startswith(('<', '<!DOCTYPE', '<html')):
-                try:
-                    html_content = response.content.decode('utf-8', errors='ignore')
-                except:
-                    html_content = response.content.decode('latin-1', errors='ignore')
-            return html_content, 200
-        else:
-            return None, response.status_code
-    except Exception as e:
-        print(f"   ❌ Download error: {e}")
-        return None, 0
-
-# ============================================================
 # 7. FUNGSI UTAMA
 # ============================================================
 
@@ -583,7 +610,6 @@ def crawl_one_sitemap(force_download=False):
     
     if force_download or not sitemap_files:
         download_all_sitemaps()
-        # Refresh daftar setelah download
         sitemap_files = get_sitemap_files()
     else:
         print(f"📂 Menggunakan {len(sitemap_files)} sitemap lokal yang sudah ada")
@@ -615,7 +641,10 @@ def crawl_one_sitemap(force_download=False):
     for i, url in enumerate(new_urls, 1):
         print(f"\n🔄 [{i}/{len(new_urls)}] {url}")
         print("-" * 60)
-        html_content, status = download_html(url)
+        
+        # Gunakan cloudscraper untuk download halaman
+        html_content, status = download_html_page(url)
+        
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
             metadata = parse_html_page(html_content, url)
@@ -639,7 +668,9 @@ def crawl_one_sitemap(force_download=False):
                 "error": f"HTTP {status}"
             }
             results.append(metadata)
-        time.sleep(0.5)
+        
+        # Jeda lebih lama untuk menghindari ban
+        time.sleep(1)
     
     new_count = save_to_database(results)
     print(f"\n💾 Database: {new_count} link baru ditambahkan")

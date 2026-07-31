@@ -10,9 +10,13 @@ venv/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# HTML pages (ignore semua, tapi kita commit links.json)
-html_pages/
-*.html
+# Database & JSON (jangan ignore biar bisa di-commit)
+# !links.db
+# !links.json
+
+# Sitemap directory (ignore isi folder tapi commit foldernya)
+sitemaps/*.xml
+!sitemaps/.gitkeep
 
 # File sementara
 *.log

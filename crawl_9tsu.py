@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 
 BASE_URL = "https://9tsu.in"
 SITEMAP_INDEX = f"{BASE_URL}/sitemap_index.xml"
-HTML_DIR = "html_pages"  # Direktori untuk menyimpan HTML
+HTML_DIR = "html_pages"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -45,32 +45,42 @@ def create_directory():
 
 
 # ============================================================
-# 3. DOWNLOAD DAN SIMPAN HTML
+# 3. DOWNLOAD DAN SIMPAN HTML (DIPERBAIKI)
 # ============================================================
 
 def download_and_save_html(url, scraper, save_html=True):
     """
-    Download HTML dari URL dan simpan ke file
+    Download HTML dari URL dan simpan ke file dengan encoding yang benar
     Returns: (html_content, filename, status_code)
     """
     try:
         response = scraper.get(url, timeout=60)
         
         if response.status_code == 200:
+            # 🔥 PERBAIKAN 1: Pastikan encoding benar
+            if response.encoding is None:
+                response.encoding = 'utf-8'
+            
+            # 🔥 PERBAIKAN 2: Dapatkan konten sebagai text
             html_content = response.text
             
+            # 🔥 PERBAIKAN 3: Cek apakah konten valid (bukan binary)
+            if html_content and not html_content.strip().startswith('<?xml'):
+                try:
+                    html_content.encode('utf-8')
+                except UnicodeEncodeError:
+                    html_content = response.content.decode('utf-8', errors='ignore')
+            
             if save_html:
-                # Buat nama file dari URL
                 parsed = urlparse(url)
                 path = parsed.path.strip('/')
                 if not path:
                     path = 'index'
-                # Ganti karakter tidak valid untuk nama file
                 filename = path.replace('/', '_') + '.html'
                 filepath = os.path.join(HTML_DIR, filename)
                 
-                # Simpan HTML
-                with open(filepath, 'w', encoding='utf-8') as f:
+                # 🔥 PERBAIKAN 4: Simpan dengan encoding UTF-8
+                with open(filepath, 'w', encoding='utf-8', errors='ignore') as f:
                     f.write(html_content)
                 
                 return html_content, filepath, 200
@@ -106,15 +116,23 @@ def parse_html_page(html_content, url):
     if not html_content:
         return metadata
     
-    soup = BeautifulSoup(html_content, 'html.parser')
+    try:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        # Cek apakah ada tag html
+        if not soup.find('html'):
+            print(f"   ⚠️ Konten tidak valid HTML, mencoba alternatif...")
+            return parse_html_with_regex(html_content, url)
+            
+    except Exception as e:
+        print(f"   ⚠️ Error parsing with BeautifulSoup: {e}")
+        return parse_html_with_regex(html_content, url)
     
     # --- 1. ORIGINAL TITLE ---
-    # Coba dari meta property="og:title"
     og_title = soup.find('meta', property='og:title')
     if og_title and og_title.get('content'):
         metadata["original_title"] = og_title['content'].strip()
     else:
-        # Coba dari <title>
         title_tag = soup.find('title')
         if title_tag:
             metadata["original_title"] = title_tag.get_text(strip=True)
@@ -122,12 +140,10 @@ def parse_html_page(html_content, url):
     # --- 2. TITLE BERSIH ---
     cleaned_title = None
     
-    # 2a. Coba dari meta property="article:section"
     article_section = soup.find('meta', property='article:section')
     if article_section and article_section.get('content'):
         cleaned_title = article_section['content'].strip()
     
-    # 2b. Jika tidak ada, coba dari og:title
     if not cleaned_title and og_title and og_title.get('content'):
         cleaned_title = og_title['content'].strip()
         cleaned_title = re.sub(r'\s*第\d+話\s*', '', cleaned_title)
@@ -138,7 +154,6 @@ def parse_html_page(html_content, url):
         cleaned_title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned_title)
         cleaned_title = cleaned_title.strip()
     
-    # 2c. Coba dari <h1>
     if not cleaned_title:
         h1 = soup.find('h1')
         if h1:
@@ -147,7 +162,6 @@ def parse_html_page(html_content, url):
             cleaned_title = re.sub(r'\s*Season\s*\d+\s*', '', cleaned_title, flags=re.IGNORECASE)
             cleaned_title = cleaned_title.strip()
     
-    # 2d. Coba dari <title> (fallback)
     if not cleaned_title:
         title_tag = soup.find('title')
         if title_tag:
@@ -163,24 +177,20 @@ def parse_html_page(html_content, url):
     metadata["title"] = cleaned_title
     
     # --- 3. SEASON & EPISODE ---
-    # Cari di seluruh teks HTML
     html_text = soup.get_text()
     
-    # Pola 1: "Season11　第10話"
     pattern1 = r'Season\s*(\d+)\s*[　]?\s*第(\d+)話'
     match = re.search(pattern1, html_text, re.IGNORECASE)
     if match:
         metadata["season"] = int(match.group(1))
         metadata["episode"] = int(match.group(2))
     else:
-        # Pola 2: "第3話" -> season = 1
         pattern2 = r'第(\d+)話'
         match = re.search(pattern2, html_text)
         if match:
             metadata["season"] = 1
             metadata["episode"] = int(match.group(1))
         else:
-            # Pola 3: "S02E05"
             pattern3 = r'[sS](\d+)[eE](\d+)'
             match = re.search(pattern3, html_text)
             if match:
@@ -196,14 +206,66 @@ def parse_html_page(html_content, url):
 
 
 # ============================================================
-# 5. AMBIL URL DARI SITEMAP (HANYA POST-SITEMAP)
+# 5. FALLBACK PARSING DENGAN REGEX
+# ============================================================
+
+def parse_html_with_regex(html_content, url):
+    """
+    Fallback parsing dengan Regex jika BeautifulSoup gagal
+    """
+    metadata = {
+        "url": url,
+        "title": None,
+        "original_title": None,
+        "season": None,
+        "episode": None,
+        "image": None,
+        "source_page": BASE_URL,
+        "html_file": None
+    }
+    
+    try:
+        # Cari title
+        title_match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
+        if title_match:
+            raw_title = title_match.group(1).strip()
+            metadata["original_title"] = raw_title
+            cleaned = re.sub(r'\s*第\d+話\s*', '', raw_title)
+            cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
+            cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
+            cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
+            cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
+            cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
+            metadata["title"] = cleaned.strip()
+        
+        # Cari season & episode
+        season_match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', html_content, re.IGNORECASE)
+        if season_match:
+            metadata["season"] = int(season_match.group(1))
+            metadata["episode"] = int(season_match.group(2))
+        else:
+            episode_match = re.search(r'第(\d+)話', html_content)
+            if episode_match:
+                metadata["season"] = 1
+                metadata["episode"] = int(episode_match.group(1))
+        
+        # Cari image
+        image_match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+        if image_match:
+            metadata["image"] = image_match.group(1).strip()
+            
+    except Exception as e:
+        print(f"   ❌ Regex fallback error: {e}")
+    
+    return metadata
+
+
+# ============================================================
+# 6. AMBIL URL DARI SITEMAP
 # ============================================================
 
 def get_all_article_urls():
-    """
-    Ambil semua URL artikel dari sitemap_index.xml
-    HANYA dari post-sitemap
-    """
+    """Ambil semua URL artikel dari sitemap (hanya post-sitemap)"""
     try:
         print(f"📡 Mengambil sitemap index: {SITEMAP_INDEX}")
         
@@ -234,9 +296,7 @@ def get_all_article_urls():
 
 
 def extract_urls_from_sitemap(sitemap_url):
-    """
-    Ekstrak URL dari satu file sitemap
-    """
+    """Ekstrak URL dari satu file sitemap"""
     try:
         scraper = cloudscraper.create_scraper()
         scraper.headers.update(HEADERS)
@@ -259,22 +319,13 @@ def extract_urls_from_sitemap(sitemap_url):
 
 
 # ============================================================
-# 6. FUNGSI UTAMA CRAWL & INDEX
+# 7. FUNGSI UTAMA
 # ============================================================
 
 def crawl_and_index(max_pages=None):
-    """
-    Fungsi utama crawling dan indexing
-    1. Ambil URL dari sitemap
-    2. Download HTML setiap halaman
-    3. Simpan HTML ke direktori
-    4. Parse HTML untuk ekstrak metadata
-    5. Simpan hasil ke links.json
-    """
-    # Buat direktori HTML
+    """Fungsi utama crawling dan indexing"""
     create_directory()
     
-    # Ambil URL dari sitemap
     urls = get_all_article_urls()
     
     if not urls:
@@ -295,18 +346,15 @@ def crawl_and_index(max_pages=None):
         print(f"\n🔄 [{i+1}/{len(urls)}] {url}")
         print("-" * 60)
         
-        # 1. Download HTML
         html_content, html_file, status = download_and_save_html(url, scraper, save_html=True)
         
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download")
             print(f"   📄 Disimpan di: {html_file}")
             
-            # 2. Parse HTML
             metadata = parse_html_page(html_content, url)
             metadata["html_file"] = html_file
             
-            # 3. Tampilkan hasil parsing
             print(f"   📝 Hasil parsing:")
             print(f"      - Title: {metadata['title']}")
             print(f"      - Original: {metadata['original_title']}")
@@ -317,7 +365,6 @@ def crawl_and_index(max_pages=None):
             results.append(metadata)
         else:
             print(f"   ❌ Gagal download HTML (status: {status})")
-            # Tetap tambahkan URL sebagai metadata minimal
             metadata = {
                 "url": url,
                 "title": None,
@@ -331,21 +378,17 @@ def crawl_and_index(max_pages=None):
             }
             results.append(metadata)
         
-        # Jeda antar request
         time.sleep(1)
     
-    # 4. Buat output JSON
     output = {
         "timestamp": datetime.now().isoformat(),
         "total": len(results),
         "links": results
     }
     
-    # 5. Simpan links.json
     with open("links.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
-    # 6. Buat report
     successful = sum(1 for r in results if r.get('title'))
     print("\n" + "=" * 60)
     print(f"✅ Selesai!")
@@ -360,7 +403,7 @@ def crawl_and_index(max_pages=None):
 
 
 # ============================================================
-# 7. EKSEKUSI
+# 8. EKSEKUSI
 # ============================================================
 
 if __name__ == "__main__":

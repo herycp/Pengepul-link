@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# File sementara
+*.log
+*.tmp
+.DS_Store
+
+# Jangan ignore links.json biar bisa di-commit
+# !links.json

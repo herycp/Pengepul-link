@@ -20,6 +20,7 @@ SITEMAP_INDEX = f"{BASE_URL}/sitemap_index.xml"
 DB_FILE = "links.db"
 JSON_FILE = "links.json"
 SITEMAP_DIR = "sitemaps"
+BATCH_SIZE = 500  # 🔥 Proses 500 link per siklus
 
 ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
 
@@ -68,6 +69,18 @@ def init_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sitemap_file TEXT UNIQUE,
             processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # 🔥 Tabel untuk tracking progress per sitemap
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS processing_state (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sitemap_file TEXT UNIQUE,
+            offset INTEGER DEFAULT 0,
+            total INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'pending',  -- pending, processing, done, error
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
     
@@ -151,13 +164,14 @@ def get_database_count():
     return count
 
 # ============================================================
-# 3. FUNGSI STATUS SITEMAP
+# 3. FUNGSI STATUS SITEMAP & PROGRESS
 # ============================================================
 
 def mark_sitemap_processed(sitemap_file):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('INSERT OR IGNORE INTO processed_sitemaps (sitemap_file) VALUES (?)', (sitemap_file,))
+    cursor.execute('UPDATE processing_state SET status = "done" WHERE sitemap_file = ?', (sitemap_file,))
     conn.commit()
     conn.close()
 
@@ -168,6 +182,31 @@ def get_processed_sitemaps():
     rows = cursor.fetchall()
     conn.close()
     return {row[0] for row in rows}
+
+def get_processing_state(sitemap_file):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT offset, total, status FROM processing_state WHERE sitemap_file = ?', (sitemap_file,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {'offset': row[0], 'total': row[1], 'status': row[2]}
+    return None
+
+def upsert_processing_state(sitemap_file, offset, total, status):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO processing_state (sitemap_file, offset, total, status, updated_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(sitemap_file) DO UPDATE SET
+            offset = excluded.offset,
+            total = excluded.total,
+            status = excluded.status,
+            updated_at = CURRENT_TIMESTAMP
+    ''', (sitemap_file, offset, total, status))
+    conn.commit()
+    conn.close()
 
 # ============================================================
 # 4. MANAJEMEN SITEMAP LOKAL
@@ -313,7 +352,10 @@ def get_next_unprocessed_sitemap():
     processed = get_processed_sitemaps()
     for f in all_files:
         if f not in processed:
-            return f
+            # Cek apakah ada state processing yang pending/processing
+            state = get_processing_state(f)
+            if state is None or state['status'] in ['pending', 'processing']:
+                return f
     return None
 
 def get_urls_from_local_sitemap(sitemap_filename):
@@ -334,6 +376,18 @@ def get_urls_from_local_sitemap(sitemap_filename):
     except Exception as e:
         print(f"❌ Error parsing sitemap lokal {sitemap_filename}: {e}")
         return []
+
+def get_next_batch(sitemap_file, offset, batch_size=BATCH_SIZE):
+    """Ambil batch URL berikutnya dari sitemap"""
+    all_urls = get_urls_from_local_sitemap(sitemap_file)
+    if not all_urls:
+        return [], 0, 0
+    total = len(all_urls)
+    if offset >= total:
+        return [], total, total
+    end = min(offset + batch_size, total)
+    batch = all_urls[offset:end]
+    return batch, offset, end
 
 # ============================================================
 # 5. DOWNLOAD HTML - FIX BINARY
@@ -527,7 +581,6 @@ def parse_html_page(html_content, url):
     iframe = soup.find('iframe')
     if iframe and iframe.get('src'):
         embed_url = iframe['src'].strip()
-        # Fix: Jika URL dimulai dengan //, tambahkan https:
         if embed_url.startswith('//'):
             embed_url = 'https:' + embed_url
         metadata["embed_url"] = embed_url
@@ -656,7 +709,7 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 7. FUNGSI UTAMA
+# 7. FUNGSI UTAMA - BATCH PROCESSING
 # ============================================================
 
 def crawl_one_sitemap(force_download=False):
@@ -670,32 +723,48 @@ def crawl_one_sitemap(force_download=False):
     else:
         print(f"📂 Menggunakan {len(sitemap_files)} sitemap lokal yang sudah ada")
     
-    next_sitemap = get_next_unprocessed_sitemap()
-    if not next_sitemap:
+    # Cari sitemap yang sedang diproses atau baru
+    sitemap_file = get_next_unprocessed_sitemap()
+    if not sitemap_file:
         print("✅ Semua sitemap sudah diproses. Tidak ada yang baru.")
         return
     
-    print(f"📌 Memproses sitemap: {next_sitemap}")
+    # Ambil state
+    state = get_processing_state(sitemap_file)
+    if state is None:
+        # Hitung total URL
+        all_urls = get_urls_from_local_sitemap(sitemap_file)
+        if not all_urls:
+            print(f"❌ Tidak ada URL di {sitemap_file}, tandai selesai.")
+            mark_sitemap_processed(sitemap_file)
+            return
+        total = len(all_urls)
+        offset = 0
+        status = 'processing'
+        upsert_processing_state(sitemap_file, offset, total, status)
+    else:
+        offset = state['offset']
+        total = state['total']
+        if state['status'] == 'done':
+            print(f"✅ Sitemap {sitemap_file} sudah selesai diproses.")
+            mark_sitemap_processed(sitemap_file)
+            return
+        if state['status'] == 'pending':
+            status = 'processing'
+            upsert_processing_state(sitemap_file, offset, total, status)
     
-    urls = get_urls_from_local_sitemap(next_sitemap)
-    if not urls:
-        print(f"❌ Tidak ada URL ditemukan di {next_sitemap}")
-        mark_sitemap_processed(next_sitemap)
+    # Ambil batch
+    batch, start, end = get_next_batch(sitemap_file, offset, BATCH_SIZE)
+    if not batch:
+        print(f"✅ Sitemap {sitemap_file} sudah selesai (offset {offset} >= {total})")
+        mark_sitemap_processed(sitemap_file)
         return
     
-    print(f"✅ Total URL dalam sitemap: {len(urls)}")
-    
-    new_urls = [url for url in urls if not is_url_exists(url)]
-    print(f"🆕 URL baru: {len(new_urls)}")
-    
-    if not new_urls:
-        print("✅ Tidak ada konten baru di sitemap ini.")
-        mark_sitemap_processed(next_sitemap)
-        return
+    print(f"📌 Memproses {sitemap_file}: link {start+1} - {end} dari {total}")
     
     results = []
-    for i, url in enumerate(new_urls, 1):
-        print(f"\n🔄 [{i}/{len(new_urls)}] {url}")
+    for i, url in enumerate(batch, start=1):
+        print(f"\n🔄 [{start+i}/{total}] {url}")
         print("-" * 60)
         
         html_content, status = download_html_page(url)
@@ -728,16 +797,24 @@ def crawl_one_sitemap(force_download=False):
         
         time.sleep(1)
     
+    # Simpan hasil ke database
     new_count = save_to_database(results)
-    print(f"\n💾 Database: {new_count} link baru ditambahkan")
+    print(f"\n💾 Database: {new_count} link baru ditambahkan dari batch ini")
     
-    mark_sitemap_processed(next_sitemap)
-    print(f"✅ Sitemap {next_sitemap} ditandai sudah diproses")
+    # Update offset
+    new_offset = end
+    if new_offset >= total:
+        print(f"✅ Sitemap {sitemap_file} selesai diproses semua ({total} link)")
+        mark_sitemap_processed(sitemap_file)
+    else:
+        upsert_processing_state(sitemap_file, new_offset, total, 'processing')
+        print(f"📌 Progress {sitemap_file}: {new_offset}/{total} link diproses, lanjutkan run berikutnya")
     
+    # Ekspor ke JSON
     export_to_json()
     
-    total = get_database_count()
-    print(f"\n📊 Total link di database: {total}")
+    total_db = get_database_count()
+    print(f"\n📊 Total link di database: {total_db}")
 
 # ============================================================
 # 8. EKSEKUSI
@@ -755,8 +832,8 @@ if __name__ == "__main__":
             print("⚠️ Argumen tidak dikenal. Gunakan --download untuk mengunduh sitemap.")
     
     print("=" * 60)
-    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in")
-    print("📌 Mode: 1 sitemap terbaru per siklus")
+    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in (Batch 500 per siklus)")
+    print(f"📌 Batch size: {BATCH_SIZE} link per run")
     print("=" * 60)
     
     crawl_one_sitemap(force_download)

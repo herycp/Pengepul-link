@@ -10,11 +10,8 @@ import time
 from datetime import datetime
 from urllib.parse import urljoin
 
-try:
-    import cloudscraper
-except ImportError:
-    print("Instal cloudscraper: pip install cloudscraper")
-    exit(1)
+from bs4 import BeautifulSoup
+import cloudscraper
 
 # Konfigurasi
 BASE_URL = "https://9tsu.vip"
@@ -57,17 +54,29 @@ def parse_title(title):
     season = 1
     episode = None
 
+    # Pola-pola yang mungkin (case insensitive)
     patterns = [
+        # "Judul Season X Episode Y" atau "Judul Season X 第Y話"
         (r'(.*?)\s*Season\s*(\d+)\s*(?:Episode\s*|第)(\d+)[話話]?', 3),
+        # "Judul Season X - Episode Y"
         (r'(.*?)\s*Season\s*(\d+)\s*[-–]\s*(?:Episode\s*|第)(\d+)[話話]?', 3),
+        # "Judul SXE Y" atau "Judul SXEY"
         (r'(.*?)\s*S(\d+)E(\d+)', 3),
+        # "Judul Season X" (tanpa episode)
         (r'(.*?)\s*Season\s*(\d+)', 2),
+        # "Judul 第X話" (tanpa season, default season=1)
         (r'(.*?)\s*第(\d+)[話話]', 2),
+        # "Judul Episode X" (tanpa season, default season=1)
         (r'(.*?)\s*Episode\s*(\d+)', 2),
+        # "Judul Ep X" (tanpa season, default season=1)
         (r'(.*?)\s*Ep\.?\s*(\d+)', 2),
+        # "Judul Eps X" (tanpa season, default season=1)
         (r'(.*?)\s*Eps\.?\s*(\d+)', 2),
+        # "Judul #X" (tanpa season, default season=1)
         (r'(.*?)\s*#(\d+)', 2),
+        # "Judul - Episode X"
         (r'(.*?)\s*[-–]\s*(?:Episode\s*|第)(\d+)[話話]?', 2),
+        # "Judul X話"
         (r'(.*?)\s*(\d+)[話話]', 2),
     ]
 
@@ -82,8 +91,10 @@ def parse_title(title):
             elif group_count == 2:
                 clean_title = groups[0].strip()
                 episode = int(groups[1])
+                # season tetap 1
             break
 
+    # Jika clean_title kosong, gunakan original
     if not clean_title:
         clean_title = original
 
@@ -125,11 +136,11 @@ def extract_links_from_page(html, base_url):
     links = []
 
     # Cari semua elemen artikel
-    articles = soup.select("article, .post, .entry, .type-post, .item, .video-item, .blog-item")
+    articles = soup.select("article, .post, .entry, .type-post, .item, .video-item, .blog-item, .hentry, .result-item")
     
     # Jika tidak ada, ambil dari div utama
     if not articles:
-        content_div = soup.select_one(".content, .main, #content, .site-content, .container")
+        content_div = soup.select_one(".content, .main, #content, .site-content, .container, .post-list")
         if content_div:
             articles = content_div.select("a[href]")
         else:
@@ -139,7 +150,11 @@ def extract_links_from_page(html, base_url):
         # Cari judul
         title_elem = article.select_one("h2 a, h3 a, h4 a, .entry-title a, .post-title a, a[rel='bookmark']")
         if not title_elem:
-            continue
+            # Jika artikel adalah link langsung
+            if article.name == "a" and article.get("href"):
+                title_elem = article
+            else:
+                continue
 
         title = title_elem.text.strip()
         href = title_elem.get("href")
@@ -151,7 +166,11 @@ def extract_links_from_page(html, base_url):
             continue
             
         # Filter link yang tidak relevan
-        skip_patterns = ["/category/", "/tag/", "/page/", "/author/", "/wp-", "#", "?s=", "/search/", "/feed/"]
+        skip_patterns = [
+            "/category/", "/tag/", "/page/", "/author/", 
+            "/wp-", "#", "?s=", "/search/", "/feed/",
+            "/login", "/register", "/wp-admin"
+        ]
         if any(p in full_url for p in skip_patterns):
             continue
 

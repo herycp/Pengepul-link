@@ -1,111 +1,302 @@
 #!/usr/bin/env python3
-import sys
-import time
+"""
+Ekstrak semua link artikel dari 9tsu.vip
+Dengan parsing season dan episode dari judul
+"""
+
 import json
-from datetime import datetime
-import cloudscraper  # wajib install: pip install cloudscraper
-from bs4 import BeautifulSoup
 import re
+import time
+import random
+from datetime import datetime
+from urllib.parse import urljoin, urlparse
 
-# ========== KONFIGURASI ==========
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-TIMEOUT = 15
-DELAY = 2  # jeda antar request (detik)
-# =================================
+import requests
+from bs4 import BeautifulSoup
 
-def get_page(url):
-    """Mengambil konten HTML dengan cloudscraper + header"""
-    scraper = cloudscraper.create_scraper()
-    headers = {"User-Agent": USER_AGENT}
-    try:
-        print(f"Memproses: {url}")
-        resp = scraper.get(url, headers=headers, timeout=TIMEOUT)
-        if resp.status_code == 200:
-            return resp.text
-        else:
-            print(f"Status {resp.status_code} untuk {url}")
-            return None
-    except Exception as e:
-        print(f"Gagal mengambil {url}: {e}")
-        return None
+# Konfigurasi
+BASE_URL = "https://9tsu.vip"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
-def extract_links_from_html(html, base_url):
-    """Ekstrak semua link video (misal dari tag <a> atau <source>)"""
-    soup = BeautifulSoup(html, 'html.parser')
-    links = set()
+# Daftar halaman yang akan di-scrape
+PAGES = [
+    "/",
+    "/daily",
+    "/drama-monday1",
+    "/drama-tuesday1",
+    "/drama-wednesdaydouga",
+    "/drama-thursdaydouga",
+    "/drama-fridaydouga",
+    "/drama-saturdaydouga",
+    "/drama-sundaydouga",
+    "/dramaend",
+    "/premium",
+]
 
-    # Cari link di tag <a> yang mengandung kata 'download' atau 'video'
-    for a in soup.find_all('a', href=True):
-        href = a['href']
-        if 'download' in href.lower() or '.mp4' in href or '/video/' in href:
-            full_url = href if href.startswith('http') else base_url.rstrip('/') + '/' + href.lstrip('/')
-            links.add(full_url)
 
-    # Cari juga di tag <source> (biasa untuk video player)
-    for source in soup.find_all('source', src=True):
-        src = source['src']
-        full_url = src if src.startswith('http') else base_url.rstrip('/') + '/' + src.lstrip('/')
-        links.add(full_url)
+def parse_title(title):
+    """
+    Ekstrak judul, season, episode dari string judul.
+    Return: (clean_title, season, episode)
+    """
+    if not title:
+        return "", 1, None
 
-    # Cari pola URL video di dalam script atau atribut (jika ada)
-    # Contoh pola: https://cdn.9tsu.vip/.../video.mp4
-    pattern = r'https?://[^\s"\']+\.(?:mp4|m3u8|ts|avi|mkv)'
-    found = re.findall(pattern, html)
-    for f in found:
-        links.add(f)
+    original = title.strip()
+    clean_title = original
+    season = 1
+    episode = None
 
-    return list(links)
+    # Pola-pola yang mungkin (case insensitive)
+    patterns = [
+        # "Judul Season X Episode Y" atau "Judul Season X 第Y話"
+        (r'(.*?)\s*Season\s*(\d+)\s*(?:Episode\s*|第)(\d+)[話話]?', 3),
+        # "Judul Season X - Episode Y"
+        (r'(.*?)\s*Season\s*(\d+)\s*[-–]\s*(?:Episode\s*|第)(\d+)[話話]?', 3),
+        # "Judul SXE Y" atau "Judul SXEY"
+        (r'(.*?)\s*S(\d+)E(\d+)', 3),
+        # "Judul Season X" (tanpa episode)
+        (r'(.*?)\s*Season\s*(\d+)', 2),
+        # "Judul 第X話" (tanpa season, default season=1)
+        (r'(.*?)\s*第(\d+)[話話]', 2),
+        # "Judul Episode X" (tanpa season, default season=1)
+        (r'(.*?)\s*Episode\s*(\d+)', 2),
+        # "Judul Ep X" (tanpa season, default season=1)
+        (r'(.*?)\s*Ep\.?\s*(\d+)', 2),
+        # "Judul Eps X" (tanpa season, default season=1)
+        (r'(.*?)\s*Eps\.?\s*(\d+)', 2),
+        # "Judul #X" (tanpa season, default season=1)
+        (r'(.*?)\s*#(\d+)', 2),
+        # "Judul - Episode X"
+        (r'(.*?)\s*[-–]\s*(?:Episode\s*|第)(\d+)[話話]?', 2),
+        # "Judul X話"
+        (r'(.*?)\s*(\d+)[話話]', 2),
+    ]
+
+    for pattern, group_count in patterns:
+        match = re.search(pattern, original, re.IGNORECASE)
+        if match:
+            groups = match.groups()
+            if group_count == 3:
+                clean_title = groups[0].strip()
+                season = int(groups[1])
+                episode = int(groups[2])
+            elif group_count == 2:
+                clean_title = groups[0].strip()
+                episode = int(groups[1])
+                # season tetap 1
+            break
+
+    # Jika clean_title kosong, gunakan original
+    if not clean_title:
+        clean_title = original
+
+    return clean_title, season, episode
+
+
+def get_page(url, max_retries=3):
+    """Fetch halaman dengan retry dan random delay"""
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+    }
+    
+    for attempt in range(max_retries):
+        try:
+            # Random delay untuk menghindari deteksi
+            time.sleep(random.uniform(1, 3))
+            
+            resp = requests.get(url, headers=headers, timeout=30)
+            
+            if resp.status_code == 200:
+                return resp.text
+            elif resp.status_code == 403:
+                print(f"  ⚠️ 403 Forbidden untuk {url}, mencoba dengan User-Agent berbeda...")
+                # Coba dengan User-Agent alternatif
+                alt_headers = headers.copy()
+                alt_headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                resp2 = requests.get(url, headers=alt_headers, timeout=30)
+                if resp2.status_code == 200:
+                    return resp2.text
+            else:
+                print(f"  ⚠️ Status {resp.status_code} untuk {url}")
+                
+        except Exception as e:
+            print(f"  ⚠️ Attempt {attempt+1} gagal: {e}")
+            time.sleep(3)
+    
+    return None
+
+
+def extract_links_from_page(html, base_url):
+    """Ekstrak semua link artikel dari halaman"""
+    soup = BeautifulSoup(html, "lxml")
+    links = []
+
+    # Cari semua elemen artikel
+    selectors = [
+        "article",
+        ".post",
+        ".entry",
+        ".type-post",
+        ".item",
+        ".video-item",
+        ".blog-item",
+        ".post-item",
+        ".entry-item",
+        ".hentry",
+        ".result-item",
+        ".search-item",
+    ]
+    
+    articles = []
+    for selector in selectors:
+        articles.extend(soup.select(selector))
+    
+    # Jika tidak ada, coba cari semua link dengan href tertentu
+    if not articles:
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            # Filter link yang menuju ke artikel
+            if href.startswith("/") and "/drama/" in href:
+                full_url = urljoin(base_url, href)
+                if full_url not in [l["url"] for l in links]:
+                    title = a.text.strip() or "Unknown"
+                    clean_title, season, episode = parse_title(title)
+                    links.append({
+                        "url": full_url,
+                        "title": clean_title,
+                        "original_title": title,
+                        "season": season,
+                        "episode": episode,
+                        "image": None,
+                        "source_page": base_url,
+                    })
+        return links
+
+    for article in articles:
+        # Cari judul dan link
+        title_selectors = [
+            "h2 a",
+            "h3 a",
+            "h4 a",
+            ".entry-title a",
+            ".post-title a",
+            "a[rel='bookmark']",
+            "a.title",
+            "a.post-link",
+        ]
+        
+        title_elem = None
+        for selector in title_selectors:
+            title_elem = article.select_one(selector)
+            if title_elem:
+                break
+        
+        if not title_elem:
+            # Coba cari link pertama di artikel
+            first_link = article.find("a", href=True)
+            if first_link:
+                title_elem = first_link
+            else:
+                continue
+
+        title = title_elem.text.strip()
+        href = title_elem.get("href")
+        if not href:
+            continue
+
+        full_url = urljoin(base_url, href)
+        if not full_url.startswith("http"):
+            continue
+            
+        # Skip link yang bukan artikel (misal: /category/, /tag/, /page/)
+        skip_patterns = [
+            "/category/",
+            "/tag/",
+            "/page/",
+            "/author/",
+            "/wp-",
+            "#",
+            "?s=",
+            "/search/",
+        ]
+        if any(p in full_url for p in skip_patterns):
+            continue
+
+        # Cari gambar
+        img_elem = article.select_one("img")
+        img_url = None
+        if img_elem:
+            img_url = img_elem.get("data-src") or img_elem.get("src") or img_elem.get("data-lazy-src")
+            if img_url and (img_url.startswith("data:image") or "placeholder" in img_url):
+                img_url = None
+
+        # Parse season dan episode dari judul
+        clean_title, season, episode = parse_title(title)
+
+        links.append({
+            "url": full_url,
+            "title": clean_title,
+            "original_title": title,
+            "season": season,
+            "episode": episode,
+            "image": img_url,
+            "source_page": base_url,
+        })
+
+    return links
+
 
 def main():
-    # Baca daftar URL dari argumen atau dari file? 
-    # Di log terlihat ada 3 URL: https://9tsu.vip/, daily, drama-monday1
-    # Kita ambil dari sys.argv atau pakai daftar default
-
-    if len(sys.argv) > 1:
-        urls = sys.argv[1:]  # bisa kasih banyak URL
-    else:
-        # Default: daftar URL yang ingin di-scrape
-        urls = [
-            "https://9tsu.vip/",
-            "https://9tsu.vip/daily",
-            "https://9tsu.vip/drama-monday1"
-        ]
-
-    print("=" * 50)
-    print("9TSU_LINK_EXTRACTOR")
+    print("=" * 60)
+    print("9TSU LINK EXTRACTOR")
     print(f"Waktu: {datetime.now().isoformat()}")
-    print("=" * 50)
-    print()
+    print("=" * 60)
 
-    all_links = {}
+    all_links = []
+    seen_urls = set()
 
-    for url in urls:
+    for page in PAGES:
+        url = urljoin(BASE_URL, page)
+        print(f"\n📄 Memproses: {url}")
         html = get_page(url)
-        if html:
-            links = extract_links_from_html(html, url)
-            all_links[url] = links
-            print(f"  -> Ditemukan {len(links)} link dari {url}")
-        else:
-            all_links[url] = []
-            print(f"  -> Gagal mengambil {url}")
-        time.sleep(DELAY)  # jeda biar tidak dianggap spam
+        if not html:
+            print(f"  ❌ Gagal mengambil halaman")
+            continue
 
-    # Tampilkan hasil akhir
-    print("\n" + "=" * 50)
-    print("HASIL EKSTRAKSI")
-    print("=" * 50)
-    total = 0
-    for url, links in all_links.items():
-        print(f"\n{url}")
-        for i, link in enumerate(links, 1):
-            print(f"  {i}. {link}")
-        total += len(links)
-    print(f"\nTotal link ditemukan: {total}")
+        links = extract_links_from_page(html, url)
+        print(f"  ✅ Ditemukan {len(links)} link")
 
-    # Simpan ke file JSON (opsional)
-    with open("extracted_links.json", "w") as f:
-        json.dump(all_links, f, indent=2, ensure_ascii=False)
-    print("Hasil juga disimpan ke extracted_links.json")
+        for link in links:
+            if link["url"] not in seen_urls:
+                seen_urls.add(link["url"])
+                all_links.append(link)
+
+    print(f"\n📊 Total link unik: {len(all_links)}")
+
+    # Simpan ke file
+    output = {
+        "timestamp": datetime.now().isoformat(),
+        "total": len(all_links),
+        "links": all_links,
+    }
+
+    with open("links.json", "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+
+    # Juga simpan sebagai list URL saja untuk kemudahan
+    with open("urls.txt", "w", encoding="utf-8") as f:
+        for link in all_links:
+            f.write(link["url"] + "\n")
+
+    print(f"\n💾 Disimpan ke links.json dan urls.txt")
+    print("✅ Selesai!")
+
 
 if __name__ == "__main__":
     main()

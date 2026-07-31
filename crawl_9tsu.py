@@ -20,9 +20,6 @@ DB_FILE = "links.db"
 JSON_FILE = "links.json"
 SITEMAP_DIR = "sitemaps"
 
-# Daftar domain alternatif jika primary domain 403
-ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
-
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
@@ -43,10 +40,8 @@ HEADERS = {
 # ============================================================
 
 def init_database():
-    """Inisialisasi database dan tabel"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS links (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +73,6 @@ def init_database():
     print("✅ Database siap")
 
 def is_url_exists(url):
-    """Cek apakah URL sudah ada di database"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM links WHERE url = ?", (url,))
@@ -87,7 +81,6 @@ def is_url_exists(url):
     return exists
 
 def save_to_database(metadata_list):
-    """Simpan metadata ke database (skip jika sudah ada)"""
     if not metadata_list:
         return 0
     
@@ -115,7 +108,6 @@ def save_to_database(metadata_list):
     return new_count
 
 def export_to_json():
-    """Ekspor semua data dari database ke JSON"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('SELECT url, title, season, episode, image, description, embed_url, embed_platform, created_at FROM links')
@@ -148,7 +140,6 @@ def export_to_json():
     print(f"📁 JSON ekspor: {len(links)} link")
 
 def get_database_count():
-    """Jumlah total link di database"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('SELECT COUNT(*) FROM links')
@@ -161,7 +152,6 @@ def get_database_count():
 # ============================================================
 
 def mark_sitemap_processed(sitemap_file):
-    """Tandai sitemap sebagai sudah diproses"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('INSERT OR IGNORE INTO processed_sitemaps (sitemap_file) VALUES (?)', (sitemap_file,))
@@ -169,7 +159,6 @@ def mark_sitemap_processed(sitemap_file):
     conn.close()
 
 def get_processed_sitemaps():
-    """Ambil daftar sitemap yang sudah diproses"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('SELECT sitemap_file FROM processed_sitemaps')
@@ -182,39 +171,14 @@ def get_processed_sitemaps():
 # ============================================================
 
 def create_sitemap_dir():
-    """Buat direktori sitemap jika belum ada"""
     if not os.path.exists(SITEMAP_DIR):
         os.makedirs(SITEMAP_DIR)
         print(f"📁 Direktori sitemap dibuat: {SITEMAP_DIR}")
 
-def get_sitemap_from_alternative_domains():
-    """Coba akses sitemap dari domain alternatif jika primary domain 403"""
-    for domain in ALTERNATIVE_DOMAINS:
-        try:
-            sitemap_url = f"{domain}/sitemap_index.xml"
-            print(f"🔄 Mencoba domain alternatif: {sitemap_url}")
-            scraper = cloudscraper.create_scraper()
-            scraper.headers.update({
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-                "Accept-Language": "id-ID,id;q=0.9",
-            })
-            response = scraper.get(sitemap_url, timeout=60)
-            if response.status_code == 200:
-                print(f"✅ Berhasil menggunakan domain: {domain}")
-                return response.content, domain
-        except Exception as e:
-            print(f"   ❌ Gagal: {e}")
-            continue
-    return None, None
-
 def download_all_sitemaps():
-    """Download semua post-sitemap dari online ke folder lokal"""
     create_sitemap_dir()
-    
     try:
         print(f"📡 Mengambil daftar sitemap dari: {SITEMAP_INDEX}")
-        
         scraper = cloudscraper.create_scraper()
         scraper.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -231,19 +195,9 @@ def download_all_sitemaps():
         })
         
         response = scraper.get(SITEMAP_INDEX, timeout=60)
+        response.raise_for_status()
         
-        if response.status_code == 403:
-            print("⚠️ Primary domain 403 Forbidden. Mencoba domain alternatif...")
-            content, domain = get_sitemap_from_alternative_domains()
-            if content is None:
-                print("❌ Semua domain alternatif gagal.")
-                return
-            response_content = content
-        else:
-            response.raise_for_status()
-            response_content = response.content
-        
-        root = ET.fromstring(response_content)
+        root = ET.fromstring(response.content)
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
         sitemap_urls = []
         for loc in root.findall('.//ns:loc', ns):
@@ -259,13 +213,7 @@ def download_all_sitemaps():
                 print(f"⏭️  {filename} sudah ada, dilewati")
                 continue
             print(f"⬇️  Download {filename} ({idx}/{len(sitemap_urls)})")
-            
-            sitemap_scraper = cloudscraper.create_scraper()
-            sitemap_scraper.headers.update({
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-            })
-            resp = sitemap_scraper.get(url, timeout=60)
+            resp = requests.get(url, timeout=60)
             if resp.status_code == 200:
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(resp.text)
@@ -278,7 +226,6 @@ def download_all_sitemaps():
         print(f"❌ Error download sitemaps: {e}")
 
 def get_sitemap_files():
-    """Daftar file sitemap lokal diurutkan ascending (kecil = baru)"""
     create_sitemap_dir()
     files = [f for f in os.listdir(SITEMAP_DIR) if f.startswith('post-sitemap') and f.endswith('.xml')]
     if not files:
@@ -287,7 +234,6 @@ def get_sitemap_files():
     return files
 
 def get_next_unprocessed_sitemap():
-    """Ambil sitemap terkecil (terbaru) yang belum diproses"""
     all_files = get_sitemap_files()
     if not all_files:
         return None
@@ -298,7 +244,6 @@ def get_next_unprocessed_sitemap():
     return None
 
 def get_urls_from_local_sitemap(sitemap_filename):
-    """Ekstrak URL dari file sitemap lokal"""
     filepath = os.path.join(SITEMAP_DIR, sitemap_filename)
     if not os.path.exists(filepath):
         print(f"❌ File tidak ditemukan: {filepath}")
@@ -318,14 +263,13 @@ def get_urls_from_local_sitemap(sitemap_filename):
         return []
 
 # ============================================================
-# 5. DOWNLOAD HTML PAGE (DENGAN CLOUDSCRAPER)
+# 🔥 PERUBAHAN: 5. DOWNLOAD HTML PAGE (DIPERBAIKI - TIDAK BINARY)
 # ============================================================
 
 def download_html_page(url, retry=3):
     """
     Download HTML halaman artikel menggunakan cloudscraper
-    untuk melewati Cloudflare / anti-bot.
-    Retry jika gagal.
+    dengan force encoding UTF-8 dan handle compression.
     """
     for attempt in range(retry):
         try:
@@ -348,18 +292,39 @@ def download_html_page(url, retry=3):
             response = scraper.get(url, timeout=60)
             
             if response.status_code == 200:
-                response.encoding = 'utf-8'
-                html_content = response.text
-                if not html_content or not html_content.strip().startswith(('<', '<!DOCTYPE', '<html')):
-                    try:
-                        html_content = response.content.decode('utf-8', errors='ignore')
-                    except:
-                        html_content = response.content.decode('latin-1', errors='ignore')
+                # 🔥 PERBAIKAN 1: Paksa encoding UTF-8
+                if response.encoding is None or response.encoding.lower() in ['iso-8859-1', 'windows-1252']:
+                    response.encoding = 'utf-8'
+                
+                # 🔥 PERBAIKAN 2: Coba dapatkan konten sebagai text
+                try:
+                    html_content = response.text
+                except:
+                    html_content = response.content.decode('utf-8', errors='ignore')
+                
+                # 🔥 PERBAIKAN 3: Jika konten tidak valid, coba alternative decoding
+                if not html_content or len(html_content) < 100 or not any(tag in html_content[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                    for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
+                        try:
+                            decoded = response.content.decode(encoding, errors='ignore')
+                            if decoded and len(decoded) > len(html_content) and any(tag in decoded[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                                html_content = decoded
+                                break
+                        except:
+                            continue
+                
+                # 🔥 PERBAIKAN 4: Bersihkan karakter aneh
+                html_content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', html_content)
+                
+                # 🔥 PERBAIKAN 5: Jika masih kosong, coba raw content
+                if not html_content or len(html_content) < 50:
+                    html_content = response.content.decode('utf-8', errors='ignore')
+                
                 return html_content, 200
             else:
                 print(f"   ⚠️ Attempt {attempt+1}/{retry} - Status: {response.status_code}")
                 if attempt < retry - 1:
-                    time.sleep(2)  # Tunggu sebelum retry
+                    time.sleep(2)
                 else:
                     return None, response.status_code
                 
@@ -377,7 +342,6 @@ def download_html_page(url, retry=3):
 # ============================================================
 
 def extract_description(html_content):
-    """Ekstrak deskripsi dari div.body-content"""
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
         body_content = soup.find('div', class_='body-content')
@@ -396,7 +360,6 @@ def extract_description(html_content):
         return None
 
 def extract_embed_info(html_content):
-    """Ekstrak iframe embed URL dan platform"""
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
         result = {"embed_url": None, "embed_platform": None}
@@ -432,7 +395,6 @@ def extract_embed_info(html_content):
         return {"embed_url": None, "embed_platform": None}
 
 def parse_html_page(html_content, url):
-    """Parse HTML untuk ekstrak metadata"""
     metadata = {
         "url": url,
         "title": None,
@@ -527,7 +489,6 @@ def parse_html_page(html_content, url):
     return metadata
 
 def parse_html_with_regex(html_content, url):
-    """Fallback parsing dengan Regex"""
     metadata = {
         "url": url,
         "title": None,
@@ -598,14 +559,13 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 7. FUNGSI UTAMA
+# 🔥 PERUBAHAN: 7. FUNGSI UTAMA (DENGAN DEBUG PREVIEW)
 # ============================================================
 
 def crawl_one_sitemap(force_download=False):
     """Proses 1 sitemap belum diproses (terkecil/terbaru)"""
     init_database()
     
-    # Cek sitemap lokal yang sudah ada
     sitemap_files = get_sitemap_files()
     
     if force_download or not sitemap_files:
@@ -642,11 +602,15 @@ def crawl_one_sitemap(force_download=False):
         print(f"\n🔄 [{i}/{len(new_urls)}] {url}")
         print("-" * 60)
         
-        # Gunakan cloudscraper untuk download halaman
         html_content, status = download_html_page(url)
         
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
+            
+            # 🔥 PERUBAHAN: Debug preview HTML
+            preview = html_content[:200].replace('\n', ' ').replace('\r', ' ')
+            print(f"   🔍 Preview HTML: {preview}...")
+            
             metadata = parse_html_page(html_content, url)
             print(f"   📝 Hasil parsing:")
             print(f"      - Title: {metadata['title']}")
@@ -669,7 +633,6 @@ def crawl_one_sitemap(force_download=False):
             }
             results.append(metadata)
         
-        # Jeda lebih lama untuk menghindari ban
         time.sleep(1)
     
     new_count = save_to_database(results)

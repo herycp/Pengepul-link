@@ -8,7 +8,6 @@ import time
 import os
 import gzip
 import subprocess
-import tempfile
 from datetime import datetime
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -330,7 +329,7 @@ def get_urls_from_local_sitemap(sitemap_filename):
         return []
 
 # ============================================================
-# 🔥 PERUBAHAN UTAMA: 5. DOWNLOAD HTML (DENGAN CURL FALLBACK)
+# 🔥 PERBAIKAN: 5. DOWNLOAD HTML (CURL FALLBACK)
 # ============================================================
 
 def download_with_curl(url):
@@ -388,7 +387,6 @@ def download_html_page(url, retry=3):
                 if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
                     return html, 200
                 else:
-                    # Coba decode manual
                     try:
                         html = response.content.decode('utf-8', errors='ignore')
                         if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
@@ -435,7 +433,7 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 6. FUNGSI PARSING HTML (Sama seperti sebelumnya)
+# 🔥 PERBAIKAN: 6. PARSING HTML (DIPERBAIKI)
 # ============================================================
 
 def extract_description(html_content):
@@ -492,6 +490,9 @@ def extract_embed_info(html_content):
         return {"embed_url": None, "embed_platform": None}
 
 def parse_html_page(html_content, url):
+    """
+    Parse HTML untuk ekstrak metadata dengan pendekatan yang lebih akurat.
+    """
     metadata = {
         "url": url,
         "title": None,
@@ -508,84 +509,104 @@ def parse_html_page(html_content, url):
     
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
-        if not soup.find('html'):
-            return parse_html_with_regex(html_content, url)
-    except Exception:
-        return parse_html_with_regex(html_content, url)
-    
-    # TITLE
-    cleaned = None
-    article_section = soup.find('meta', property='article:section')
-    if article_section and article_section.get('content'):
-        cleaned = article_section['content'].strip()
-    
-    if not cleaned:
-        og_title = soup.find('meta', property='og:title')
-        if og_title and og_title.get('content'):
-            cleaned = og_title['content'].strip()
-            cleaned = re.sub(r'\s*第\d+話\s*', '', cleaned)
-            cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-            cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
-            cleaned = cleaned.strip()
-    
-    if not cleaned:
-        h1 = soup.find('h1')
-        if h1:
-            cleaned = h1.get_text(strip=True)
-            cleaned = re.sub(r'\s*第\d+話\s*', '', cleaned)
-            cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-            cleaned = cleaned.strip()
-    
-    if not cleaned:
-        title_tag = soup.find('title')
-        if title_tag:
-            cleaned = title_tag.get_text(strip=True)
-            cleaned = re.sub(r'\s*第\d+話\s*', '', cleaned)
-            cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-            cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
-            cleaned = cleaned.strip()
-    
-    metadata["title"] = cleaned
-    
-    # SEASON & EPISODE
-    text = soup.get_text()
-    match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', text, re.IGNORECASE)
-    if match:
-        metadata["season"] = int(match.group(1))
-        metadata["episode"] = int(match.group(2))
-    else:
-        match = re.search(r'第(\d+)話', text)
+        
+        # --- TITLE ---
+        # Prioritas: article:section > og:title > h1 > title
+        cleaned = None
+        
+        # 1. Coba dari article:section
+        article_section = soup.find('meta', property='article:section')
+        if article_section and article_section.get('content'):
+            cleaned = article_section['content'].strip()
+        
+        # 2. Coba dari og:title
+        if not cleaned:
+            og_title = soup.find('meta', property='og:title')
+            if og_title and og_title.get('content'):
+                cleaned = og_title['content'].strip()
+                # Bersihkan dari teks tambahan
+                cleaned = re.sub(r'\s*第\d+話\s*', '', cleaned)
+                cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
+                cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
+                cleaned = cleaned.strip()
+        
+        # 3. Coba dari h1
+        if not cleaned:
+            h1 = soup.find('h1')
+            if h1:
+                cleaned = h1.get_text(strip=True)
+                cleaned = re.sub(r'\s*第\d+話\s*', '', cleaned)
+                cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
+                cleaned = cleaned.strip()
+        
+        # 4. Fallback dari title
+        if not cleaned:
+            title_tag = soup.find('title')
+            if title_tag:
+                cleaned = title_tag.get_text(strip=True)
+                cleaned = re.sub(r'\s*第\d+話\s*', '', cleaned)
+                cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
+                cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
+                cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
+                cleaned = cleaned.strip()
+        
+        metadata["title"] = cleaned
+        
+        # --- SEASON & EPISODE ---
+        # Cari di seluruh teks HTML
+        text = soup.get_text()
+        
+        # Pola: "Season11　第10話" atau "第3話"
+        season = None
+        episode = None
+        
+        # Coba pola dengan season
+        match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', text, re.IGNORECASE)
         if match:
-            metadata["season"] = 1
-            metadata["episode"] = int(match.group(1))
+            season = int(match.group(1))
+            episode = int(match.group(2))
         else:
-            match = re.search(r'[sS](\d+)[eE](\d+)', text)
+            # Coba pola tanpa season (anggap season=1)
+            match = re.search(r'第(\d+)話', text)
             if match:
-                metadata["season"] = int(match.group(1))
-                metadata["episode"] = int(match.group(2))
-    
-    # IMAGE
-    og_image = soup.find('meta', property='og:image')
-    if og_image and og_image.get('content'):
-        metadata["image"] = og_image['content'].strip()
-    
-    # DESCRIPTION
-    metadata["description"] = extract_description(html_content)
-    
-    # EMBED
-    embed_info = extract_embed_info(html_content)
-    metadata["embed_url"] = embed_info["embed_url"]
-    metadata["embed_platform"] = embed_info["embed_platform"]
-    
-    return metadata
+                season = 1
+                episode = int(match.group(1))
+            else:
+                # Coba pola SXE
+                match = re.search(r'[sS](\d+)[eE](\d+)', text)
+                if match:
+                    season = int(match.group(1))
+                    episode = int(match.group(2))
+        
+        metadata["season"] = season
+        metadata["episode"] = episode
+        
+        # --- IMAGE ---
+        og_image = soup.find('meta', property='og:image')
+        if og_image and og_image.get('content'):
+            metadata["image"] = og_image['content'].strip()
+        
+        # --- DESCRIPTION ---
+        metadata["description"] = extract_description(html_content)
+        
+        # --- EMBED ---
+        embed_info = extract_embed_info(html_content)
+        metadata["embed_url"] = embed_info["embed_url"]
+        metadata["embed_platform"] = embed_info["embed_platform"]
+        
+        return metadata
+        
+    except Exception as e:
+        print(f"   ⚠️ Error parsing with BeautifulSoup: {e}")
+        return parse_html_with_regex(html_content, url)
 
 def parse_html_with_regex(html_content, url):
+    """Fallback parsing dengan Regex"""
     metadata = {
         "url": url,
         "title": None,
@@ -598,6 +619,7 @@ def parse_html_with_regex(html_content, url):
     }
     
     try:
+        # Title
         title_match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
         if title_match:
             raw = title_match.group(1).strip()
@@ -609,6 +631,7 @@ def parse_html_with_regex(html_content, url):
             cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
             metadata["title"] = cleaned.strip()
         
+        # Season & Episode
         season_match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', html_content, re.IGNORECASE)
         if season_match:
             metadata["season"] = int(season_match.group(1))
@@ -619,10 +642,12 @@ def parse_html_with_regex(html_content, url):
                 metadata["season"] = 1
                 metadata["episode"] = int(episode_match.group(1))
         
+        # Image
         image_match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
         if image_match:
             metadata["image"] = image_match.group(1).strip()
         
+        # Description
         desc_match = re.search(r'<div\s+class="body-content[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
         if desc_match:
             desc = re.sub(r'<[^>]+>', '', desc_match.group(1)).strip()
@@ -635,6 +660,7 @@ def parse_html_with_regex(html_content, url):
                 if desc:
                     metadata["description"] = desc
         
+        # Embed
         iframe_match = re.search(r'<iframe[^>]+src="([^"]+)"', html_content, re.IGNORECASE)
         if iframe_match:
             embed_url = iframe_match.group(1).strip()
@@ -650,8 +676,8 @@ def parse_html_with_regex(html_content, url):
                 parsed = urlparse(embed_url)
                 metadata["embed_platform"] = parsed.netloc
     
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"   ❌ Regex fallback error: {e}")
     
     return metadata
 
@@ -703,7 +729,8 @@ def crawl_one_sitemap(force_download=False):
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
             
-            preview = html_content[:200].replace('\n', ' ').replace('\r', ' ')
+            # Debug preview
+            preview = html_content[:300].replace('\n', ' ').replace('\r', ' ')
             print(f"   🔍 Preview: {preview}...")
             
             metadata = parse_html_page(html_content, url)

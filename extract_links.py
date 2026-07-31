@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Ekstrak semua link artikel dari 9tsu.vip
-Menggunakan Cloudscraper untuk bypass Cloudflare
 """
 
 import json
@@ -10,8 +9,8 @@ import time
 from datetime import datetime
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
 import cloudscraper
+from bs4 import BeautifulSoup
 
 # Konfigurasi
 BASE_URL = "https://9tsu.vip"
@@ -31,7 +30,6 @@ PAGES = [
     "/premium",
 ]
 
-# Buat scraper dengan konfigurasi sederhana
 scraper = cloudscraper.create_scraper()
 
 
@@ -45,7 +43,6 @@ def parse_title(title):
     season = 1
     episode = None
 
-    # Pola-pola yang mungkin (case insensitive)
     patterns = [
         (r'(.*?)\s*Season\s*(\d+)\s*(?:Episode\s*|第)(\d+)[話話]?', 3),
         (r'(.*?)\s*Season\s*(\d+)\s*[-–]\s*(?:Episode\s*|第)(\d+)[話話]?', 3),
@@ -54,7 +51,6 @@ def parse_title(title):
         (r'(.*?)\s*第(\d+)[話話]', 2),
         (r'(.*?)\s*Episode\s*(\d+)', 2),
         (r'(.*?)\s*Ep\.?\s*(\d+)', 2),
-        (r'(.*?)\s*Eps\.?\s*(\d+)', 2),
         (r'(.*?)\s*#(\d+)', 2),
         (r'(.*?)\s*[-–]\s*(?:Episode\s*|第)(\d+)[話話]?', 2),
         (r'(.*?)\s*(\d+)[話話]', 2),
@@ -95,30 +91,11 @@ def get_page(url, max_retries=3):
             print(f"  🔄 Attempt {attempt+1}...")
             resp = scraper.get(url, headers=headers, timeout=30)
             
-            # Cek response
             if resp.status_code == 200:
-                # Pastikan response berupa string
-                if isinstance(resp.text, str):
-                    print(f"  ✅ Success ({len(resp.text)} bytes)")
-                    return resp.text
-                else:
-                    print(f"  ⚠️ Response bukan string, mencoba decode...")
-                    try:
-                        return resp.content.decode('utf-8')
-                    except:
-                        return str(resp.content)
+                print(f"  ✅ Success ({len(resp.text)} bytes)")
+                return resp.text
             else:
                 print(f"  ⚠️ Status: {resp.status_code}")
-                if resp.status_code == 403:
-                    # Coba tanpa cloudscraper
-                    import requests
-                    try:
-                        resp2 = requests.get(url, headers=headers, timeout=30)
-                        if resp2.status_code == 200:
-                            return resp2.text
-                    except:
-                        pass
-                        
         except Exception as e:
             print(f"  ⚠️ Error: {e}")
             
@@ -131,90 +108,92 @@ def extract_links_from_page(html, base_url):
     """Ekstrak semua link artikel dari halaman"""
     soup = BeautifulSoup(html, "html.parser")
     links = []
-
-    # Cari semua elemen artikel
-    selectors = [
-        "article", ".post", ".entry", ".type-post", 
-        ".item", ".video-item", ".blog-item", ".hentry", 
-        ".result-item", ".search-item"
-    ]
     
-    articles = []
-    for selector in selectors:
-        articles.extend(soup.select(selector))
+    # ===== DEBUG: Tulis HTML ke file untuk inspect =====
+    with open("debug.html", "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"  📝 Debug HTML saved to debug.html")
     
-    # Jika tidak ada, cari link di konten utama
-    if not articles:
-        content_div = soup.select_one(".content, .main, #content, .site-content, .container, .post-list")
-        if content_div:
-            articles = content_div.find_all("a", href=True)
-        else:
-            articles = soup.find_all("a", href=True)
-
-    for article in articles:
-        # Cari judul
-        title_elem = None
-        title_selectors = [
-            "h2 a", "h3 a", "h4 a", 
-            ".entry-title a", ".post-title a", 
-            "a[rel='bookmark']", ".title"
-        ]
-        
-        for selector in title_selectors:
-            title_elem = article.select_one(selector)
-            if title_elem:
-                break
-        
-        if not title_elem and article.name == "a":
-            title_elem = article
-        elif not title_elem:
-            continue
-
-        title = title_elem.text.strip()
-        href = title_elem.get("href")
+    # ===== CARI SEMUA LINK =====
+    all_links = soup.find_all("a", href=True)
+    print(f"  🔗 Total links in page: {len(all_links)}")
+    
+    # Filter link yang menuju ke artikel drama
+    drama_links = []
+    for a in all_links:
+        href = a.get("href", "")
         if not href:
             continue
-
+            
         # Build full URL
         if href.startswith("/"):
             full_url = urljoin(base_url, href)
         else:
             full_url = href
             
-        if not full_url.startswith("http"):
-            continue
+        # Cek apakah ini link artikel (biasanya mengandung /drama/ atau /movie/)
+        if "/drama/" in full_url or "/movie/" in full_url or "/film/" in full_url:
+            title = a.text.strip()
+            if not title:
+                # Coba cari di parent
+                parent = a.parent
+                if parent:
+                    title_elem = parent.select_one("h2, h3, h4, .title, .entry-title")
+                    if title_elem:
+                        title = title_elem.text.strip()
             
-        # Filter link yang tidak relevan
-        skip_patterns = [
-            "/category/", "/tag/", "/page/", "/author/", 
-            "/wp-", "#", "?s=", "/search/", "/feed/",
-            "/login", "/register", "/wp-admin", "/cdn-cgi/"
-        ]
-        if any(p in full_url for p in skip_patterns):
-            continue
-
-        # Cari gambar
-        img_elem = article.select_one("img")
-        img_url = None
-        if img_elem:
-            img_url = img_elem.get("data-src") or img_elem.get("src") or img_elem.get("data-lazy-src")
-            if img_url and (img_url.startswith("data:image") or "placeholder" in img_url or "blank" in img_url):
-                img_url = None
-
-        # Parse season dan episode
-        clean_title, season, episode = parse_title(title)
-
-        links.append({
-            "url": full_url,
-            "title": clean_title,
-            "original_title": title,
-            "season": season,
-            "episode": episode,
-            "image": img_url,
-            "source_page": base_url,
-        })
-
-    return links
+            if title:
+                clean_title, season, episode = parse_title(title)
+                drama_links.append({
+                    "url": full_url,
+                    "title": clean_title,
+                    "original_title": title,
+                    "season": season,
+                    "episode": episode,
+                    "image": None,
+                    "source_page": base_url,
+                })
+    
+    # Jika tidak ada link drama, coba cari dari artikel
+    if not drama_links:
+        # Cari semua artikel
+        articles = soup.select("article, .post, .entry, .item, .video-item, .blog-item, .hentry")
+        print(f"  📄 Articles found: {len(articles)}")
+        
+        for article in articles:
+            # Cari judul
+            title_elem = article.select_one("h2 a, h3 a, h4 a, .entry-title a, .post-title a, a[rel='bookmark']")
+            if not title_elem:
+                continue
+                
+            title = title_elem.text.strip()
+            href = title_elem.get("href")
+            if not href:
+                continue
+                
+            full_url = urljoin(base_url, href)
+            if not full_url.startswith("http"):
+                continue
+                
+            # Cari gambar
+            img_elem = article.select_one("img")
+            img_url = None
+            if img_elem:
+                img_url = img_elem.get("data-src") or img_elem.get("src")
+                
+            clean_title, season, episode = parse_title(title)
+            
+            drama_links.append({
+                "url": full_url,
+                "title": clean_title,
+                "original_title": title,
+                "season": season,
+                "episode": episode,
+                "image": img_url,
+                "source_page": base_url,
+            })
+    
+    return drama_links
 
 
 def main():

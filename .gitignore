@@ -10,10 +10,11 @@ venv/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# HTML pages (ignore semua, tapi kita commit links.json)
+html_pages/
+*.html
+
 # File sementara
 *.log
 *.tmp
 .DS_Store
-
-# Jangan ignore links.json biar bisa di-commit
-# !links.json

@@ -1,0 +1,60 @@
+name: Crawl 9tsu Links
+
+on:
+  # 1. Jadwal: jalan setiap hari jam 00:00 UTC
+  schedule:
+    - cron: '0 0 * * *'
+  
+  # 2. Manual: bisa dijalankan dari tab Actions
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: 'Jumlah halaman (kosong = semua)'
+        required: false
+        default: ''
+        type: string
+
+# Izin untuk menulis ke repository (push)
+permissions:
+  contents: write
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Batas waktu, mencegah loop tak berujung
+
+    steps:
+      # 1. Checkout kode repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests
+
+      # 4. Jalankan crawler
+      - name: Run crawler
+        run: |
+          if [ -z "${{ github.event.inputs.max_pages }}" ]; then
+            python crawl_9tsu.py
+          else
+            python crawl_9tsu.py ${{ github.event.inputs.max_pages }}
+          fi
+
+      # 5. Commit dan push hasil (jika ada perubahan)
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update links.json [skip ci]'
+          file_pattern: links.json
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

@@ -38,7 +38,6 @@ def init_database():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
-    # Tabel links
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS links (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +56,6 @@ def init_database():
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_title ON links(title)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_season_episode ON links(season, episode)')
     
-    # Tabel untuk mencatat sitemap yang sudah diproses
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS processed_sitemaps (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,6 +79,9 @@ def is_url_exists(url):
 
 def save_to_database(metadata_list):
     """Simpan metadata ke database (skip jika sudah ada)"""
+    if not metadata_list:
+        return 0
+    
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     new_count = 0
@@ -147,7 +148,7 @@ def get_database_count():
     return count
 
 # ============================================================
-# 3. FUNGSI STATUS SITEMAP (DIPROSES / BELUM)
+# 3. FUNGSI STATUS SITEMAP
 # ============================================================
 
 def mark_sitemap_processed(sitemap_file):
@@ -178,10 +179,7 @@ def create_sitemap_dir():
         print(f"📁 Direktori sitemap dibuat: {SITEMAP_DIR}")
 
 def download_all_sitemaps():
-    """
-    Download semua post-sitemap dari online ke folder lokal.
-    Hanya download yang belum ada di lokal.
-    """
+    """Download semua post-sitemap dari online ke folder lokal"""
     create_sitemap_dir()
     try:
         print(f"📡 Mengambil daftar sitemap dari: {SITEMAP_INDEX}")
@@ -219,21 +217,19 @@ def download_all_sitemaps():
         print(f"❌ Error download sitemaps: {e}")
 
 def get_sitemap_files():
-    """
-    Daftar file sitemap lokal (post-sitemap*.xml) diurutkan ascending.
-    Semakin kecil angka → semakin baru.
-    """
+    """Daftar file sitemap lokal diurutkan ascending (kecil = baru)"""
     create_sitemap_dir()
     files = [f for f in os.listdir(SITEMAP_DIR) if f.startswith('post-sitemap') and f.endswith('.xml')]
+    if not files:
+        return []
     files.sort(key=lambda x: int(re.search(r'(\d+)', x).group(1)) if re.search(r'(\d+)', x) else 0)
-    return files  # indeks 0 = angka terkecil = terbaru
+    return files
 
 def get_next_unprocessed_sitemap():
-    """
-    Ambil sitemap terkecil (terbaru) yang belum diproses.
-    Return: nama file atau None jika semua sudah diproses.
-    """
+    """Ambil sitemap terkecil (terbaru) yang belum diproses"""
     all_files = get_sitemap_files()
+    if not all_files:
+        return None
     processed = get_processed_sitemaps()
     for f in all_files:
         if f not in processed:
@@ -342,15 +338,12 @@ def parse_html_page(html_content, url):
     except Exception:
         return parse_html_with_regex(html_content, url)
     
-    # --- TITLE ---
+    # TITLE
     cleaned = None
-    
-    # Coba dari article:section
     article_section = soup.find('meta', property='article:section')
     if article_section and article_section.get('content'):
         cleaned = article_section['content'].strip()
     
-    # Jika tidak ada, coba dari og:title
     if not cleaned:
         og_title = soup.find('meta', property='og:title')
         if og_title and og_title.get('content'):
@@ -363,7 +356,6 @@ def parse_html_page(html_content, url):
             cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
             cleaned = cleaned.strip()
     
-    # Jika masih tidak ada, coba dari h1
     if not cleaned:
         h1 = soup.find('h1')
         if h1:
@@ -372,7 +364,6 @@ def parse_html_page(html_content, url):
             cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
             cleaned = cleaned.strip()
     
-    # Fallback terakhir dari title
     if not cleaned:
         title_tag = soup.find('title')
         if title_tag:
@@ -387,9 +378,8 @@ def parse_html_page(html_content, url):
     
     metadata["title"] = cleaned
     
-    # --- SEASON & EPISODE ---
+    # SEASON & EPISODE
     text = soup.get_text()
-    
     match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', text, re.IGNORECASE)
     if match:
         metadata["season"] = int(match.group(1))
@@ -405,15 +395,15 @@ def parse_html_page(html_content, url):
                 metadata["season"] = int(match.group(1))
                 metadata["episode"] = int(match.group(2))
     
-    # --- IMAGE ---
+    # IMAGE
     og_image = soup.find('meta', property='og:image')
     if og_image and og_image.get('content'):
         metadata["image"] = og_image['content'].strip()
     
-    # --- DESCRIPTION ---
+    # DESCRIPTION
     metadata["description"] = extract_description(html_content)
     
-    # --- EMBED ---
+    # EMBED
     embed_info = extract_embed_info(html_content)
     metadata["embed_url"] = embed_info["embed_url"]
     metadata["embed_platform"] = embed_info["embed_platform"]
@@ -434,7 +424,6 @@ def parse_html_with_regex(html_content, url):
     }
     
     try:
-        # Title
         title_match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
         if title_match:
             raw = title_match.group(1).strip()
@@ -446,7 +435,6 @@ def parse_html_with_regex(html_content, url):
             cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
             metadata["title"] = cleaned.strip()
         
-        # Season & Episode
         season_match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', html_content, re.IGNORECASE)
         if season_match:
             metadata["season"] = int(season_match.group(1))
@@ -457,12 +445,10 @@ def parse_html_with_regex(html_content, url):
                 metadata["season"] = 1
                 metadata["episode"] = int(episode_match.group(1))
         
-        # Image
         image_match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
         if image_match:
             metadata["image"] = image_match.group(1).strip()
         
-        # Description
         desc_match = re.search(r'<div\s+class="body-content[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
         if desc_match:
             desc = re.sub(r'<[^>]+>', '', desc_match.group(1)).strip()
@@ -475,7 +461,6 @@ def parse_html_with_regex(html_content, url):
                 if desc:
                     metadata["description"] = desc
         
-        # Embed
         iframe_match = re.search(r'<iframe[^>]+src="([^"]+)"', html_content, re.IGNORECASE)
         if iframe_match:
             embed_url = iframe_match.group(1).strip()
@@ -520,25 +505,18 @@ def download_html(url):
         return None, 0
 
 # ============================================================
-# 7. FUNGSI UTAMA: PROSES 1 SITEMAP BELUM DIPROSES
+# 7. FUNGSI UTAMA
 # ============================================================
 
 def crawl_one_sitemap(force_download=False):
-    """
-    1. Download semua sitemap jika force_download atau folder kosong.
-    2. Ambil sitemap terkecil (terbaru) yang belum diproses.
-    3. Proses semua URL di dalamnya, simpan ke DB.
-    4. Tandai sitemap sebagai sudah diproses.
-    """
+    """Proses 1 sitemap belum diproses (terkecil/terbaru)"""
     init_database()
     
-    # Download sitemap jika perlu
-    if force_download or not os.listdir(SITEMAP_DIR):
+    if force_download or not os.path.exists(SITEMAP_DIR) or not os.listdir(SITEMAP_DIR):
         download_all_sitemaps()
     else:
         print("📂 Menggunakan sitemap lokal yang sudah ada")
     
-    # Cari sitemap berikutnya yang belum diproses (terkecil/terbaru)
     next_sitemap = get_next_unprocessed_sitemap()
     if not next_sitemap:
         print("✅ Semua sitemap sudah diproses. Tidak ada yang baru.")
@@ -546,26 +524,22 @@ def crawl_one_sitemap(force_download=False):
     
     print(f"📌 Memproses sitemap: {next_sitemap}")
     
-    # Ekstrak URL
     urls = get_urls_from_local_sitemap(next_sitemap)
     if not urls:
-        print(f"❌ Tidak ada URL ditemukan di {next_sitemap}. Tandai sebagai diproses?")
+        print(f"❌ Tidak ada URL ditemukan di {next_sitemap}")
         mark_sitemap_processed(next_sitemap)
         return
     
     print(f"✅ Total URL dalam sitemap: {len(urls)}")
     
-    # Filter URL yang belum ada di database
     new_urls = [url for url in urls if not is_url_exists(url)]
     print(f"🆕 URL baru: {len(new_urls)}")
     
     if not new_urls:
         print("✅ Tidak ada konten baru di sitemap ini.")
         mark_sitemap_processed(next_sitemap)
-        print(f"   Sitemap {next_sitemap} ditandai sudah diproses (tanpa data baru)")
         return
     
-    # Proses setiap URL baru
     results = []
     for i, url in enumerate(new_urls, 1):
         print(f"\n🔄 [{i}/{len(new_urls)}] {url}")
@@ -596,18 +570,14 @@ def crawl_one_sitemap(force_download=False):
             results.append(metadata)
         time.sleep(0.5)
     
-    # Simpan ke database
     new_count = save_to_database(results)
     print(f"\n💾 Database: {new_count} link baru ditambahkan")
     
-    # Tandai sitemap sebagai sudah diproses
     mark_sitemap_processed(next_sitemap)
     print(f"✅ Sitemap {next_sitemap} ditandai sudah diproses")
     
-    # Ekspor ke JSON
     export_to_json()
     
-    # Statistik
     total = get_database_count()
     print(f"\n📊 Total link di database: {total}")
 
@@ -627,8 +597,8 @@ if __name__ == "__main__":
             print("⚠️ Argumen tidak dikenal. Gunakan --download untuk mengunduh sitemap.")
     
     print("=" * 60)
-    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in (1 sitemap belum diproses per siklus)")
-    print("📌 Urutan ascending: angka kecil = terbaru, diproses dari yang terkecil belum diproses")
+    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in")
+    print("📌 Mode: 1 sitemap terbaru per siklus")
     print("=" * 60)
     
     crawl_one_sitemap(force_download)

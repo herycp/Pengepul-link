@@ -4,7 +4,7 @@ import json
 import re
 import time
 from datetime import datetime
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 # ============================================================
 # 1. KONFIGURASI
@@ -30,114 +30,169 @@ HEADERS = {
 
 
 # ============================================================
-# 2. PARSING TITLE, SEASON, EPISODE
+# 2. EKSTRAKSI SEASON & EPISODE DARI HTML
 # ============================================================
 
-def parse_title_season_episode(original_title):
-    """Parsing judul untuk mendapatkan title, season, episode"""
-    if not original_title:
-        return None, None, None
-
-    title = original_title.strip()
+def extract_season_episode(html_content):
+    """
+    Ekstrak season dan episode dari konten HTML
+    """
     season = None
     episode = None
-
-    # Pola 1: "Judul Season11　第10話"
-    pattern1 = r'^(.+?)\s+Season(\d+)\s*[　]?\s*第(\d+)話'
-    match = re.search(pattern1, original_title, re.IGNORECASE)
+    
+    # Pola 1: "Season11　第10話" atau "Season 11 第10話"
+    pattern1 = r'Season\s*(\d+)\s*[　]?\s*第(\d+)話'
+    match = re.search(pattern1, html_content, re.IGNORECASE)
     if match:
-        title = match.group(1).strip()
-        season = int(match.group(2))
-        episode = int(match.group(3))
-        return title, season, episode
-
-    # Pola 2: "Judul 第5話" -> season = 1
-    pattern2 = r'^(.+?)\s*[　]?\s*第(\d+)話'
-    match = re.search(pattern2, original_title)
+        return int(match.group(1)), int(match.group(2))
+    
+    # Pola 2: "第3話" (hanya episode) -> season default = 1
+    pattern2 = r'第(\d+)話'
+    match = re.search(pattern2, html_content)
     if match:
-        title = match.group(1).strip()
-        episode = int(match.group(2))
-        season = 1
-        return title, season, episode
-
-    # Pola 3: "Judul S02E05"
-    pattern3 = r'^(.+?)\s+[sS](\d+)[eE](\d+)'
-    match = re.search(pattern3, original_title)
+        return 1, int(match.group(1))
+    
+    # Pola 3: "S02E05" atau "S2E5"
+    pattern3 = r'[sS](\d+)[eE](\d+)'
+    match = re.search(pattern3, html_content)
     if match:
-        title = match.group(1).strip()
-        season = int(match.group(2))
-        episode = int(match.group(3))
-        return title, season, episode
-
-    return title, None, None
+        return int(match.group(1)), int(match.group(2))
+    
+    return season, episode
 
 
 # ============================================================
-# 3. EKSTRAKSI TITLE DARI HTML (DENGAN DEBUG)
+# 3. EKSTRAKSI TITLE BERSIH DARI HTML
 # ============================================================
 
-def extract_title_from_html(html_content, url):
+def extract_cleaned_title(html_content):
     """
-    Mencoba berbagai cara untuk mengekstrak judul dari HTML
+    Ekstrak title bersih (tanpa season/episode/nama situs)
+    Prioritas: article:section > og:title > title
     """
-    methods = []
     
-    # 1. Dari <title>
-    match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
+    # 1. Coba dari article:section (paling bersih)
+    match = re.search(r'<meta\s+property="article:section"\s+content="([^"]+)"', html_content, re.IGNORECASE)
     if match:
-        raw = match.group(1).strip()
-        raw = re.sub(r'\s*[-|]\s*9tsu.*$', '', raw).strip()
-        raw = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', raw).strip()
-        raw = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', raw).strip()
-        if raw:
-            return raw
+        title = match.group(1).strip()
+        if title:
+            return title
     
-    # 2. Dari <h1> atau <h2> dengan class tertentu
-    match = re.search(r'<h1[^>]*>(.*?)</h1>', html_content, re.IGNORECASE | re.DOTALL)
-    if match:
-        raw = re.sub(r'<[^>]+>', '', match.group(1)).strip()
-        if raw:
-            return raw
-    
-    # 3. Dari meta property="og:title"
+    # 2. Coba dari og:title
     match = re.search(r'<meta\s+property="og:title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
     if match:
-        raw = match.group(1).strip()
-        if raw:
-            return raw
+        title = match.group(1).strip()
+        # Bersihkan dari teks tambahan
+        title = re.sub(r'\s*第\d+話\s*', '', title)
+        title = re.sub(r'\s*Season\s*\d+\s*', '', title, flags=re.IGNORECASE)
+        title = re.sub(r'\s*[-|]\s*9tsu.*$', '', title)
+        title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', title)
+        title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', title)
+        title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', title)
+        title = title.strip()
+        if title:
+            return title
     
-    # 4. Dari meta name="title"
-    match = re.search(r'<meta\s+name="title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+    # 3. Coba dari <title>
+    match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
     if match:
-        raw = match.group(1).strip()
-        if raw:
-            return raw
-    
-    # 5. Dari class "entry-title" (umum di WordPress)
-    match = re.search(r'<[^>]+class="[^"]*entry-title[^"]*"[^>]*>(.*?)</', html_content, re.IGNORECASE | re.DOTALL)
-    if match:
-        raw = re.sub(r'<[^>]+>', '', match.group(1)).strip()
-        if raw:
-            return raw
-    
-    # 6. Dari schema.org itemprop="name"
-    match = re.search(r'<[^>]+itemprop="name"[^>]*>(.*?)</', html_content, re.IGNORECASE | re.DOTALL)
-    if match:
-        raw = re.sub(r'<[^>]+>', '', match.group(1)).strip()
-        if raw:
-            return raw
-    
-    # Jika semua gagal, gunakan nama file dari URL
-    path = urlparse(url).path
-    filename = path.split('/')[-1].replace('.html', '')
-    if filename:
-        return filename
+        title = match.group(1).strip()
+        title = re.sub(r'\s*第\d+話\s*', '', title)
+        title = re.sub(r'\s*Season\s*\d+\s*', '', title, flags=re.IGNORECASE)
+        title = re.sub(r'\s*[-|]\s*9tsu.*$', '', title)
+        title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', title)
+        title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', title)
+        title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', title)
+        title = title.strip()
+        if title:
+            return title
     
     return None
 
 
 # ============================================================
-# 4. AMBIL URL DARI SITEMAP (HANYA POST-SITEMAP)
+# 4. EKSTRAKSI ORIGINAL TITLE (MENTAH)
+# ============================================================
+
+def extract_original_title(html_content):
+    """
+    Ekstrak original title (mentah dari halaman)
+    """
+    # Coba dari og:title
+    match = re.search(r'<meta\s+property="og:title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+    
+    # Coba dari <title>
+    match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    
+    return None
+
+
+# ============================================================
+# 5. EKSTRAKSI IMAGE
+# ============================================================
+
+def extract_image(html_content):
+    """
+    Ekstrak URL gambar dari meta og:image
+    """
+    match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+    return None
+
+
+# ============================================================
+# 6. EKSTRAKSI METADATA LENGKAP
+# ============================================================
+
+def extract_metadata(url, html_content):
+    """
+    Ekstrak semua metadata dari halaman
+    """
+    metadata = {
+        "url": url,
+        "title": None,
+        "original_title": None,
+        "season": None,
+        "episode": None,
+        "image": None,
+        "source_page": BASE_URL
+    }
+    
+    # Original title
+    metadata["original_title"] = extract_original_title(html_content)
+    
+    # Title bersih
+    metadata["title"] = extract_cleaned_title(html_content)
+    
+    # Jika title masih None, gunakan original_title yang sudah dibersihkan
+    if not metadata["title"] and metadata["original_title"]:
+        metadata["title"] = metadata["original_title"]
+        metadata["title"] = re.sub(r'\s*第\d+話\s*', '', metadata["title"])
+        metadata["title"] = re.sub(r'\s*Season\s*\d+\s*', '', metadata["title"], flags=re.IGNORECASE)
+        metadata["title"] = re.sub(r'\s*[-|]\s*9tsu.*$', '', metadata["title"])
+        metadata["title"] = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', metadata["title"])
+        metadata["title"] = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', metadata["title"])
+        metadata["title"] = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', metadata["title"])
+        metadata["title"] = metadata["title"].strip()
+    
+    # Season & Episode
+    season, episode = extract_season_episode(html_content)
+    metadata["season"] = season
+    metadata["episode"] = episode
+    
+    # Image
+    metadata["image"] = extract_image(html_content)
+    
+    return metadata
+
+
+# ============================================================
+# 7. AMBIL URL DARI SITEMAP (HANYA POST-SITEMAP)
 # ============================================================
 
 def get_all_article_urls():
@@ -146,7 +201,7 @@ def get_all_article_urls():
     HANYA dari post-sitemap (bukan page-sitemap, category-sitemap, dll)
     """
     try:
-        print(f"📡 Mengambil daftar sitemap dari: {SITEMAP_INDEX}")
+        print(f"📡 Mengambil sitemap index: {SITEMAP_INDEX}")
         
         scraper = cloudscraper.create_scraper()
         scraper.headers.update(HEADERS)
@@ -160,15 +215,11 @@ def get_all_article_urls():
         all_urls = []
         for loc in root.findall('.//ns:loc', ns):
             sitemap_url = loc.text
-            if sitemap_url:
-                # 🔥 FILTER: HANYA yang mengandung "post-sitemap"
-                if 'post-sitemap' in sitemap_url.lower():
-                    print(f"   ✅ Memproses: {sitemap_url}")
-                    urls = extract_urls_from_sitemap(sitemap_url)
-                    all_urls.extend(urls)
-                    print(f"      → {len(urls)} URL ditemukan")
-                else:
-                    print(f"   ⏭️  Skip: {sitemap_url}")
+            if sitemap_url and 'post-sitemap' in sitemap_url.lower():
+                print(f"   ✅ Memproses: {sitemap_url}")
+                urls = extract_urls_from_sitemap(sitemap_url)
+                all_urls.extend(urls)
+                print(f"      → {len(urls)} URL ditemukan")
                 time.sleep(0.5)
         
         print(f"✅ Total URL ditemukan: {len(all_urls)}")
@@ -195,10 +246,8 @@ def extract_urls_from_sitemap(sitemap_url):
         urls = []
         for loc in root.findall('.//ns:loc', ns):
             url = loc.text
-            if url:
-                # Hanya URL artikel (.html atau /drama/)
-                if url.endswith('.html') or '/drama/' in url:
-                    urls.append(url)
+            if url and (url.endswith('.html') or '/drama/' in url):
+                urls.append(url)
         return urls
     except Exception as e:
         print(f"⚠️ Error parsing sitemap {sitemap_url}: {e}")
@@ -206,67 +255,25 @@ def extract_urls_from_sitemap(sitemap_url):
 
 
 # ============================================================
-# 5. EKSTRAK METADATA DENGAN TITLE BARU
-# ============================================================
-
-def extract_metadata(url, html_content):
-    """
-    Ekstrak metadata dari halaman artikel
-    """
-    metadata = {
-        "url": url,
-        "title": None,
-        "original_title": None,
-        "season": None,
-        "episode": None,
-        "image": None,
-        "source_page": BASE_URL
-    }
-    
-    # Ekstrak title
-    raw_title = extract_title_from_html(html_content, url)
-    
-    if raw_title:
-        # Hapus angka di awal jika ada (misal "125645.html")
-        raw_title = re.sub(r'^\d+\.?html?\s*[-|]?\s*', '', raw_title)
-        metadata["original_title"] = raw_title
-        title, season, episode = parse_title_season_episode(raw_title)
-        metadata["title"] = title or raw_title
-        metadata["season"] = season
-        metadata["episode"] = episode
-    else:
-        # Fallback ke URL
-        path = urlparse(url).path
-        fallback = path.split('/')[-1].replace('.html', '')
-        metadata["title"] = fallback
-        metadata["original_title"] = fallback
-    
-    # Ambil gambar
-    img_match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-    if img_match:
-        metadata["image"] = img_match.group(1)
-    
-    return metadata
-
-
-# ============================================================
-# 6. FUNGSI UTAMA CRAWL
+# 8. FUNGSI UTAMA CRAWL & INDEX
 # ============================================================
 
 def crawl_and_index(max_pages=None):
-    """Fungsi utama crawling dan indexing"""
-    
+    """
+    Fungsi utama crawling dan indexing
+    max_pages: batas maksimum halaman (untuk testing)
+    """
     urls = get_all_article_urls()
     
     if not urls:
-        print("⚠️ Gagal mengambil URL dari sitemap.")
+        print("❌ Tidak ada URL ditemukan.")
         return None
     
     if max_pages:
         urls = urls[:max_pages]
         print(f"🔧 Mode testing: hanya {max_pages} dari {len(urls)} URL")
-    
-    print(f"✅ Memproses {len(urls)} URL artikel")
+    else:
+        print(f"📊 Total URL akan diproses: {len(urls)}")
     
     results = []
     scraper = cloudscraper.create_scraper()
@@ -274,29 +281,32 @@ def crawl_and_index(max_pages=None):
     
     for i, url in enumerate(urls):
         try:
-            print(f"🔄 [{i+1}/{len(urls)}]: {url}")
+            print(f"🔄 [{i+1}/{len(urls)}] {url}")
             
             response = scraper.get(url, timeout=60)
             
             if response.status_code == 200:
                 metadata = extract_metadata(url, response.text)
                 results.append(metadata)
-                print(f"   ✅ Title: {metadata['title']} (S{metadata['season']} E{metadata['episode']})")
+                print(f"   ✅ Title: {metadata['title']}")
+                print(f"      Season: {metadata['season']}, Episode: {metadata['episode']}")
             else:
                 print(f"   ❌ Status: {response.status_code}")
             
+            # Jeda antar request
             time.sleep(1)
             
         except Exception as e:
             print(f"   ❌ Error: {e}")
     
-    # Simpan ke file
+    # Buat output JSON
     output = {
         "timestamp": datetime.now().isoformat(),
         "total": len(results),
         "links": results
     }
     
+    # Simpan ke file
     with open("links.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
@@ -307,7 +317,7 @@ def crawl_and_index(max_pages=None):
 
 
 # ============================================================
-# 7. EKSEKUSI
+# 9. EKSEKUSI
 # ============================================================
 
 if __name__ == "__main__":
@@ -317,11 +327,12 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         try:
             max_pages = int(sys.argv[1])
+            print(f"🔧 Argumen: hanya {max_pages} halaman")
         except ValueError:
-            print("⚠️ Argumen harus berupa angka")
+            print("⚠️ Argumen harus berupa angka. Menggunakan semua halaman.")
     
     print("=" * 50)
-    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in (Post-Sitemap Only)")
+    print("🚀 PENGEPUL-LINK - Crawler & Scraper 9tsu.in")
     print("=" * 50)
     
     crawl_and_index(max_pages)

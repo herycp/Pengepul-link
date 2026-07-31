@@ -27,7 +27,7 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
     "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Accept-Encoding": "identity",  # 🔥 Kunci: tolak kompresi
+    "Accept-Encoding": "identity",
     "Connection": "keep-alive",
     "Upgrade-Insecure-Requests": "1",
     "Sec-Fetch-Dest": "document",
@@ -336,11 +336,10 @@ def get_urls_from_local_sitemap(sitemap_filename):
         return []
 
 # ============================================================
-# 🔥 5. DOWNLOAD HTML - FIX BINARY
+# 5. DOWNLOAD HTML - FIX BINARY
 # ============================================================
 
 def download_html_with_cloudscraper(url):
-    """Download HTML dengan cloudscraper dan identity encoding"""
     try:
         scraper = cloudscraper.create_scraper(
             browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
@@ -351,28 +350,22 @@ def download_html_with_cloudscraper(url):
         response = scraper.get(url, timeout=60)
         
         if response.status_code == 200:
-            # Coba dapatkan raw content
             raw = response.content
             
-            # Cek apakah gzip
             if len(raw) >= 2 and raw[0] == 0x1F and raw[1] == 0x8B:
                 try:
                     raw = gzip.decompress(raw)
-                    print("   🔓 Decompressed gzip")
                 except:
                     pass
             
-            # Decode dengan UTF-8
             try:
                 html = raw.decode('utf-8')
             except:
                 html = raw.decode('latin-1', errors='ignore')
             
-            # Cek apakah HTML valid
             if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
                 return html, 200
             else:
-                # Coba response.text sebagai alternatif
                 try:
                     response.encoding = 'utf-8'
                     html2 = response.text
@@ -380,7 +373,6 @@ def download_html_with_cloudscraper(url):
                         return html2, 200
                 except:
                     pass
-                print(f"   ⚠️ Konten tidak valid (binary atau challenge)")
                 return None, 403
         else:
             return None, response.status_code
@@ -389,7 +381,6 @@ def download_html_with_cloudscraper(url):
         return None, 0
 
 def download_html_with_curl(url):
-    """Fallback: download dengan curl"""
     try:
         cmd = [
             'curl', '-s', '-L',
@@ -406,7 +397,6 @@ def download_html_with_curl(url):
         result = subprocess.run(cmd, capture_output=True, timeout=35)
         if result.returncode == 0:
             content = result.stdout
-            # Cek gzip
             if len(content) >= 2 and content[0] == 0x1F and content[1] == 0x8B:
                 try:
                     content = gzip.decompress(content)
@@ -427,26 +417,16 @@ def download_html_with_curl(url):
         return None, 0
 
 def download_html_page(url, retry=3):
-    """
-    Download HTML dengan multiple metode:
-    1. Cloudscraper (identity encoding)
-    2. Curl fallback
-    """
-    # Metode 1: Cloudscraper
     for attempt in range(retry):
-        print(f"   📡 Attempt {attempt+1}/{retry} with cloudscraper...")
         html, status = download_html_with_cloudscraper(url)
         if status == 200 and html:
             return html, 200
-        if status == 403 and 'Just a moment' in str(html):
-            print(f"   ⚠️ Cloudflare challenge detected, retrying...")
+        if status == 403:
             time.sleep(3 + attempt * 2)
             continue
         if status != 403:
             break
     
-    # Metode 2: Curl fallback
-    print("   🔄 Curl fallback...")
     html, status = download_html_with_curl(url)
     if status == 200 and html:
         return html, 200
@@ -454,7 +434,7 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 6. PARSING HTML (Sama seperti sebelumnya)
+# 6. PARSING HTML
 # ============================================================
 
 def parse_html_page(html_content, url):
@@ -559,6 +539,14 @@ def parse_html_page(html_content, url):
                 metadata["embed_url"] = embed_url
                 parsed = urlparse(embed_url)
                 metadata["embed_platform"] = parsed.netloc
+        else:
+            for a in soup.find_all('a', href=True):
+                href = a['href']
+                if any(x in href for x in ['dailymotion', 'youtube', 'ok.ru', 'vimeo']):
+                    metadata["embed_url"] = href
+                    parsed = urlparse(href)
+                    metadata["embed_platform"] = parsed.netloc
+                    break
     
     return metadata
 
@@ -640,6 +628,13 @@ def parse_html_with_regex(html_content, url):
                 metadata["embed_url"] = embed_url
                 parsed = urlparse(embed_url)
                 metadata["embed_platform"] = parsed.netloc
+            else:
+                match = re.search(r'href="([^"]*(?:dailymotion|youtube|ok\.ru|vimeo)[^"]*)"', html_content, re.IGNORECASE)
+                if match:
+                    embed_url = match.group(1).strip()
+                    metadata["embed_url"] = embed_url
+                    parsed = urlparse(embed_url)
+                    metadata["embed_platform"] = parsed.netloc
     
     except Exception as e:
         print(f"   ❌ Regex fallback error: {e}")
@@ -694,15 +689,13 @@ def crawl_one_sitemap(force_download=False):
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
             
-            preview = html_content[:100].replace('\n', ' ').replace('\r', ' ')
-            print(f"   🔍 Preview: {preview}...")
-            
             metadata = parse_html_page(html_content, url)
             print(f"   📝 Hasil parsing:")
             print(f"      - Title: {metadata['title']}")
             print(f"      - Season: {metadata['season']}")
             print(f"      - Episode: {metadata['episode']}")
             print(f"      - Embed Platform: {metadata['embed_platform']}")
+            print(f"      - Embed URL: {metadata['embed_url']}")
             results.append(metadata)
         else:
             print(f"   ❌ Gagal download (status {status})")
@@ -749,7 +742,7 @@ if __name__ == "__main__":
     
     print("=" * 60)
     print("🚀 PENGEPUL-LINK - Crawler 9tsu.in")
-    print("📌 Mode: 1 sitemap terbaru per siklus (Binary Fixed)")
+    print("📌 Mode: 1 sitemap terbaru per siklus")
     print("=" * 60)
     
     crawl_one_sitemap(force_download)

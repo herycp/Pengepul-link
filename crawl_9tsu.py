@@ -106,6 +106,7 @@ def is_all_sitemaps_processed():
     return all(f in processed for f in sitemap_files)
 
 def is_url_exists(url):
+    """Cek apakah URL sudah ada di database"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM links WHERE url = ?", (url,))
@@ -113,29 +114,64 @@ def is_url_exists(url):
     conn.close()
     return exists
 
+def get_existing_urls(url_list):
+    """
+    Filter URL yang sudah ada di database.
+    Return: (existing_urls, new_urls)
+    """
+    if not url_list:
+        return [], []
+    
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    
+    # Buat placeholder untuk query IN
+    placeholders = ','.join(['?'] * len(url_list))
+    query = f"SELECT url FROM links WHERE url IN ({placeholders})"
+    cursor.execute(query, url_list)
+    
+    existing = {row[0] for row in cursor.fetchall()}
+    conn.close()
+    
+    new_urls = [url for url in url_list if url not in existing]
+    existing_urls = list(existing)
+    
+    return existing_urls, new_urls
+
 def save_to_database(metadata_list):
+    """Simpan metadata ke database (skip jika sudah ada)"""
     if not metadata_list:
         return 0
+    
+    # Filter URL yang sudah ada
+    urls = [data.get('url') for data in metadata_list if data.get('url')]
+    existing, new_urls = get_existing_urls(urls)
+    
+    if not new_urls:
+        print(f"   ⏭️  Semua {len(urls)} link sudah ada di database, skip")
+        return 0
+    
+    # Filter metadata yang URL-nya baru
+    new_data = [data for data in metadata_list if data.get('url') in new_urls]
     
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     new_count = 0
-    for data in metadata_list:
-        if not is_url_exists(data.get('url')):
-            cursor.execute('''
-                INSERT INTO links (url, title, season, episode, image, description, embed_url, embed_platform)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                data.get('url'),
-                data.get('title'),
-                data.get('season'),
-                data.get('episode'),
-                data.get('image'),
-                data.get('description'),
-                data.get('embed_url'),
-                data.get('embed_platform')
-            ))
-            new_count += 1
+    for data in new_data:
+        cursor.execute('''
+            INSERT INTO links (url, title, season, episode, image, description, embed_url, embed_platform)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data.get('url'),
+            data.get('title'),
+            data.get('season'),
+            data.get('episode'),
+            data.get('image'),
+            data.get('description'),
+            data.get('embed_url'),
+            data.get('embed_platform')
+        ))
+        new_count += 1
     conn.commit()
     conn.close()
     return new_count
@@ -717,7 +753,7 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 7. FUNGSI UTAMA - DENGAN AUTO RESET
+# 7. FUNGSI UTAMA - DENGAN FILTER URL EXISTING
 # ============================================================
 
 def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
@@ -761,25 +797,39 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         print("✅ Semua sitemap sudah diproses. Selesai.")
         return
     
+    # Ambil semua URL dari sitemap
     all_urls = get_urls_from_local_sitemap(sitemap_file)
     if not all_urls:
         print(f"❌ Tidak ada URL di {sitemap_file}")
         mark_sitemap_processed(sitemap_file)
         return
     
-    total = len(all_urls)
+    total_raw = len(all_urls)
     
-    if max_pages and max_pages < total:
-        all_urls = all_urls[:max_pages]
-        total = len(all_urls)
-        print(f"🔢 Testing: hanya {total} link dari sitemap {sitemap_file}")
-    else:
-        print(f"📌 Memproses semua {total} link dari {sitemap_file}")
+    # 🔥 FILTER: Hanya proses URL yang belum ada di database
+    existing_urls, new_urls = get_existing_urls(all_urls)
     
+    print(f"📊 Sitemap {sitemap_file}:")
+    print(f"   - Total URL: {total_raw}")
+    print(f"   - Sudah ada di database: {len(existing_urls)} (skip)")
+    print(f"   - URL baru: {len(new_urls)} (akan diproses)")
+    
+    if not new_urls:
+        print("✅ Semua URL sudah ada di database. Tandai selesai.")
+        mark_sitemap_processed(sitemap_file)
+        return
+    
+    if max_pages and max_pages < len(new_urls):
+        new_urls = new_urls[:max_pages]
+        print(f"🔢 Testing: hanya {len(new_urls)} link baru yang diproses")
+    
+    total = len(new_urls)
+    
+    # Update state dengan jumlah URL baru
     upsert_processing_state(sitemap_file, 0, total, 'processing')
     
     results = []
-    for i, url in enumerate(all_urls, 1):
+    for i, url in enumerate(new_urls, 1):
         print(f"\n🔄 [{i}/{total}] {url}")
         print("-" * 60)
         
@@ -821,7 +871,7 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     print(f"\n💾 Database: {new_count} link baru ditambahkan")
     
     mark_sitemap_processed(sitemap_file)
-    print(f"✅ Sitemap {sitemap_file} selesai diproses ({total} link)")
+    print(f"✅ Sitemap {sitemap_file} selesai diproses ({total} link baru)")
     
     export_to_json()
     

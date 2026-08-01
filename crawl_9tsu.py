@@ -300,6 +300,24 @@ def get_sitemap_index_content():
     
     return None, None
 
+def get_online_sitemap_list():
+    """Ambil daftar sitemap dari online (hanya post-sitemap)"""
+    content, domain = get_sitemap_index_content()
+    if content is None:
+        return []
+    try:
+        root = ET.fromstring(content)
+        ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+        sitemap_urls = []
+        for loc in root.findall('.//ns:loc', ns):
+            url = loc.text
+            if url and 'post-sitemap' in url.lower():
+                sitemap_urls.append(url)
+        return sitemap_urls
+    except Exception as e:
+        print(f"❌ Error parsing online sitemap index: {e}")
+        return []
+
 def download_all_sitemaps():
     """Download semua post-sitemap (force download)"""
     create_sitemap_dir()
@@ -328,24 +346,6 @@ def download_all_sitemaps():
             print(f"   ❌ Gagal download {filename}")
         time.sleep(0.5)
     print("✅ Semua sitemap selesai diunduh")
-
-def get_online_sitemap_list():
-    """Ambil daftar sitemap dari online (hanya post-sitemap)"""
-    content, domain = get_sitemap_index_content()
-    if content is None:
-        return []
-    try:
-        root = ET.fromstring(content)
-        ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
-        sitemap_urls = []
-        for loc in root.findall('.//ns:loc', ns):
-            url = loc.text
-            if url and 'post-sitemap' in url.lower():
-                sitemap_urls.append(url)
-        return sitemap_urls
-    except Exception as e:
-        print(f"❌ Error parsing online sitemap index: {e}")
-        return []
 
 def get_sitemap_files():
     create_sitemap_dir()
@@ -720,36 +720,26 @@ def parse_html_with_regex(html_content, url):
 # 7. FUNGSI UTAMA - DENGAN AUTO RESET
 # ============================================================
 
-def crawl_one_sitemap(force_download=False, reset=False):
+def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     init_database()
     
-    # 🔥 Jika user minta reset manual
     if reset:
         reset_processing_state()
     
-    # 🔥 CEK: Apakah semua sitemap sudah diproses?
     if is_all_sitemaps_processed():
         print("=" * 60)
         print("🔄 SEMUA SITEMAP SUDAH DIPROSES 100%")
         print("📡 Melakukan AUTO RESET dan download ulang semua sitemap...")
         print("=" * 60)
-        
-        # Reset status processing
         reset_processing_state()
-        
-        # Download ulang semua sitemap
         download_all_sitemaps()
-        
-        # Set semua sitemap ke status pending
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
             if all_urls:
                 upsert_processing_state(f, 0, len(all_urls), 'pending')
-        
         print("✅ Reset selesai. Memulai proses dari awal...")
         print("=" * 60)
     
-    # 🔥 Jika user minta force download
     elif force_download:
         download_all_sitemaps()
         for f in get_sitemap_files():
@@ -757,7 +747,6 @@ def crawl_one_sitemap(force_download=False, reset=False):
             if all_urls:
                 upsert_processing_state(f, 0, len(all_urls), 'pending')
     
-    # Pastikan sitemap tersedia
     sitemap_files = get_sitemap_files()
     if not sitemap_files:
         print("📂 Tidak ada sitemap lokal. Download semua...")
@@ -767,54 +756,37 @@ def crawl_one_sitemap(force_download=False, reset=False):
             if all_urls:
                 upsert_processing_state(f, 0, len(all_urls), 'pending')
     
-    # Cari sitemap yang belum diproses
     sitemap_file = get_next_unprocessed_sitemap()
     if not sitemap_file:
         print("✅ Semua sitemap sudah diproses. Selesai.")
         return
     
-    # Proses sitemap yang ditemukan
-    state = get_processing_state(sitemap_file)
-    if state is None:
-        all_urls = get_urls_from_local_sitemap(sitemap_file)
-        if not all_urls:
-            print(f"❌ Tidak ada URL di {sitemap_file}, tandai selesai.")
-            mark_sitemap_processed(sitemap_file)
-            return
-        total = len(all_urls)
-        offset = 0
-        status = 'processing'
-        upsert_processing_state(sitemap_file, offset, total, status)
-    else:
-        offset = state['offset']
-        total = state['total']
-        if state['status'] == 'done':
-            print(f"✅ Sitemap {sitemap_file} sudah selesai diproses.")
-            mark_sitemap_processed(sitemap_file)
-            return
-        if state['status'] == 'pending':
-            status = 'processing'
-            upsert_processing_state(sitemap_file, offset, total, status)
-    
-    # Ambil batch
-    batch, start, end = get_next_batch(sitemap_file, offset, BATCH_SIZE)
-    if not batch:
-        print(f"✅ Sitemap {sitemap_file} sudah selesai (offset {offset} >= {total})")
+    all_urls = get_urls_from_local_sitemap(sitemap_file)
+    if not all_urls:
+        print(f"❌ Tidak ada URL di {sitemap_file}")
         mark_sitemap_processed(sitemap_file)
         return
     
-    print(f"📌 Memproses {sitemap_file}: link {start+1} - {end} dari {total}")
+    total = len(all_urls)
+    
+    if max_pages and max_pages < total:
+        all_urls = all_urls[:max_pages]
+        total = len(all_urls)
+        print(f"🔢 Testing: hanya {total} link dari sitemap {sitemap_file}")
+    else:
+        print(f"📌 Memproses semua {total} link dari {sitemap_file}")
+    
+    upsert_processing_state(sitemap_file, 0, total, 'processing')
     
     results = []
-    for i, url in enumerate(batch, start=1):
-        print(f"\n🔄 [{start+i}/{total}] {url}")
+    for i, url in enumerate(all_urls, 1):
+        print(f"\n🔄 [{i}/{total}] {url}")
         print("-" * 60)
         
         html_content, status = download_html_page(url)
         
         if status == 200 and html_content:
             print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
-            
             metadata = parse_html_page(html_content, url)
             print(f"   📝 Hasil parsing:")
             print(f"      - Title: {metadata['title']}")
@@ -846,15 +818,10 @@ def crawl_one_sitemap(force_download=False, reset=False):
         time.sleep(1)
     
     new_count = save_to_database(results)
-    print(f"\n💾 Database: {new_count} link baru ditambahkan dari batch ini")
+    print(f"\n💾 Database: {new_count} link baru ditambahkan")
     
-    new_offset = end
-    if new_offset >= total:
-        print(f"✅ Sitemap {sitemap_file} selesai diproses semua ({total} link)")
-        mark_sitemap_processed(sitemap_file)
-    else:
-        upsert_processing_state(sitemap_file, new_offset, total, 'processing')
-        print(f"📌 Progress {sitemap_file}: {new_offset}/{total} link diproses, lanjutkan run berikutnya")
+    mark_sitemap_processed(sitemap_file)
+    print(f"✅ Sitemap {sitemap_file} selesai diproses ({total} link)")
     
     export_to_json()
     
@@ -870,21 +837,33 @@ if __name__ == "__main__":
     
     force_download = False
     reset = False
+    max_pages = None
     
-    for arg in sys.argv[1:]:
-        if arg.lower() == '--download':
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i].lower()
+        if arg == '--download':
             force_download = True
             print("🔧 Mode: Download ulang semua sitemap")
-        elif arg.lower() == '--reset':
-            reset = True
-            print("🔧 Mode: Reset semua status pemrosesan")
+        elif arg == '--reset':
+            reset = True            print("🔧 Mode: Reset semua status pemrosesan")
+        elif arg == '--max-pages' and i + 1 < len(sys.argv):
+            try:
+                max_pages = int(sys.argv[i + 1])
+                print(f"🔧 Mode testing: hanya {max_pages} link")
+                i += 1
+            except ValueError:
+                print(f"⚠️ Argumen --max-pages harus berupa angka")
         else:
-            print(f"⚠️ Argumen tidak dikenal: {arg}")
-            print("Gunakan --download untuk mengunduh sitemap, --reset untuk reset status.")
+            print(f"⚠️ Argumen tidak dikenal: {sys.argv[i]}")
+            print("Gunakan --download, --reset, atau --max-pages N")
+        i += 1
     
     print("=" * 60)
     print("🚀 PENGEPUL-LINK - Crawler 9tsu.in (Auto Reset)")
     print(f"📌 Batch size: {BATCH_SIZE} link per run")
+    if max_pages:
+        print(f"🔢 Max pages: {max_pages}")
     print("=" * 60)
     
-    crawl_one_sitemap(force_download, reset)
+    crawl_one_sitemap(force_download, reset, max_pages)

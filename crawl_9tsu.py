@@ -846,7 +846,8 @@ if __name__ == "__main__":
             force_download = True
             print("🔧 Mode: Download ulang semua sitemap")
         elif arg == '--reset':
-            reset = True            print("🔧 Mode: Reset semua status pemrosesan")
+            reset = True
+            print("🔧 Mode: Reset semua status pemrosesan")
         elif arg == '--max-pages' and i + 1 < len(sys.argv):
             try:
                 max_pages = int(sys.argv[i + 1])

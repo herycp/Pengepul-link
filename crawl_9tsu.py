@@ -87,6 +87,16 @@ def init_database():
     conn.close()
     print("✅ Database siap")
 
+def reset_processing_state():
+    """Reset semua status pemrosesan (processed_sitemaps & processing_state)"""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM processed_sitemaps')
+    cursor.execute('DELETE FROM processing_state')
+    conn.commit()
+    conn.close()
+    print("🔄 Status pemrosesan direset (semua sitemap akan diproses ulang)")
+
 def is_url_exists(url):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -208,7 +218,7 @@ def upsert_processing_state(sitemap_file, offset, total, status):
     conn.close()
 
 # ============================================================
-# 4. MANAJEMEN SITEMAP LOKAL
+# 4. MANAJEMEN SITEMAP LOKAL & ONLINE
 # ============================================================
 
 def create_sitemap_dir():
@@ -282,58 +292,74 @@ def get_sitemap_index_content():
     
     return None, None
 
-def download_all_sitemaps():
-    create_sitemap_dir()
-    
-    index_content, used_domain = get_sitemap_index_content()
-    if index_content is None:
-        print("❌ Gagal mengakses sitemap index dari semua domain.")
-        return
-    
+def get_online_sitemap_list():
+    """Ambil daftar sitemap dari online (hanya post-sitemap)"""
+    content, domain = get_sitemap_index_content()
+    if content is None:
+        return []
     try:
-        root = ET.fromstring(index_content)
+        root = ET.fromstring(content)
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
         sitemap_urls = []
         for loc in root.findall('.//ns:loc', ns):
             url = loc.text
             if url and 'post-sitemap' in url.lower():
                 sitemap_urls.append(url)
-        print(f"✅ Ditemukan {len(sitemap_urls)} post-sitemap dari {used_domain}")
+        return sitemap_urls
     except Exception as e:
-        print(f"❌ Error parsing sitemap index: {e}")
-        return
+        print(f"❌ Error parsing online sitemap index: {e}")
+        return []
+
+def download_new_sitemaps():
+    """Download sitemap yang belum ada di lokal"""
+    online_urls = get_online_sitemap_list()
+    if not online_urls:
+        print("❌ Tidak bisa mendapatkan daftar sitemap online.")
+        return False
     
-    for idx, url in enumerate(sitemap_urls, 1):
+    new_files = []
+    for url in online_urls:
         filename = url.split('/')[-1]
         filepath = os.path.join(SITEMAP_DIR, filename)
-        
-        if os.path.exists(filepath):
-            print(f"⏭️  {filename} sudah ada, dilewati")
-            continue
-        
-        print(f"⬇️  Download {filename} ({idx}/{len(sitemap_urls)})")
+        if not os.path.exists(filepath):
+            new_files.append(filename)
+            print(f"⬇️  Download sitemap baru: {filename}")
+            content, status = download_sitemap_with_cloudscraper(url)
+            if status == 200 and content:
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                print(f"   ✅ Tersimpan: {filepath}")
+            else:
+                print(f"   ❌ Gagal download {filename}")
+        else:
+            print(f"⏭️  {filename} sudah ada")
+    
+    if new_files:
+        print(f"✅ {len(new_files)} sitemap baru diunduh.")
+    else:
+        print("✅ Tidak ada sitemap baru.")
+    return True
+
+def download_all_sitemaps():
+    """Download semua post-sitemap (force download)"""
+    create_sitemap_dir()
+    online_urls = get_online_sitemap_list()
+    if not online_urls:
+        print("❌ Gagal mendapatkan daftar sitemap online.")
+        return
+    
+    for url in online_urls:
+        filename = url.split('/')[-1]
+        filepath = os.path.join(SITEMAP_DIR, filename)
+        print(f"⬇️  Download {filename}")
         content, status = download_sitemap_with_cloudscraper(url)
-        
         if status == 200 and content:
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
             print(f"   ✅ Tersimpan: {filepath}")
         else:
-            print(f"   ❌ Gagal download (status {status})")
-            for alt_domain in ALTERNATIVE_DOMAINS:
-                alt_url = url.replace(BASE_URL, alt_domain)
-                print(f"   🔄 Mencoba alternatif: {alt_url}")
-                content2, status2 = download_sitemap_with_cloudscraper(alt_url)
-                if status2 == 200 and content2:
-                    with open(filepath, 'w', encoding='utf-8') as f:
-                        f.write(content2)
-                    print(f"   ✅ Tersimpan dari alternatif: {filepath}")
-                    break
-                else:
-                    print(f"   ❌ Gagal alternatif (status {status2})")
-        
+            print(f"   ❌ Gagal download {filename}")
         time.sleep(0.5)
-    
     print("✅ Semua sitemap selesai diunduh")
 
 def get_sitemap_files():
@@ -387,7 +413,7 @@ def get_next_batch(sitemap_file, offset, batch_size=BATCH_SIZE):
     return batch, offset, end
 
 # ============================================================
-# 5. DOWNLOAD HTML - FIX BINARY
+# 5. DOWNLOAD HTML
 # ============================================================
 
 def download_html_with_cloudscraper(url):
@@ -574,7 +600,7 @@ def parse_html_page(html_content, url):
         if desc:
             metadata["description"] = desc
     
-    # --- EMBED - FIX: Tambahkan https:// jika URL dimulai dengan // ---
+    # --- EMBED ---
     iframe = soup.find('iframe')
     if iframe and iframe.get('src'):
         embed_url = iframe['src'].strip()
@@ -706,25 +732,38 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 7. FUNGSI UTAMA - BATCH PROCESSING
+# 7. FUNGSI UTAMA - BATCH PROCESSING dengan auto-check update
 # ============================================================
 
-def crawl_one_sitemap(force_download=False):
+def crawl_one_sitemap(force_download=False, reset=False):
     init_database()
     
-    sitemap_files = get_sitemap_files()
+    if reset:
+        reset_processing_state()
     
+    # Pastikan semua sitemap sudah diunduh (jika force_download atau kosong)
+    sitemap_files = get_sitemap_files()
     if force_download or not sitemap_files:
         download_all_sitemaps()
         sitemap_files = get_sitemap_files()
     else:
         print(f"📂 Menggunakan {len(sitemap_files)} sitemap lokal yang sudah ada")
     
+    # Cari sitemap yang belum diproses
     sitemap_file = get_next_unprocessed_sitemap()
     if not sitemap_file:
-        print("✅ Semua sitemap sudah diproses. Tidak ada yang baru.")
-        return
+        # Semua sitemap sudah diproses. Cek update online.
+        print("📡 Semua sitemap lokal sudah diproses. Mengecek update online...")
+        # Download sitemap baru (jika ada)
+        download_new_sitemaps()
+        # Refresh daftar file
+        sitemap_files = get_sitemap_files()
+        sitemap_file = get_next_unprocessed_sitemap()
+        if not sitemap_file:
+            print("✅ Tidak ada update baru. Selesai.")
+            return
     
+    # Proses sitemap yang ditemukan
     state = get_processing_state(sitemap_file)
     if state is None:
         all_urls = get_urls_from_local_sitemap(sitemap_file)
@@ -747,6 +786,7 @@ def crawl_one_sitemap(force_download=False):
             status = 'processing'
             upsert_processing_state(sitemap_file, offset, total, status)
     
+    # Ambil batch
     batch, start, end = get_next_batch(sitemap_file, offset, BATCH_SIZE)
     if not batch:
         print(f"✅ Sitemap {sitemap_file} sudah selesai (offset {offset} >= {total})")
@@ -772,7 +812,6 @@ def crawl_one_sitemap(force_download=False):
             print(f"      - Episode: {metadata['episode']}")
             print(f"      - Embed Platform: {metadata['embed_platform']}")
             print(f"      - Embed URL: {metadata['embed_url']}")
-            # Description
             if metadata['description']:
                 desc_preview = metadata['description'][:100] + '...' if len(metadata['description']) > 100 else metadata['description']
                 print(f"      - Description: {desc_preview}")
@@ -820,16 +859,22 @@ if __name__ == "__main__":
     import sys
     
     force_download = False
-    if len(sys.argv) > 1:
-        if sys.argv[1].lower() == '--download':
+    reset = False
+    
+    for arg in sys.argv[1:]:
+        if arg.lower() == '--download':
             force_download = True
             print("🔧 Mode: Download ulang semua sitemap")
+        elif arg.lower() == '--reset':
+            reset = True
+            print("🔧 Mode: Reset semua status pemrosesan")
         else:
-            print("⚠️ Argumen tidak dikenal. Gunakan --download untuk mengunduh sitemap.")
+            print(f"⚠️ Argumen tidak dikenal: {arg}")
+            print("Gunakan --download untuk mengunduh sitemap, --reset untuk reset status.")
     
     print("=" * 60)
     print("🚀 PENGEPUL-LINK - Crawler 9tsu.in (Batch 500 per siklus)")
     print(f"📌 Batch size: {BATCH_SIZE} link per run")
     print("=" * 60)
     
-    crawl_one_sitemap(force_download)
+    crawl_one_sitemap(force_download, reset)

@@ -1,0 +1,202 @@
+name: Update Domain (dremoxa.space -> pulvexa.space)
+
+on:
+  # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
+  schedule:
+    - cron: '0 2 * * *'
+  
+  # 🔘 Manual: bisa dijalankan dari tab Actions
+  workflow_dispatch:
+    inputs:
+      old_domain:
+        description: 'Domain lama yang akan diganti'
+        required: false
+        default: 'dremoxa.space'
+        type: string
+      new_domain:
+        description: 'Domain baru pengganti'
+        required: false
+        default: 'pulvexa.space'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      # ============================================================
+      # STEP 1: Checkout repository
+      # ============================================================
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # ============================================================
+      # STEP 2: Setup Python
+      # ============================================================
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      # ============================================================
+      # STEP 3: Create update script with dynamic domain
+      # ============================================================
+      - name: Create update script
+        env:
+          OLD_DOMAIN: ${{ github.event.inputs.old_domain || 'dremoxa.space' }}
+          NEW_DOMAIN: ${{ github.event.inputs.new_domain || 'pulvexa.space' }}
+        run: |
+          cat > update_domain.py << 'EOF'
+          import sqlite3
+          import json
+          import re
+          import os
+          from datetime import datetime
+          from shutil import copy2
+          
+          DB_FILE = "links.db"
+          JSON_FILE = "links.json"
+          OLD_DOMAIN = os.environ.get('OLD_DOMAIN', 'dremoxa.space')
+          NEW_DOMAIN = os.environ.get('NEW_DOMAIN', 'pulvexa.space')
+          
+          def backup_file(filename):
+              timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+              backup_name = f"{filename}.backup_{timestamp}"
+              try:
+                  copy2(filename, backup_name)
+                  print(f"📦 Backup dibuat: {backup_name}")
+              except FileNotFoundError:
+                  print(f"⚠️ File {filename} tidak ditemukan, backup skip")
+          
+          def update_database():
+              if not os.path.exists(DB_FILE):
+                  print(f"⚠️ File {DB_FILE} tidak ditemukan, lewati database")
+                  return 0
+              
+              conn = sqlite3.connect(DB_FILE)
+              cursor = conn.cursor()
+              
+              cursor.execute("SELECT COUNT(*) FROM links WHERE embed_url LIKE ? OR embed_platform = ?", 
+                             (f'%{OLD_DOMAIN}%', OLD_DOMAIN))
+              total = cursor.fetchone()[0]
+              print(f"🔍 Ditemukan {total} record yang perlu diupdate di database")
+              
+              if total == 0:
+                  print("✅ Tidak ada perubahan di database")
+                  conn.close()
+                  return 0
+              
+              cursor.execute("UPDATE links SET embed_url = REPLACE(embed_url, ?, ?) WHERE embed_url LIKE ?",
+                             (OLD_DOMAIN, NEW_DOMAIN, f'%{OLD_DOMAIN}%'))
+              updated_url = cursor.rowcount
+              
+              cursor.execute("UPDATE links SET embed_platform = ? WHERE embed_platform = ?",
+                             (NEW_DOMAIN, OLD_DOMAIN))
+              updated_platform = cursor.rowcount
+              
+              conn.commit()
+              conn.close()
+              
+              print(f"✅ Database diupdate: {updated_url} embed_url, {updated_platform} embed_platform")
+              return total
+          
+          def update_json():
+              if not os.path.exists(JSON_FILE):
+                  print(f"⚠️ File {JSON_FILE} tidak ditemukan, lewati JSON")
+                  return
+              
+              with open(JSON_FILE, 'r', encoding='utf-8') as f:
+                  data = json.load(f)
+              
+              total = 0
+              for link in data.get('links', []):
+                  if link.get('embed_url') and OLD_DOMAIN in link['embed_url']:
+                      link['embed_url'] = link['embed_url'].replace(OLD_DOMAIN, NEW_DOMAIN)
+                      total += 1
+                  if link.get('embed_platform') == OLD_DOMAIN:
+                      link['embed_platform'] = NEW_DOMAIN
+              
+              if total == 0:
+                  print("✅ Tidak ada perubahan di JSON")
+                  return
+              
+              backup_file(JSON_FILE)
+              data['timestamp'] = datetime.now().isoformat()
+              with open(JSON_FILE, 'w', encoding='utf-8') as f:
+                  json.dump(data, f, ensure_ascii=False, indent=2)
+              
+              print(f"✅ JSON diupdate: {total} link")
+          
+          def main():
+              print("=" * 60)
+              print(f"🔄 Mengganti domain {OLD_DOMAIN} -> {NEW_DOMAIN}")
+              print("=" * 60)
+              
+              if os.path.exists(DB_FILE):
+                  backup_file(DB_FILE)
+                  update_database()
+              else:
+                  print(f"⚠️ File {DB_FILE} tidak ditemukan, lewati database")
+              
+              update_json()
+              
+              print("\n✅ Selesai!")
+          
+          if __name__ == "__main__":
+              main()
+          EOF
+      
+      # ============================================================
+      # STEP 4: Run update script
+      # ============================================================
+      - name: Run update script
+        env:
+          OLD_DOMAIN: ${{ github.event.inputs.old_domain || 'dremoxa.space' }}
+          NEW_DOMAIN: ${{ github.event.inputs.new_domain || 'pulvexa.space' }}
+        run: |
+          python update_domain.py
+      
+      # ============================================================
+      # STEP 5: Check for changes
+      # ============================================================
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📝 Changes detected:"
+            git status --porcelain
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "✅ No changes detected"
+          fi
+      
+      # ============================================================
+      # STEP 6: Commit and push changes
+      # ============================================================
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            chore: update domain ${{ github.event.inputs.old_domain || 'dremoxa.space' }} -> ${{ github.event.inputs.new_domain || 'pulvexa.space' }} [skip ci]
+          file_pattern: '*.db *.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+          push_options: '--force'
+          skip_fetch: true
+      
+      # ============================================================
+      # STEP 7: No changes
+      # ============================================================
+      - name: No changes
+        if: steps.check_changes.outputs.changes == 'false'
+        run: echo "✅ Tidak ada perubahan, skip commit"

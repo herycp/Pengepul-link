@@ -11,7 +11,7 @@ permissions:
 jobs:
   extract:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     
     steps:
       - name: Checkout repository
@@ -51,7 +51,7 @@ jobs:
             echo "✅ No changes detected"
           fi
       
-      - name: Commit and push changes
+      - name: Commit and push changes (including backups)
         if: steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -60,7 +60,7 @@ jobs:
             
             - Processed blogspherenews.xyz embeds
             - Backups saved in backups/ (max 5)
-          file_pattern: '*.db *.json backups/'
+          file_pattern: '*.db *.json backups/* backups/.gitkeep'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

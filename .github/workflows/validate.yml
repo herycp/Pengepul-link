@@ -32,10 +32,10 @@ jobs:
 
       - name: Ensure reports directories
         run: |
-          mkdir -p reports/validation
-          touch reports/validation/.gitkeep
+          mkdir -p reports
+          touch reports/.gitkeep
 
-      - name: Run data validation (with verification)
+      - name: Run data validation
         run: python validate_data.py
 
       - name: Run integrity reports (2 & 3)
@@ -60,7 +60,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: update validation and integrity reports [skip ci]'
-          file_pattern: 'reports/*.md reports/validation/* reports/validation/.gitkeep'
+          file_pattern: 'reports/*.md'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

@@ -19,15 +19,146 @@ def ensure_reports_dir():
         os.makedirs(REPORTS_DIR)
 
 # ============================================================
-# REPORT 1: TIDAK DIGUNAKAN (skip)
+# LOGIKA KHUSUS: 100 DATA YANG SUDAH BERUBAH (BEFORE vs AFTER)
 # ============================================================
-def generate_embed_report(target_domain="blogspherenews.xyz", limit=100):
-    # Report ini tidak digunakan (sesuai permintaan: report 1 tidak perlu)
-    print("ℹ️ Report 1 (Embed Replacement) dilewati.")
-    return
+def get_100_embed_comparisons(target_domain="blogspherenews.xyz", limit=100):
+    """
+    Mengambil data yang di links.db SEKARANG sudah di-update,
+    lalu mencocokkan embed_url LAMA-nya dari file backup.
+    """
+    comparison_list = []
+    if not os.path.exists(BACKUP_DIR):
+        print(f"⚠️ Folder backup '{BACKUP_DIR}' tidak ditemukan.")
+        return comparison_list
+
+    # Urutkan backup dari yang PALING LAMA ke TERBARU
+    # (Backup lama dipastikan masih menyimpan URL blogspherenews asli)
+    db_backups = sorted(glob.glob(os.path.join(BACKUP_DIR, "db_*.backup_*")), key=os.path.getmtime)
+
+    if not db_backups or not os.path.exists(DB_FILE):
+        print("⚠️ Backup DB atau links.db utama tidak ditemukan.")
+        return comparison_list
+
+    try:
+        # 1. Ambil record dari links.db SEKARANG yang SUDAH BERHASIL di-update
+        conn_curr = sqlite3.connect(DB_FILE)
+        cursor_curr = conn_curr.cursor()
+        cursor_curr.execute(
+            "SELECT id, url, embed_url, embed_platform FROM links WHERE embed_url NOT LIKE ? AND embed_url IS NOT NULL AND embed_url != '' ORDER BY id ASC",
+            (f'%{target_domain}%',)
+        )
+        updated_in_db = cursor_curr.fetchall()
+        conn_curr.close()
+
+        if not updated_in_db:
+            return comparison_list
+
+        # 2. Cari URL LAMA (blogspherenews.xyz) dari file backup
+        for backup_file in db_backups:
+            try:
+                conn_old = sqlite3.connect(backup_file)
+                cursor_old = conn_old.cursor()
+
+                for rec_id, page_url, new_embed, platform in updated_in_db:
+                    # Skip jika ID ini sudah dapat data lamanya
+                    if any(item['id'] == rec_id for item in comparison_list):
+                        continue
+
+                    cursor_old.execute(
+                        "SELECT embed_url FROM links WHERE (id = ? OR url = ?) AND embed_url LIKE ?",
+                        (rec_id, page_url, f'%{target_domain}%')
+                    )
+                    old_row = cursor_old.fetchone()
+
+                    if old_row:
+                        comparison_list.append({
+                            'id': rec_id,
+                            'page_url': page_url,
+                            'old_embed': old_row[0],
+                            'new_embed': new_embed,
+                            'platform': platform or "-"
+                        })
+
+                    if len(comparison_list) >= limit:
+                        break
+
+                conn_old.close()
+            except Exception:
+                continue
+
+            if len(comparison_list) >= limit:
+                break
+
+        print(f"🔍 Berhasil menemukan {len(comparison_list)} sampel perbandingan data (Before vs After).")
+
+    except Exception as e:
+        print(f"⚠️ Gagal memproses perbandingan data: {e}")
+
+    return comparison_list
 
 # ============================================================
-# REPORT 2: CEK SINKRONISASI ISI DB & JSON
+# REPORT 1: PENGGANTIAN URL EMBED (01_embed_replacement_report.md)
+# ============================================================
+def generate_embed_report(target_domain="blogspherenews.xyz", limit=100):
+    ensure_reports_dir()
+    filepath = os.path.join(REPORTS_DIR, "01_embed_replacement_report.md")
+
+    if not os.path.exists(DB_FILE):
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write("# ❌ Error\nFile `links.db` tidak ditemukan.")
+        return
+
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM links")
+    total_records = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM links WHERE embed_url NOT LIKE ?", (f'%{target_domain}%',))
+    updated_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM links WHERE embed_url LIKE ?", (f'%{target_domain}%',))
+    remaining_count = cursor.fetchone()[0]
+    conn.close()
+
+    pct_success = round((updated_count / total_records * 100), 2) if total_records > 0 else 0
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    # Ambil sampel perbandingan
+    comparisons = get_100_embed_comparisons(target_domain, limit)
+
+    md = []
+    md.append("# 📊 Laporan Penggantian URL Embed\n")
+    md.append(f"_Diperbarui secara otomatis pada: `{now}`_\n")
+    md.append("## 📈 Ringkasan Ekstraksi Real-time\n")
+    md.append("| Metrik | Jumlah | Persentase |")
+    md.append("| :--- | :---: | :---: |")
+    md.append(f"| **Total Record DB** | `{total_records}` | `100%` |")
+    md.append(f"| **Berhasil Diperbarui** | `{updated_count}` | `{pct_success}%` |")
+    md.append(f"| **Belum Diperbarui** | `{remaining_count}` | `{round(100 - pct_success, 2)}%` |\n")
+
+    md.append(f"## 📋 Sampel Perbandingan {len(comparisons)} Data yang Berhasil Diperbarui (Backup vs DB Sekarang)\n")
+    if comparisons:
+        md.append("| ID | Halaman Asli / Section | Embed Lama (`blogspherenews` di Backup) | Real Embed Baru (`links.db` Sekarang) | Platform Baru | Status |")
+        md.append("| :---: | :--- | :--- | :--- | :---: | :---: |")
+
+        for item in comparisons:
+            rec_id = item['id']
+            page_url = f"[{item['page_url'][:25]}...]({item['page_url']})" if item['page_url'] else "-"
+            old_embed = f"`{item['old_embed']}`"
+            new_embed = f"`{item['new_embed']}`"
+            platform = f"`{item['platform']}`"
+            status = "✅ Diperbarui"
+
+            md.append(f"| {rec_id} | {page_url} | {old_embed} | {new_embed} | {platform} | {status} |")
+    else:
+        md.append("> ℹ️ **Info**: Belum ada sampel perbandingan data yang dapat dicocokkan.")
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(md))
+    print(f"📄 Report 1 berhasil dibuat: `{filepath}` ({len(comparisons)} sampel ditampilkan)")
+
+# ============================================================
+# REPORT 2: CEK SINKRONISASI ISI DB & JSON (02_db_json_sync_report.md)
 # ============================================================
 def generate_sync_report():
     ensure_reports_dir()
@@ -137,15 +268,13 @@ def generate_sync_report():
         md.append("## ⚠️ Detail Perbedaan Isi Record (DB vs JSON)\n")
         md.append("| URL Target | Kolom / Field | Nilai di DB (`links.db`) | Nilai di JSON (`links.json`) |")
         md.append("| :--- | :---: | :--- | :--- |")
-        for m in mismatches[:20]:
+        for m in mismatches:
             url_disp = f"[{m['url'][:30]}...]({m['url']})"
             for diff in m['diffs']:
                 f_name = f"`{diff['field']}`"
                 db_v = f"`{diff['db_val'][:30]}`" if diff['db_val'] else "*(kosong)*"
                 json_v = f"`{diff['json_val'][:30]}`" if diff['json_val'] else "*(kosong)*"
                 md.append(f"| {url_disp} | {f_name} | {db_v} | {json_v} |")
-        if len(mismatches) > 20:
-            md.append(f"| _... dan {len(mismatches)-20} lainnya_ | | | |")
 
     if not is_content_synced:
         md.append("\n### 💡 Solusi Penyelarasan")
@@ -159,7 +288,7 @@ def generate_sync_report():
     print(f"📄 Report 2 berhasil dibuat: `{filepath}`")
 
 # ============================================================
-# REPORT 3: BACKUP & ROLLBACK STATUS
+# REPORT 3: BACKUP & ROLLBACK STATUS (03_backup_integrity_report.md)
 # ============================================================
 def generate_backup_report():
     ensure_reports_dir()
@@ -178,13 +307,11 @@ def generate_backup_report():
     if db_backups:
         md.append("| Nama File Backup | Ukuran File | Tanggal Dibuat |")
         md.append("| :--- | :---: | :---: |")
-        for f in db_backups[:10]:
+        for f in db_backups:
             fname = os.path.basename(f)
             size = f"{os.path.getsize(f) / 1024:.1f} KB"
             mtime = datetime.fromtimestamp(os.path.getmtime(f)).strftime("%Y-%m-%d %H:%M:%S")
             md.append(f"| `{fname}` | `{size}` | `{mtime}` |")
-        if len(db_backups) > 10:
-            md.append(f"| _... dan {len(db_backups)-10} lainnya_ | | |")
     else:
         md.append("> ⚠️ Tidak ada file backup database ditemukan.")
 
@@ -192,13 +319,11 @@ def generate_backup_report():
     if json_backups:
         md.append("| Nama File Backup | Ukuran File | Tanggal Dibuat |")
         md.append("| :--- | :---: | :---: |")
-        for f in json_backups[:10]:
+        for f in json_backups:
             fname = os.path.basename(f)
             size = f"{os.path.getsize(f) / 1024:.1f} KB"
             mtime = datetime.fromtimestamp(os.path.getmtime(f)).strftime("%Y-%m-%d %H:%M:%S")
             md.append(f"| `{fname}` | `{size}` | `{mtime}` |")
-        if len(json_backups) > 10:
-            md.append(f"| _... dan {len(json_backups)-10} lainnya_ | | |")
     else:
         md.append("> ⚠️ Tidak ada file backup JSON ditemukan.")
 
@@ -253,10 +378,11 @@ def rollback_database():
     sync_db_to_json()
 
 def generate_all_reports():
-    print("\n🚀 Memulai pembuatan laporan...")
+    print("\n🚀 Memulai pembuatan 3 Laporan Markdown...")
+    generate_embed_report()
     generate_sync_report()
     generate_backup_report()
-    print("✨ Laporan selesai dibuat di folder 'reports/'!\n")
+    print("✨ Seluruh laporan berhasil dibuat di folder 'reports/'!\n")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -267,17 +393,7 @@ if __name__ == "__main__":
             generate_all_reports()
         elif arg == '--rollback':
             rollback_database()
-        elif arg == '--report2':
-            generate_sync_report()
-        elif arg == '--report3':
-            generate_backup_report()
         else:
             print(f"❌ Argumen '{arg}' tidak dikenal.")
-            print("\nPenggunaan:")
-            print("  python check_integrity.py --generate-reports")
-            print("  python check_integrity.py --report2")
-            print("  python check_integrity.py --report3")
-            print("  python check_integrity.py --sync-db-to-json")
-            print("  python check_integrity.py --rollback")
     else:
         generate_all_reports()

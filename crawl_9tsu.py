@@ -284,14 +284,10 @@ def get_url_batch_from_sitemap(sitemap_file, offset, limit):
     return batch, end, total
 
 # ============================================================
-# 4. VERIFIKASI SITEMAP vs DATABASE (DIPERBAIKI)
+# 4. VERIFIKASI SITEMAP vs DATABASE
 # ============================================================
 
 def verify_sitemap_coverage():
-    """
-    Verifikasi apakah semua URL di setiap sitemap sudah ada di database.
-    Jika ada link yang terlewat (missing > 0), reset sitemap ke pending & offset 0.
-    """
     print("\n" + "=" * 60)
     print("🔍 VERIFIKASI KECOCOKAN SITEMAP vs DATABASE")
     print("=" * 60)
@@ -329,26 +325,35 @@ def verify_sitemap_coverage():
             print(f"   - Ada di database: {db_count}")
             print(f"   - ❌ Terlewat: {missing} link")
             
-            # 🔥 PERBAIKAN: Selalu reset ke pending & offset 0 jika ada missing
-            print(f"   - 🔄 Reset status ke 'pending' dan offset ke 0")
-            conn.execute("""
-                UPDATE processing_state 
-                SET status = 'pending', offset = 0, updated_at = CURRENT_TIMESTAMP
-                WHERE sitemap_file = ?
-            """, (f,))
-            reset_count += 1
+            if is_done:
+                print(f"   - 🔄 Reset status dari 'done' ke 'pending', offset 0")
+                conn.execute("""
+                    UPDATE processing_state 
+                    SET status = 'pending', offset = 0, updated_at = CURRENT_TIMESTAMP
+                    WHERE sitemap_file = ?
+                """, (f,))
+                reset_count += 1
+            else:
+                current_state = get_processing_state(f)
+                if current_state:
+                    current_offset = current_state['offset']
+                    if missing > 10 or current_offset == 0:
+                        print(f"   - 🔄 Reset offset ke 0 karena banyak link terlewat")
+                        conn.execute("""
+                            UPDATE processing_state 
+                            SET offset = 0, updated_at = CURRENT_TIMESTAMP
+                            WHERE sitemap_file = ?
+                        """, (f,))
+                        reset_count += 1
+                    else:
+                        print(f"   - ℹ️  Offset saat ini: {current_offset}, missing: {missing}")
+            
             total_missing += missing
         else:
             if is_done:
                 print(f"✅ {f}: {sitemap_count}/{sitemap_count} link terverifikasi (done)")
             else:
-                # Jika belum done tapi semua sudah ada, tandai done
-                print(f"✅ {f}: {sitemap_count}/{sitemap_count} link sudah di database, tandai done")
-                cursor.execute("""
-                    UPDATE processing_state 
-                    SET status = 'done', updated_at = CURRENT_TIMESTAMP
-                    WHERE sitemap_file = ?
-                """, (f,))
+                print(f"✅ {f}: {sitemap_count}/{sitemap_count} link sudah di database")
     
     conn.commit()
     conn.close()
@@ -787,7 +792,7 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 8. FUNGSI UTAMA
+# 8. FUNGSI UTAMA - DENGAN LOOP INTERNAL PER SITEMAP
 # ============================================================
 
 def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
@@ -796,7 +801,7 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     if reset:
         reset_processing_state()
     
-    # 🔥 VERIFIKASI
+    # Verifikasi
     total_missing, reset_count = verify_sitemap_coverage()
     if reset_count > 0:
         print(f"📡 {reset_count} sitemap direset, akan diproses ulang.")
@@ -843,7 +848,6 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     for f, off, tot in unprocessed:
         print(f"   - {f}: offset={off}, total={tot}")
     
-    # Kumpulkan URL baru
     target_count = BATCH_SIZE
     if max_pages and max_pages < target_count:
         target_count = max_pages
@@ -851,59 +855,63 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     
     all_new_urls = []
     processed_sitemap_info = []
-    
     remaining = target_count
+    
+    # 🔥 Loop per sitemap dengan internal loop untuk memproses sampai selesai
     for sitemap_file, offset, total in unprocessed:
-        # Cek di awal loop
         if remaining <= 0:
             break
         
         print(f"\n📌 Memproses sitemap: {sitemap_file}, offset={offset}, total={total}, remaining={remaining}")
         
-        # Ambil batch sebesar remaining
-        batch, new_offset, total_urls = get_url_batch_from_sitemap(sitemap_file, offset, remaining)
-        print(f"   Batch diambil: {len(batch)} URL (dari offset {offset} sampai {new_offset})")
-        
-        if not batch:
-            print(f"   ⚠️ Batch kosong, tandai selesai")
-            mark_sitemap_processed(sitemap_file)
-            continue
-        
-        # Filter URL yang sudah ada di database
-        existing, new_urls = get_existing_urls(batch)
-        print(f"   Sudah ada di database: {len(existing)} link")
-        print(f"   URL baru: {len(new_urls)} link")
-        
-        if not new_urls:
-            if new_offset >= total_urls:
-                print(f"   ✅ Sitemap {sitemap_file} selesai (semua URL sudah ada)")
+        # 🔥 Internal loop: proses sitemap ini sampai habis atau remaining habis
+        while offset < total and remaining > 0:
+            # Ambil batch sebesar remaining
+            batch, new_offset, total_urls = get_url_batch_from_sitemap(sitemap_file, offset, remaining)
+            print(f"   Batch diambil: {len(batch)} URL (dari offset {offset} sampai {new_offset})")
+            
+            if not batch:
+                # Tidak ada URL di sitemap ini, tandai selesai
+                print(f"   ⚠️ Batch kosong, tandai selesai")
                 mark_sitemap_processed(sitemap_file)
+                break
+            
+            # Filter URL yang sudah ada
+            existing, new_urls = get_existing_urls(batch)
+            print(f"   Sudah ada di database: {len(existing)} link")
+            print(f"   URL baru: {len(new_urls)} link")
+            
+            if new_urls:
+                # Simpan URL baru
+                for url in new_urls:
+                    all_new_urls.append((url, sitemap_file))
+                remaining -= len(new_urls)
+                print(f"   📊 Sisa kuota: {remaining} link")
+                # Catat info untuk update state nanti
+                processed_sitemap_info.append({
+                    'sitemap_file': sitemap_file,
+                    'new_offset': new_offset,
+                    'total': total_urls,
+                    'taken': len(new_urls)
+                })
             else:
-                print(f"   📌 Update offset ke {new_offset} (belum selesai)")
-                upsert_processing_state(sitemap_file, new_offset, total_urls, 'pending')
-            continue
+                print(f"   ℹ️  Tidak ada URL baru di batch ini, lanjut ke batch berikutnya")
+            
+            # Update offset untuk lanjut ke batch berikutnya
+            offset = new_offset
         
-        # Simpan URL baru
-        for url in new_urls:
-            all_new_urls.append((url, sitemap_file))
-        
-        # Update remaining
-        remaining -= len(new_urls)
-        print(f"   📊 Sisa kuota setelah filter: {remaining} link")
-        
-        # Simpan informasi untuk update state nanti
-        processed_sitemap_info.append({
-            'sitemap_file': sitemap_file,
-            'new_offset': new_offset,
-            'total': total_urls,
-            'taken': len(new_urls)
-        })
+        # Setelah loop internal selesai (sitemap habis atau remaining habis)
+        # Update state sitemap
+        if offset >= total:
+            print(f"✅ Sitemap {sitemap_file} selesai ({total} link)")
+            mark_sitemap_processed(sitemap_file)
+        else:
+            # Jika masih ada sisa (remaining habis)
+            print(f"📌 Progress {sitemap_file}: {offset}/{total} link diproses, remaining={remaining}")
+            upsert_processing_state(sitemap_file, offset, total, 'pending')
     
     if not all_new_urls:
         print("✅ Tidak ada URL baru ditemukan di semua sitemap.")
-        for sitemap_file, offset, total in unprocessed:
-            if offset >= total:
-                mark_sitemap_processed(sitemap_file)
         return
     
     print(f"\n📌 Mengumpulkan {len(all_new_urls)} URL baru dari {len(set(s for _, s in all_new_urls))} sitemap")
@@ -948,17 +956,19 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     new_count = save_to_database(results)
     print(f"\n💾 Database: {new_count} link baru ditambahkan")
     
-    # Update state
+    # Update state setiap sitemap yang sudah diambil (jika belum diupdate di loop internal)
+    # Tapi karena di loop internal kita sudah update state, kita hanya perlu pastikan
+    # semua sitemap di processed_sitemap_info sudah terupdate.
+    # Sebenarnya state sudah diupdate di loop internal, jadi tidak perlu lagi.
+    # Tapi kita tetap lakukan untuk sitemap yang belum terupdate.
     for info in processed_sitemap_info:
         sitemap_file = info['sitemap_file']
-        new_offset = info['new_offset']
-        total = info['total']
-        if new_offset >= total:
-            mark_sitemap_processed(sitemap_file)
-            print(f"✅ Sitemap {sitemap_file} selesai ({total} link)")
-        else:
-            upsert_processing_state(sitemap_file, new_offset, total, 'pending')
-            print(f"📌 Progress {sitemap_file}: {new_offset}/{total} link diproses")
+        # Cek apakah sitemap sudah ditandai done
+        state = get_processing_state(sitemap_file)
+        if state and state['status'] != 'done':
+            # Jika offset sudah mencapai total, tandai done
+            if state['offset'] >= state['total']:
+                mark_sitemap_processed(sitemap_file)
     
     export_to_json()
     total_db = get_database_count()
@@ -994,8 +1004,8 @@ if __name__ == "__main__":
             print("Gunakan --download, --reset, atau --max-pages N")
         i += 1
     print("=" * 60)
-    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in (500 dari semua sitemap)")
-    print(f"📌 Target: {BATCH_SIZE} link per run dari seluruh sitemap")
+    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in")
+    print(f"📌 Target: {BATCH_SIZE} link per run")
     if max_pages:
         print(f"🔢 Max pages: {max_pages}")
     print("=" * 60)

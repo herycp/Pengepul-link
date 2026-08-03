@@ -20,7 +20,7 @@ SITEMAP_INDEX = f"{BASE_URL}/sitemap_index.xml"
 DB_FILE = "links.db"
 JSON_FILE = "links.json"
 SITEMAP_DIR = "sitemaps"
-BATCH_SIZE = 500  # Total link per run dari semua sitemap
+BATCH_SIZE = 500
 
 ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
 
@@ -249,14 +249,12 @@ def get_unprocessed_sitemaps():
             continue
         state = get_processing_state(f)
         if state is None:
-            # Belum ada state, buat baru dengan offset 0
             urls = get_urls_from_local_sitemap(f)
             total = len(urls) if urls else 0
             if total > 0:
                 upsert_processing_state(f, 0, total, 'pending')
                 result.append((f, 0, total))
             else:
-                # Tidak ada URL, tandai selesai
                 mark_sitemap_processed(f)
         else:
             if state['status'] != 'done':
@@ -297,7 +295,100 @@ def get_url_batch_from_sitemap(sitemap_file, offset, limit):
     return batch, end, total
 
 # ============================================================
-# 4. MANAJEMEN SITEMAP LOKAL & ONLINE
+# 4. VERIFIKASI SITEMAP vs DATABASE
+# ============================================================
+
+def verify_sitemap_coverage():
+    """
+    Verifikasi apakah semua URL di setiap sitemap sudah ada di database.
+    Jika ada link yang terlewat, reset status sitemap ke pending.
+    """
+    print("\n" + "=" * 60)
+    print("🔍 VERIFIKASI KECOCOKAN SITEMAP vs DATABASE")
+    print("=" * 60)
+    
+    sitemap_files = get_sitemap_files()
+    if not sitemap_files:
+        print("❌ Tidak ada sitemap ditemukan.")
+        return 0, 0
+    
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    
+    total_missing = 0
+    reset_count = 0
+    
+    for f in sitemap_files:
+        urls = get_urls_from_local_sitemap(f)
+        if not urls:
+            continue
+        
+        # Hitung berapa URL di sitemap yang ADA di database
+        placeholders = ','.join(['?'] * len(urls))
+        query = f"SELECT COUNT(*) FROM links WHERE url IN ({placeholders})"
+        cursor.execute(query, urls)
+        db_count = cursor.fetchone()[0]
+        
+        sitemap_count = len(urls)
+        missing = sitemap_count - db_count
+        
+        # Ambil status dari processing_state
+        state = get_processing_state(f)
+        is_done = state and state['status'] == 'done'
+        
+        if missing > 0:
+            print(f"\n📌 {f}:")
+            print(f"   - Total di sitemap: {sitemap_count}")
+            print(f"   - Ada di database: {db_count}")
+            print(f"   - ❌ Terlewat: {missing} link")
+            
+            # Jika statusnya 'done' tapi masih ada missing, reset ke pending
+            if is_done:
+                print(f"   - 🔄 Reset status dari 'done' ke 'pending'")
+                conn.execute("""
+                    UPDATE processing_state 
+                    SET status = 'pending', offset = 0, updated_at = CURRENT_TIMESTAMP
+                    WHERE sitemap_file = ?
+                """, (f,))
+                reset_count += 1
+            else:
+                # Jika belum done, hanya update offset jika perlu
+                current_state = get_processing_state(f)
+                if current_state:
+                    current_offset = current_state['offset']
+                    if missing > 10:
+                        print(f"   - 🔄 Reset offset ke 0 karena banyak link terlewat")
+                        conn.execute("""
+                            UPDATE processing_state 
+                            SET offset = 0, updated_at = CURRENT_TIMESTAMP
+                            WHERE sitemap_file = ?
+                        """, (f,))
+                        reset_count += 1
+                    else:
+                        print(f"   - ℹ️  Offset saat ini: {current_offset}, missing: {missing}")
+            
+            total_missing += missing
+        else:
+            if is_done:
+                print(f"✅ {f}: {sitemap_count}/{sitemap_count} link terverifikasi (done)")
+            else:
+                print(f"✅ {f}: {sitemap_count}/{sitemap_count} link sudah di database")
+    
+    conn.commit()
+    conn.close()
+    
+    print("\n" + "=" * 60)
+    if total_missing == 0:
+        print("✅ SEMUA SITEMAP TERVERIFIKASI - Tidak ada link terlewat")
+    else:
+        print(f"⚠️ Ditemukan {total_missing} link terlewat di {reset_count} sitemap")
+        print(f"🔄 {reset_count} sitemap direset ke status 'pending'")
+    print("=" * 60)
+    
+    return total_missing, reset_count
+
+# ============================================================
+# 5. MANAJEMEN SITEMAP LOKAL & ONLINE
 # ============================================================
 
 def create_sitemap_dir():
@@ -418,7 +509,7 @@ def get_sitemap_files():
     return files
 
 # ============================================================
-# 5. DOWNLOAD HTML
+# 6. DOWNLOAD HTML
 # ============================================================
 
 def download_html_with_cloudscraper(url):
@@ -510,7 +601,7 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 6. PARSING HTML (sama seperti sebelumnya)
+# 7. PARSING HTML
 # ============================================================
 
 def parse_html_page(html_content, url):
@@ -716,7 +807,7 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 7. FUNGSI UTAMA - DENGAN LOGIKA 500 DARI SEMUA SITEMAP
+# 8. FUNGSI UTAMA - 500 DARI SEMUA SITEMAP + VERIFIKASI
 # ============================================================
 
 def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
@@ -724,6 +815,12 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     
     if reset:
         reset_processing_state()
+    
+    # 🔥 VERIFIKASI SETIAP RUN
+    total_missing, reset_count = verify_sitemap_coverage()
+    
+    if reset_count > 0:
+        print(f"📡 {reset_count} sitemap direset, akan diproses ulang.")
     
     # Auto reset jika semua sitemap selesai
     if is_all_sitemaps_processed():
@@ -733,7 +830,6 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         print("=" * 60)
         reset_processing_state()
         download_all_sitemaps()
-        # Set semua sitemap ke status pending
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
             if all_urls:
@@ -770,8 +866,9 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         target_count = max_pages
         print(f"🔢 Testing: target {target_count} link")
     
-    all_new_urls = []          # List of (url, sitemap_file, offset, total)
-    processed_sitemap_info = [] # Untuk update state nanti
+    all_new_urls = []
+    processed_sitemap_info = []
+    skipped_count = 0
     
     remaining = target_count
     for sitemap_file, offset, total in unprocessed:
@@ -872,7 +969,7 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     print(f"\n📊 Total link di database: {total_db}")
 
 # ============================================================
-# 8. EKSEKUSI
+# 9. EKSEKUSI
 # ============================================================
 
 if __name__ == "__main__":

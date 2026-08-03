@@ -30,13 +30,13 @@ jobs:
           pip install --upgrade pip
           pip install requests cloudscraper beautifulsoup4 lxml
 
-      - name: Ensure directories
+      - name: Ensure reports directories
         run: |
-          mkdir -p reports
           mkdir -p reports/validation
+          touch reports/validation/.gitkeep
 
-      - name: Run data validation (all cycles)
-        run: python validate_data.py --all
+      - name: Run data validation (with verification)
+        run: python validate_data.py
 
       - name: Run integrity reports (2 & 3)
         run: |
@@ -48,16 +48,19 @@ jobs:
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📝 Changes detected:"
+            git status --porcelain
           else
             echo "changes=false" >> $GITHUB_OUTPUT
+            echo "✅ No changes detected"
           fi
 
       - name: Commit and push changes
         if: steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: update validation reports [skip ci]'
-          file_pattern: 'reports/*.md reports/validation/*'
+          commit_message: 'chore: update validation and integrity reports [skip ci]'
+          file_pattern: 'reports/*.md reports/validation/* reports/validation/.gitkeep'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

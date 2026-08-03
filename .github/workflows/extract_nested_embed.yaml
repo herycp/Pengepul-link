@@ -1,0 +1,69 @@
+name: Extract Nested Embed (blogspherenews.xyz)
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests cloudscraper beautifulsoup4 lxml
+      
+      - name: Create extract script
+        run: |
+          cat > extract_nested_embed.py << 'EOF'
+          # (copy kode extract_nested_embed.py di atas)
+          EOF
+      
+      - name: Run extract nested embed
+        run: |
+          python extract_nested_embed.py --all
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📝 Changes detected:"
+            git status --porcelain
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "✅ No changes detected"
+          fi
+      
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: extract nested embed from blogspherenews.xyz [skip ci]'
+          file_pattern: '*.db *.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+          push_options: '--force'
+          skip_fetch: true
+      
+      - name: No changes
+        if: steps.check_changes.outputs.changes == 'false'
+        run: echo "✅ Tidak ada perubahan, skip commit"

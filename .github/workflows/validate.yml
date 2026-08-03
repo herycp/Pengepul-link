@@ -1,0 +1,69 @@
+name: Data Validation & Integrity Reports
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests cloudscraper beautifulsoup4 lxml
+
+      - name: Ensure directories
+        run: |
+          mkdir -p reports
+          mkdir -p reports/validation
+
+      - name: Run data validation (all cycles)
+        run: python validate_data.py --all
+
+      - name: Run integrity reports (2 & 3)
+        run: |
+          python check_integrity.py --report2
+          python check_integrity.py --report3
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update validation reports [skip ci]'
+          file_pattern: 'reports/*.md reports/validation/*'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+          push_options: '--force'
+          skip_fetch: true
+
+      - name: No changes
+        if: steps.check_changes.outputs.changes == 'false'
+        run: echo "✅ Tidak ada perubahan laporan."

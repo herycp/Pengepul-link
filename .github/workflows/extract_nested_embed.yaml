@@ -1,72 +1,51 @@
-name: Extract Nested Embed (blogspherenews.xyz)
+name: Extract Nested Embeds Batch Processing
 
 on:
   schedule:
-    - cron: '0 4 * * *'
-  workflow_dispatch:
+    # Dijalankan otomatis setiap 6 jam sekali (bisa disesuaikan)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Memungkinkan untuk menjalankan skrip secara manual dari tab Actions
 
 permissions:
-  contents: write
+  contents: write # PENTING: Izin menulis agar GitHub Actions bisa commit & push file DB/Backups
 
 jobs:
-  extract:
+  run-extraction:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    
+
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Python
+          fetch-depth: 0 # Menarik seluruh commit history
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
-      - name: Install dependencies
+
+      - name: Install Dependencies
         run: |
-          pip install --upgrade pip
-          pip install requests cloudscraper beautifulsoup4 lxml
-      
-      - name: Ensure backups directory exists
-        run: |
-          mkdir -p backups
-          touch backups/.gitkeep
-      
-      - name: Run extract nested embed
+          python -m pip install --upgrade pip
+          pip install requests cloudscraper beautifulsoup4
+
+      - name: Run Embed Extraction
         run: |
           python extract_nested_embed.py --all
-      
-      - name: Check for changes
-        id: check_changes
+
+      - name: Commit and Push Changes (Database, JSON, & Backups)
         run: |
-          if [[ -n $(git status --porcelain) ]]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-            echo "📝 Changes detected:"
-            git status --porcelain
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage file utama dan folder backups
+          git add links.db links.json extract_progress.json backups/
+          
+          # Cek apakah ada perubahan file sebelum commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "auto: extract embed batch update & backup [skip ci]"
+            git push
+            echo "✅ Perubahan berhasil di-push ke repository!"
           else
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "✅ No changes detected"
+            echo "ℹ️ Tidak ada perubahan data pada batch ini."
           fi
-      
-      - name: Commit and push changes (including backups)
-        if: steps.check_changes.outputs.changes == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: |
-            chore: extract nested embed and update backups [skip ci]
-            
-            - Processed blogspherenews.xyz embeds
-            - Backups saved in backups/ (max 5)
-          file_pattern: '*.db *.json backups/* backups/.gitkeep'
-          commit_user_name: 'github-actions[bot]'
-          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
-          push_options: '--force'
-          skip_fetch: true
-      
-      - name: No changes
-        if: steps.check_changes.outputs.changes == 'false'
-        run: echo "✅ Tidak ada perubahan, skip commit"

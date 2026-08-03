@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-03T17:41:27.524448",
-  "total": 1743,
+  "timestamp": "2026-08-03T17:48:18.059263",
+  "total": 1245,
   "processed": 500,
-  "updated": 7494,
-  "failed": 6,
-  "remaining": 1243
+  "updated": 7992,
+  "failed": 8,
+  "remaining": 745
 }

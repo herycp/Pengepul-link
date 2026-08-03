@@ -128,7 +128,7 @@ def extract_nested_embeds_from_db():
         if real_embed:
             print(f"   ✅ Real embed: {real_embed}")
             # Update database
-            cursor.execute("UPDATE links SET embed_url = ? WHERE id = ?", (real_embed, real_embed))
+            cursor.execute("UPDATE links SET embed_url = ? WHERE id = ?", (real_embed, record_id))
             # Juga update embed_platform
             parsed = urlparse(real_embed)
             platform = parsed.netloc

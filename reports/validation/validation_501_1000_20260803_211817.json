@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-08-03T21:18:18.358941",
+  "cycle": {
+    "start": 501,
+    "end": 1000
+  },
+  "results": {
+    "outside_domain": [
+      {
+        "id": 845,
+        "url": "https://9tsu.in/douga/123082.html",
+        "db_embed": "https://www.dailymotion.com/dorama9tsu",
+        "db_platform": "www.dailymotion.com",
+        "real_embed": "https://www.dailymotion.com/dorama9tsu",
+        "is_correct": true,
+        "error": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,298 @@
+{
+  "timestamp": "2026-08-03T21:27:24.915509",
+  "cycle": {
+    "start": 24001,
+    "end": 24202
+  },
+  "results": {
+    "duplicate_embeds": [
+      {
+        "embed_url": "https://ok.ru/videoembed/",
+        "count": 38,
+        "records": [
+          {
+            "id": 24015,
+            "url": "https://9tsu.in/douga/35388.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24016,
+            "url": "https://9tsu.in/douga/35394.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24017,
+            "url": "https://9tsu.in/douga/35393.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24090,
+            "url": "https://9tsu.in/douga/34607.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24106,
+            "url": "https://9tsu.in/douga/35250.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24107,
+            "url": "https://9tsu.in/douga/35155.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24108,
+            "url": "https://9tsu.in/douga/35106.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24109,
+            "url": "https://9tsu.in/douga/34976.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24110,
+            "url": "https://9tsu.in/douga/34917.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24111,
+            "url": "https://9tsu.in/douga/34828.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24112,
+            "url": "https://9tsu.in/douga/34815.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24113,
+            "url": "https://9tsu.in/douga/34773.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24114,
+            "url": "https://9tsu.in/douga/34642.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24115,
+            "url": "https://9tsu.in/douga/34641.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24116,
+            "url": "https://9tsu.in/douga/34538.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24117,
+            "url": "https://9tsu.in/douga/34479.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24118,
+            "url": "https://9tsu.in/douga/34472.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24119,
+            "url": "https://9tsu.in/douga/34339.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24120,
+            "url": "https://9tsu.in/douga/34269.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24121,
+            "url": "https://9tsu.in/douga/34206.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24122,
+            "url": "https://9tsu.in/douga/34198.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24123,
+            "url": "https://9tsu.in/douga/33989.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24124,
+            "url": "https://9tsu.in/douga/33973.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24125,
+            "url": "https://9tsu.in/douga/33915.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24126,
+            "url": "https://9tsu.in/douga/33877.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24127,
+            "url": "https://9tsu.in/douga/33792.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24128,
+            "url": "https://9tsu.in/douga/33709.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24129,
+            "url": "https://9tsu.in/douga/33678.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24130,
+            "url": "https://9tsu.in/douga/33676.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24131,
+            "url": "https://9tsu.in/douga/33656.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24132,
+            "url": "https://9tsu.in/douga/33642.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24133,
+            "url": "https://9tsu.in/douga/33601.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24134,
+            "url": "https://9tsu.in/douga/30987.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24135,
+            "url": "https://9tsu.in/douga/30765.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24136,
+            "url": "https://9tsu.in/douga/35158.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24137,
+            "url": "https://9tsu.in/douga/35241.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24138,
+            "url": "https://9tsu.in/douga/30680.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 24139,
+            "url": "https://9tsu.in/douga/30605.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://ok.ru/videoembed/"
+      },
+      {
+        "embed_url": "https://ok.ru/videoembed/1535947377341",
+        "count": 2,
+        "records": [
+          {
+            "id": 24157,
+            "url": "https://9tsu.in/douga/33831.html",
+            "real_embed": "https://ok.ru/videoembed/1535947377341",
+            "error": null
+          },
+          {
+            "id": 24159,
+            "url": "https://9tsu.in/douga/33821.html",
+            "real_embed": "https://ok.ru/videoembed/1535947377341",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://ok.ru/videoembed/1535947377341"
+      },
+      {
+        "embed_url": "https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a",
+        "count": 2,
+        "records": [
+          {
+            "id": 24019,
+            "url": "https://9tsu.in/douga/31054.html",
+            "real_embed": "https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a",
+            "error": null
+          },
+          {
+            "id": 24029,
+            "url": "https://9tsu.in/douga/20121.html",
+            "real_embed": "https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a"
+      }
+    ],
+    "outside_domain": [
+      {
+        "id": 24155,
+        "url": "https://9tsu.in/douga/34117.html",
+        "db_embed": "https://9tsu.in/youtube-baraeti",
+        "db_platform": "9tsu.in",
+        "real_embed": "https://9tsu.in/youtube-baraeti",
+        "is_correct": true,
+        "error": null
+      }
+    ]
+  }
+}

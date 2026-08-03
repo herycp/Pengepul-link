@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-08-03T21:21:39.218909",
+  "cycle": {
+    "start": 18501,
+    "end": 19000
+  },
+  "results": {
+    "duplicate_embeds": [
+      {
+        "embed_url": "https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a",
+        "count": 2,
+        "records": [
+          {
+            "id": 18907,
+            "url": "https://9tsu.in/douga/61268.html",
+            "real_embed": "https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a",
+            "error": null
+          },
+          {
+            "id": 18921,
+            "url": "https://9tsu.in/douga/60692.html",
+            "real_embed": "https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a"
+      }
+    ]
+  }
+}

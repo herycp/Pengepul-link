@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-08-03T21:21:36.556197",
+  "cycle": {
+    "start": 18001,
+    "end": 18500
+  },
+  "results": {
+    "duplicate_embeds": [
+      {
+        "embed_url": "https://ok.ru/videoembed/",
+        "count": 2,
+        "records": [
+          {
+            "id": 18061,
+            "url": "https://9tsu.in/douga/42600.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 18165,
+            "url": "https://9tsu.in/douga/48756.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://ok.ru/videoembed/"
+      },
+      {
+        "embed_url": "https://ok.ru/videoembed/7624087767621",
+        "count": 2,
+        "records": [
+          {
+            "id": 18197,
+            "url": "https://9tsu.in/douga/63681.html",
+            "real_embed": "https://blogspherenews.xyz/embed/670ddd26172b884e34db7d3a",
+            "error": null
+          },
+          {
+            "id": 18255,
+            "url": "https://9tsu.in/douga/63481.html",
+            "real_embed": "https://blogspherenews.xyz/embed/670ddd26172b884e34db7d3a",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://blogspherenews.xyz/embed/670ddd26172b884e34db7d3a"
+      },
+      {
+        "embed_url": "https://ok.ru/videoembed/8175697725967",
+        "count": 2,
+        "records": [
+          {
+            "id": 18174,
+            "url": "https://9tsu.in/douga/63765.html",
+            "real_embed": "https://blogspherenews.xyz/embed/670de407172b884e34dbb766",
+            "error": null
+          },
+          {
+            "id": 18176,
+            "url": "https://9tsu.in/douga/63774.html",
+            "real_embed": "https://blogspherenews.xyz/embed/670de407172b884e34dbb766",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://blogspherenews.xyz/embed/670de407172b884e34dbb766"
+      }
+    ],
+    "outside_domain": [
+      {
+        "id": 18359,
+        "url": "https://9tsu.in/douga/63062.html",
+        "db_embed": "https://www.dailymotion.com/dorama9tsu",
+        "db_platform": "www.dailymotion.com",
+        "real_embed": "https://www.dailymotion.com/dorama9tsu",
+        "is_correct": true,
+        "error": null
+      }
+    ]
+  }
+}

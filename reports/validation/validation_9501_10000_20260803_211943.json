@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-08-03T21:19:44.865598",
+  "cycle": {
+    "start": 9501,
+    "end": 10000
+  },
+  "results": {
+    "duplicate_embeds": [
+      {
+        "embed_url": "https://ok.ru/videoembed/8610999503459",
+        "count": 2,
+        "records": [
+          {
+            "id": 9803,
+            "url": "https://9tsu.in/douga/98055.html",
+            "real_embed": "https://blogspherenews.xyz/embed/67677fa69af1d7c127a2e043",
+            "error": null
+          },
+          {
+            "id": 9908,
+            "url": "https://9tsu.in/douga/97807.html",
+            "real_embed": "https://blogspherenews.xyz/embed/67677fa69af1d7c127a2e043",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://blogspherenews.xyz/embed/67677fa69af1d7c127a2e043"
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-08-03T21:21:26.146504",
+  "cycle": {
+    "start": 17001,
+    "end": 17500
+  },
+  "results": {
+    "duplicate_embeds": [
+      {
+        "embed_url": "https://ok.ru/videoembed/",
+        "count": 4,
+        "records": [
+          {
+            "id": 17219,
+            "url": "https://9tsu.in/douga/41020.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 17220,
+            "url": "https://9tsu.in/douga/41019.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 17363,
+            "url": "https://9tsu.in/douga/34786.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          },
+          {
+            "id": 17428,
+            "url": "https://9tsu.in/douga/40879.html",
+            "real_embed": "https://ok.ru/videoembed/",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://ok.ru/videoembed/"
+      },
+      {
+        "embed_url": "https://ok.ru/videoembed/7500098505255",
+        "count": 2,
+        "records": [
+          {
+            "id": 17477,
+            "url": "https://9tsu.in/douga/66470.html",
+            "real_embed": "https://blogspherenews.xyz/embed/67012a80172b884e34da4aa3",
+            "error": null
+          },
+          {
+            "id": 17478,
+            "url": "https://9tsu.in/douga/66468.html",
+            "real_embed": "https://blogspherenews.xyz/embed/67012a80172b884e34da4aa3",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://blogspherenews.xyz/embed/67012a80172b884e34da4aa3"
+      },
+      {
+        "embed_url": "https://ok.ru/videoembed/7648117852833",
+        "count": 2,
+        "records": [
+          {
+            "id": 17063,
+            "url": "https://9tsu.in/douga/68065.html",
+            "real_embed": "https://blogspherenews.xyz/embed/67012888172b884e34da3d64",
+            "error": null
+          },
+          {
+            "id": 17123,
+            "url": "https://9tsu.in/douga/67788.html",
+            "real_embed": "https://blogspherenews.xyz/embed/67012888172b884e34da3d64",
+            "error": null
+          }
+        ],
+        "all_same": true,
+        "first_embed": "https://blogspherenews.xyz/embed/67012888172b884e34da3d64"
+      }
+    ],
+    "outside_domain": [
+      {
+        "id": 17068,
+        "url": "https://9tsu.in/douga/67984.html",
+        "db_embed": "https://blogspherenews.xyz/embed/67012a4c172b884e34da494a",
+        "db_platform": "blogspherenews.xyz",
+        "real_embed": "https://blogspherenews.xyz/embed/67012a4c172b884e34da494a",
+        "is_correct": true,
+        "error": null
+      }
+    ]
+  }
+}

@@ -1,120 +1,53 @@
-name: Extract Nested Embeds (Root Links DB & JSON)
+name: Extract Nested Embeds Batch Processing
 
 on:
-  workflow_dispatch:
-    inputs:
-      workers:
-        description: 'Jumlah Parallel Workers (Threads):'
-        required: false
-        default: '8'
-      depth:
-        description: 'Maksimal Kedalaman Nested Embed (Depth):'
-        required: false
-        default: '3'
   schedule:
-    # Otomatis jalan setiap hari jam 00:00 WIB (17:00 UTC)
-    - cron: '0 17 * * *'
+    # Dijalankan otomatis setiap 6 jam sekali
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Pemicu manual dari tab Actions
 
 permissions:
-  contents: write
+  contents: write # Izin menulis untuk commit & push ke repo
 
 jobs:
-  extract-and-push:
+  run-extraction:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Python Environment
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install requests cloudscraper beautifulsoup4
 
-      - name: Run Extractor for links.db & links.json
+      - name: Run Embed Extraction
         run: |
-          WORKERS="${{ github.event.inputs.workers || '8' }}"
-          DEPTH="${{ github.event.inputs.depth || '3' }}"
-          python scripts/extract_nested_embeds.py --workers $WORKERS --depth $DEPTH --timeout 12
+          python extract_nested_embed.py --all
 
-      - name: Commit and Push Updated links.db & links.json
+      - name: Commit and Push Changes (Database, JSON, & Backups)
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-          # Stage file database, json, dan backup di root
-          git add links.db links.json links_backup.db links_backup.json
-
-          if git diff --staged --quiet; then
-            echo "Tidak ada perubahan embed URL baru."
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Gunakan flag -f (force) agar file .db dan isi folder backups/ tetap di-stage 
+          # meskipun terdapat aturan *.db atau backups/ di file .gitignore
+          git add -f links.db links.json extract_progress.json backups/
+          
+          # Cek status staging
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "auto: extract embed batch update & backup [skip ci]"
+            git pull origin ${{ github.ref_name }} --rebase || true
+            git push origin HEAD:${{ github.ref_name }}
+            echo "✅ Perubahan berhasil di-push ke repository!"
           else
-            git commit -m "chore(embeds): update links.db and links.json root files [skip ci]"
-            git push
-            echo "🚀 Berhasil push pembaruan links.db & links.json ke repositori!"
-          fi
-name: Extract Nested Embeds (Root Links DB & JSON)
-
-on:
-  workflow_dispatch:
-    inputs:
-      workers:
-        description: 'Jumlah Parallel Workers (Threads):'
-        required: false
-        default: '8'
-      depth:
-        description: 'Maksimal Kedalaman Nested Embed (Depth):'
-        required: false
-        default: '3'
-  schedule:
-    # Otomatis jalan setiap hari jam 00:00 WIB (17:00 UTC)
-    - cron: '0 17 * * *'
-
-permissions:
-  contents: write
-
-jobs:
-  extract-and-push:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python Environment
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Run Extractor for links.db & links.json
-        run: |
-          WORKERS="${{ github.event.inputs.workers || '8' }}"
-          DEPTH="${{ github.event.inputs.depth || '3' }}"
-          python scripts/extract_nested_embeds.py --workers $WORKERS --depth $DEPTH --timeout 12
-
-      - name: Commit and Push Updated links.db & links.json
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-          # Stage file database, json, dan backup di root
-          git add links.db links.json links_backup.db links_backup.json
-
-          if git diff --staged --quiet; then
-            echo "Tidak ada perubahan embed URL baru."
-          else
-            git commit -m "chore(embeds): update links.db and links.json root files [skip ci]"
-            git push
-            echo "🚀 Berhasil push pembaruan links.db & links.json ke repositori!"
+            echo "ℹ️ Tidak ada perubahan data pada batch ini."
           fi

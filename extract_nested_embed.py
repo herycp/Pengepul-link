@@ -13,7 +13,7 @@ import os
 import shutil
 import glob
 from datetime import datetime
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 # ============================================================
@@ -24,7 +24,7 @@ DB_FILE = "links.db"
 JSON_FILE = "links.json"
 BACKUP_DIR = "backups"
 MAX_BACKUPS = 5
-BATCH_SIZE = 500  # 🔥 Proses 500 link per run
+BATCH_SIZE = 500
 TARGET_DOMAIN = "blogspherenews.xyz"
 PROGRESS_FILE = "extract_progress.json"
 
@@ -46,6 +46,12 @@ def create_backup_dir():
     if not os.path.exists(BACKUP_DIR):
         os.makedirs(BACKUP_DIR)
         print(f"📁 Direktori backup dibuat: {BACKUP_DIR}")
+    # Pastikan .gitkeep ada agar folder tetap di repo
+    gitkeep = os.path.join(BACKUP_DIR, ".gitkeep")
+    if not os.path.exists(gitkeep):
+        with open(gitkeep, 'w') as f:
+            f.write("")
+        print(f"📄 {gitkeep} dibuat")
 
 def rotate_backups(prefix, max_keep=MAX_BACKUPS):
     pattern = os.path.join(BACKUP_DIR, f"{prefix}*.backup_*")
@@ -90,7 +96,6 @@ def backup_all():
 # ============================================================
 
 def load_progress():
-    """Load progress dari file"""
     if not os.path.exists(PROGRESS_FILE):
         return {'processed_count': 0}
     try:
@@ -100,7 +105,6 @@ def load_progress():
         return {'processed_count': 0}
 
 def save_progress(processed_count, total, updated, failed):
-    """Simpan progress ke file"""
     status = {
         'timestamp': datetime.now().isoformat(),
         'total': total,
@@ -153,10 +157,6 @@ def get_iframe_from_page(url):
         return None
 
 def extract_nested_embeds_from_db():
-    """
-    Proses 500 link per run.
-    Simpan progress agar bisa dilanjutkan di run berikutnya.
-    """
     if not os.path.exists(DB_FILE):
         print(f"❌ File {DB_FILE} tidak ditemukan!")
         return
@@ -167,7 +167,6 @@ def extract_nested_embeds_from_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
-    # Cari semua record yang embed_url mengandung TARGET_DOMAIN
     cursor.execute("SELECT id, url, embed_url FROM links WHERE embed_url LIKE ?", (f'%{TARGET_DOMAIN}%',))
     all_rows = cursor.fetchall()
     
@@ -178,11 +177,9 @@ def extract_nested_embeds_from_db():
     
     total = len(all_rows)
     
-    # Load progress
     progress = load_progress()
     start_index = progress.get('processed_count', 0)
     
-    # Jika sudah selesai semua
     if start_index >= total:
         print(f"✅ Semua {total} link sudah diproses sebelumnya.")
         conn.close()
@@ -192,7 +189,6 @@ def extract_nested_embeds_from_db():
     print(f"📌 Sudah diproses: {start_index}")
     print(f"📌 Akan diproses: {BATCH_SIZE} link (atau sisa)")
     
-    # 🔥 Tentukan berapa link yang akan diproses (max BATCH_SIZE)
     end_index = min(start_index + BATCH_SIZE, total)
     batch_rows = all_rows[start_index:end_index]
     
@@ -223,16 +219,13 @@ def extract_nested_embeds_from_db():
         
         processed_count = idx
         
-        # 🔥 Commit setiap 10 link agar tidak kehilangan progress
         if idx % 10 == 0:
             conn.commit()
             save_progress(processed_count, total, updated, failed)
     
-    # Commit terakhir
     conn.commit()
     conn.close()
     
-    # 🔥 Update progress final
     save_progress(processed_count, total, updated, failed)
     
     print(f"\n{'='*50}")
@@ -244,12 +237,10 @@ def extract_nested_embeds_from_db():
     print(f"   - Sisa: {total - processed_count} link")
     print(f"{'='*50}")
     
-    # 🔥 Backup setelah batch selesai
     backup_database()
     export_to_json()
     print("📁 JSON diperbarui.")
     
-    # 🔥 Jika sudah selesai semua, hapus file progress
     if processed_count >= total:
         if os.path.exists(PROGRESS_FILE):
             os.remove(PROGRESS_FILE)
@@ -329,7 +320,6 @@ def restore_from_backup(backup_name):
     return True
 
 def show_progress():
-    """Tampilkan progress saat ini"""
     if not os.path.exists(PROGRESS_FILE):
         print("✅ Tidak ada progress aktif (semua selesai atau belum dimulai)")
         return
@@ -346,7 +336,6 @@ def show_progress():
     print("-" * 60)
 
 def reset_progress():
-    """Reset progress (hati-hati!)"""
     if os.path.exists(PROGRESS_FILE):
         os.remove(PROGRESS_FILE)
         print("🔄 Progress direset.")

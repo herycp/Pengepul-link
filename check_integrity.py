@@ -14,33 +14,38 @@ def ensure_reports_dir():
     if not os.path.exists(REPORTS_DIR):
         os.makedirs(REPORTS_DIR)
 
-def get_old_embeds_from_backup():
-    """Mengambil mapping embed_url lama dari file backup database paling baru."""
+def get_old_embeds_from_backup(target_domain="blogspherenews.xyz"):
+    """
+    Mengambil URL embed asli (blogspherenews.xyz) dengan mengiterasi file backup
+    dari yang TERLAMA hingga terbaru yang masih menyimpan domain target.
+    """
     old_embeds = {}
     if not os.path.exists(BACKUP_DIR):
         return old_embeds
 
-    db_backups = sorted(glob.glob(os.path.join(BACKUP_DIR, "db_*.backup_*")), key=os.path.getmtime, reverse=True)
-    if not db_backups:
-        return old_embeds
+    # Urutkan backup dari terlama ke terbaru (mtime ascending)
+    db_backups = sorted(glob.glob(os.path.join(BACKUP_DIR, "db_*.backup_*")), key=os.path.getmtime)
 
-    latest_backup = db_backups[0]
-    try:
-        conn = sqlite3.connect(latest_backup)
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, embed_url FROM links")
-        for row in cursor.fetchall():
-            old_embeds[row[0]] = row[1]
-        conn.close()
-    except Exception as e:
-        print(f"⚠️ Gagal membaca backup DB untuk nilai lama: {e}")
+    for backup_path in db_backups:
+        try:
+            conn = sqlite3.connect(backup_path)
+            cursor = conn.cursor()
+            # Hanya ambil record yang embed_url nya MASIH mengandung blogspherenews.xyz
+            cursor.execute("SELECT id, embed_url FROM links WHERE embed_url LIKE ?", (f'%{target_domain}%',))
+            for row in cursor.fetchall():
+                rec_id, old_url = row[0], row[1]
+                if rec_id not in old_embeds:
+                    old_embeds[rec_id] = old_url
+            conn.close()
+        except Exception:
+            pass
 
     return old_embeds
 
 # ============================================================
 # REPORT 1: CEK PENGGANTIAN URL EMBED (Lama vs Baru)
 # ============================================================
-def generate_embed_report(target_domain="blogspherenews.xyz", limit=20):
+def generate_embed_report(target_domain="blogspherenews.xyz", limit=None):
     ensure_reports_dir()
     filepath = os.path.join(REPORTS_DIR, "01_embed_replacement_report.md")
 
@@ -65,8 +70,8 @@ def generate_embed_report(target_domain="blogspherenews.xyz", limit=20):
 
     conn.close()
 
-    # Mengambil embed URL lama dari backup DB
-    old_embeds_map = get_old_embeds_from_backup()
+    # Ambil map embed lama yang valid (blogspherenews.xyz)
+    old_embeds_map = get_old_embeds_from_backup(target_domain)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
     pct_success = round((len(updated_rows) / total_records * 100), 2) if total_records > 0 else 0
@@ -81,17 +86,19 @@ def generate_embed_report(target_domain="blogspherenews.xyz", limit=20):
     md.append(f"| **Berhasil Diperbarui** | `{len(updated_rows)}` | `{pct_success}%` |")
     md.append(f"| **Belum Diperbarui** | `{remaining_count}` | `{round(100 - pct_success, 2)}%` |\n")
 
-    md.append("## 📋 Detail Perbandingan Embed (Nilai Lama vs Baru)\n")
+    md.append("## 📋 Detail Perbandingan Embed (Lama vs Baru)\n")
     if updated_rows:
         md.append("| ID | Halaman Asli / Section | Embed Lama (`blogspherenews`) | Real Embed Baru | Platform Baru |")
         md.append("| :---: | :--- | :--- | :--- | :---: |")
-        for row in updated_rows[:limit]:
+        
+        rows_to_display = updated_rows if limit is None else updated_rows[:limit]
+        for row in rows_to_display:
             rec_id = row[0]
-            page_url = f"[{row[1][:25]}...]({row[1]})" if row[1] else "-"
+            page_url = f"[{row[1][:30]}...]({row[1]})" if row[1] else "-"
             
-            # Embed lama dari backup
-            old_val = old_embeds_map.get(rec_id, f"*(Sebelumnya {target_domain})*")
-            old_embed_display = f"`{old_val}`" if old_val else "-"
+            # Ambil nilai asli blogspherenews
+            old_val = old_embeds_map.get(rec_id, f"https://{target_domain}/...")
+            old_embed_display = f"`{old_val}`"
             
             new_embed_display = f"`{row[2]}`" if row[2] else "-"
             platform_display = f"`{row[3]}`" if row[3] else "-"
@@ -102,10 +109,10 @@ def generate_embed_report(target_domain="blogspherenews.xyz", limit=20):
 
     with open(filepath, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
-    print(f"📄 Report 1 dibuat: `{filepath}`")
+    print(f"📄 Report 1 dibuat: `{filepath}` ({len(updated_rows)} baris ditampilkan)")
 
 # ============================================================
-# REPORT 2: CEK SINKRONISASI ISI DB & JSON (Content Match Query)
+# REPORT 2: CEK SINKRONISASI ISI DB & JSON
 # ============================================================
 def generate_sync_report():
     ensure_reports_dir()
@@ -120,7 +127,6 @@ def generate_sync_report():
     missing_in_json = []
     missing_in_db = []
 
-    # 1. Baca isi Database SQLite
     if db_exists:
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
@@ -139,7 +145,6 @@ def generate_sync_report():
             }
         conn.close()
 
-    # 2. Baca isi File JSON
     if json_exists:
         try:
             with open(JSON_FILE, 'r', encoding='utf-8') as f:
@@ -161,7 +166,6 @@ def generate_sync_report():
         except Exception as e:
             print(f"⚠️ Gagal membaca JSON: {e}")
 
-    # 3. Bandingkan Isi Data per Record
     all_urls = set(db_records.keys()).union(set(json_records.keys()))
     
     for url in all_urls:
@@ -175,7 +179,6 @@ def generate_sync_report():
             missing_in_json.append(url)
             continue
 
-        # Cek perbedaan isi kolom demi kolom
         diff_fields = []
         for field in ['title', 'season', 'episode', 'embed_url', 'embed_platform']:
             val_db = db_item[field]
@@ -204,10 +207,7 @@ def generate_sync_report():
     md.append("# 🔄 Laporan Content Sync DB vs JSON\n")
     md.append(f"_Diperbarui secara otomatis pada: `{now}`_\n")
     
-    if is_content_synced and is_count_synced:
-        status_badge = "✅ **100% SINKRON (Jumlah & Isi Identik)**"
-    else:
-        status_badge = "❌ **TIDAK SINKRON (Terdapat Perbedaan Data)**"
+    status_badge = "✅ **100% SINKRON (Jumlah & Isi Identik)**" if (is_content_synced and is_count_synced) else "❌ **TIDAK SINKRON (Terdapat Perbedaan Data)**"
 
     md.append("## 📌 Status Perbandingan Konten\n")
     md.append(f"**Status Keseluruhan:** {status_badge}\n")
@@ -222,16 +222,13 @@ def generate_sync_report():
         md.append("## ⚠️ Detail Perbedaan Isi Record (DB vs JSON)\n")
         md.append("| URL Target | Kolom / Field | Nilai di DB (`links.db`) | Nilai di JSON (`links.json`) |")
         md.append("| :--- | :---: | :--- | :--- |")
-        for m in mismatches[:15]:
-            url_disp = f"[{m['url'][:25]}...]({m['url']})"
+        for m in mismatches:
+            url_disp = f"[{m['url'][:30]}...]({m['url']})"
             for diff in m['diffs']:
                 f_name = f"`{diff['field']}`"
                 db_v = f"`{diff['db_val'][:30]}`" if diff['db_val'] else "*(kosong)*"
                 json_v = f"`{diff['json_val'][:30]}`" if diff['json_val'] else "*(kosong)*"
                 md.append(f"| {url_disp} | {f_name} | {db_v} | {json_v} |")
-        
-        if len(mismatches) > 15:
-            md.append(f"\n_...dan {len(mismatches) - 15} perbedaan lainnya._\n")
 
     if not is_content_synced:
         md.append("\n### 💡 Solusi Penyelarasan")

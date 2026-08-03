@@ -2,8 +2,8 @@ name: Extract Nested Embed (blogspherenews.xyz)
 
 on:
   schedule:
-    - cron: '0 4 * * *'   # Setiap hari jam 04:00 UTC
-  workflow_dispatch:      # Bisa dijalankan manual
+    - cron: '0 4 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -30,6 +30,11 @@ jobs:
           pip install --upgrade pip
           pip install requests cloudscraper beautifulsoup4 lxml
       
+      - name: Ensure backups directory exists
+        run: |
+          mkdir -p backups
+          touch backups/.gitkeep
+      
       - name: Run extract nested embed
         run: |
           python extract_nested_embed.py --all
@@ -46,7 +51,7 @@ jobs:
             echo "✅ No changes detected"
           fi
       
-      - name: Commit and push changes (including backups)
+      - name: Commit and push changes
         if: steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -55,7 +60,7 @@ jobs:
             
             - Processed blogspherenews.xyz embeds
             - Backups saved in backups/ (max 5)
-          file_pattern: '*.db *.json backups/*'
+          file_pattern: '*.db *.json backups/'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

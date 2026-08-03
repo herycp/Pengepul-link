@@ -19,61 +19,77 @@ def ensure_reports_dir():
         os.makedirs(REPORTS_DIR)
 
 # ============================================================
-# LOGIKA KHUSUS: 100 DATA YANG SUDAH BERUBAH (BACKUP vs DB SEKARANG)
+# LOGIKA KHUSUS: 100 DATA YANG SUDAH BERUBAH (BEFORE vs AFTER)
 # ============================================================
 def get_100_embed_comparisons(target_domain="blogspherenews.xyz", limit=100):
+    """
+    Mengambil data yang di links.db SEKARANG sudah di-update,
+    lalu mencocokkan embed_url LAMA-nya dari file backup.
+    """
     comparison_list = []
     if not os.path.exists(BACKUP_DIR):
         print(f"⚠️ Folder backup '{BACKUP_DIR}' tidak ditemukan.")
         return comparison_list
 
-    db_backups = sorted(glob.glob(os.path.join(BACKUP_DIR, "db_*.backup_*")), key=os.path.getmtime, reverse=True)
+    # Urutkan backup dari yang PALING LAMA ke TERBARU
+    # (Backup lama dipastikan masih menyimpan URL blogspherenews asli)
+    db_backups = sorted(glob.glob(os.path.join(BACKUP_DIR, "db_*.backup_*")), key=os.path.getmtime)
 
     if not db_backups or not os.path.exists(DB_FILE):
         print("⚠️ Backup DB atau links.db utama tidak ditemukan.")
         return comparison_list
 
-    latest_backup = db_backups[0]
-
     try:
-        conn_old = sqlite3.connect(latest_backup)
-        cursor_old = conn_old.cursor()
-
+        # 1. Ambil record dari links.db SEKARANG yang SUDAH BERHASIL di-update
         conn_curr = sqlite3.connect(DB_FILE)
         cursor_curr = conn_curr.cursor()
-
-        cursor_old.execute(
-            "SELECT id, url, embed_url FROM links WHERE embed_url LIKE ? ORDER BY id ASC",
+        cursor_curr.execute(
+            "SELECT id, url, embed_url, embed_platform FROM links WHERE embed_url NOT LIKE ? AND embed_url IS NOT NULL AND embed_url != '' ORDER BY id ASC",
             (f'%{target_domain}%',)
         )
-        old_rows = cursor_old.fetchall()
-
-        for rec_id, page_url, old_embed in old_rows:
-            cursor_curr.execute(
-                "SELECT embed_url, embed_platform FROM links WHERE (id = ? OR url = ?) AND embed_url NOT LIKE ?",
-                (rec_id, page_url, f'%{target_domain}%')
-            )
-            curr_row = cursor_curr.fetchone()
-
-            if curr_row:
-                new_embed = curr_row[0]
-                platform = curr_row[1] or "-"
-
-                comparison_list.append({
-                    'id': rec_id,
-                    'page_url': page_url,
-                    'old_embed': old_embed,
-                    'new_embed': new_embed,
-                    'platform': platform
-                })
-
-                if len(comparison_list) >= limit:
-                    break
-
-        conn_old.close()
+        updated_in_db = cursor_curr.fetchall()
         conn_curr.close()
 
-        print(f"🔍 Ditemukan {len(comparison_list)} sampel data yang SUDAH BERUBAH dari backup: {os.path.basename(latest_backup)}")
+        if not updated_in_db:
+            return comparison_list
+
+        # 2. Cari URL LAMA (blogspherenews.xyz) dari file backup
+        for backup_file in db_backups:
+            try:
+                conn_old = sqlite3.connect(backup_file)
+                cursor_old = conn_old.cursor()
+
+                for rec_id, page_url, new_embed, platform in updated_in_db:
+                    # Skip jika ID ini sudah dapat data lamanya
+                    if any(item['id'] == rec_id for item in comparison_list):
+                        continue
+
+                    cursor_old.execute(
+                        "SELECT embed_url FROM links WHERE (id = ? OR url = ?) AND embed_url LIKE ?",
+                        (rec_id, page_url, f'%{target_domain}%')
+                    )
+                    old_row = cursor_old.fetchone()
+
+                    if old_row:
+                        comparison_list.append({
+                            'id': rec_id,
+                            'page_url': page_url,
+                            'old_embed': old_row[0],
+                            'new_embed': new_embed,
+                            'platform': platform or "-"
+                        })
+
+                    if len(comparison_list) >= limit:
+                        break
+
+                conn_old.close()
+            except Exception:
+                continue
+
+            if len(comparison_list) >= limit:
+                break
+
+        print(f"🔍 Berhasil menemukan {len(comparison_list)} sampel perbandingan data (Before vs After).")
 
     except Exception as e:
         print(f"⚠️ Gagal memproses perbandingan data: {e}")
@@ -107,6 +123,7 @@ def generate_embed_report(target_domain="blogspherenews.xyz", limit=100):
     pct_success = round((updated_count / total_records * 100), 2) if total_records > 0 else 0
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
 
+    # Ambil sampel perbandingan
     comparisons = get_100_embed_comparisons(target_domain, limit)
 
     md = []
@@ -134,11 +151,11 @@ def generate_embed_report(target_domain="blogspherenews.xyz", limit=100):
 
             md.append(f"| {rec_id} | {page_url} | {old_embed} | {new_embed} | {platform} | {status} |")
     else:
-        md.append("> ℹ️ **Info**: Belum ada data `blogspherenews.xyz` yang berhasil diperbarui pada run kali ini.")
+        md.append("> ℹ️ **Info**: Belum ada sampel perbandingan data yang dapat dicocokkan.")
 
     with open(filepath, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
-    print(f"📄 Report 1 berhasil dibuat: `{filepath}` ({len(comparisons)} sampel perubahan ditampilkan)")
+    print(f"📄 Report 1 berhasil dibuat: `{filepath}` ({len(comparisons)} sampel ditampilkan)")
 
 # ============================================================
 # REPORT 2: CEK SINKRONISASI ISI DB & JSON (02_db_json_sync_report.md)

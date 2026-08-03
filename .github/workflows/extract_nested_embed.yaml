@@ -1,16 +1,15 @@
-name: Extract Nested Embeds Batch Processing
+name: Extract, Sync & Generate Markdown Reports Pipeline
 
 on:
   schedule:
-    # Dijalankan otomatis setiap 6 jam sekali
     - cron: '0 */6 * * *'
-  workflow_dispatch: # Pemicu manual dari tab Actions
+  workflow_dispatch:
 
 permissions:
-  contents: write # Izin menulis untuk commit & push ke repo
+  contents: write
 
 jobs:
-  run-extraction:
+  run-pipeline:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,25 +28,31 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests cloudscraper beautifulsoup4
 
-      - name: Run Embed Extraction
+      - name: 1. Run Embed Extraction
         run: |
           python extract_nested_embed.py --all
 
-      - name: Commit and Push Changes (Database, JSON, & Backups)
+      - name: 2. Force Sync DB to JSON
+        run: |
+          python check_integrity.py --sync-db-to-json
+
+      - name: 3. Generate 3 Markdown Reports
+        run: |
+          python check_integrity.py --generate-reports
+
+      - name: 4. Commit and Push Everything (DB, JSON, Backups & MD Reports)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Gunakan flag -f (force) agar file .db dan isi folder backups/ tetap di-stage 
-          # meskipun terdapat aturan *.db atau backups/ di file .gitignore
-          git add -f links.db links.json extract_progress.json backups/
+          # Force-add semua file termasuk DB, backups, dan laporan MD
+          git add -f links.db links.json extract_progress.json backups/ reports/*.md
           
-          # Cek status staging
           if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "auto: extract embed batch update & backup [skip ci]"
+            git commit -m "docs(reports): update embed extraction, sync & 3 md reports [skip ci]"
             git pull origin ${{ github.ref_name }} --rebase || true
             git push origin HEAD:${{ github.ref_name }}
-            echo "✅ Perubahan berhasil di-push ke repository!"
+            echo "🚀 Berhasil mem-push database dan 3 file laporan .MD ke repositori!"
           else
             echo "ℹ️ Tidak ada perubahan data pada batch ini."
           fi

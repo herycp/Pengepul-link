@@ -30,12 +30,7 @@ jobs:
           pip install --upgrade pip
           pip install requests cloudscraper beautifulsoup4 lxml
       
-      - name: Create extract script
-        run: |
-          cat > extract_nested_embed.py << 'EOF'
-          # (copy kode extract_nested_embed.py di atas)
-          EOF
-      
+      # 🔥 Langsung jalankan file yang sudah ada di repo
       - name: Run extract nested embed
         run: |
           python extract_nested_embed.py --all

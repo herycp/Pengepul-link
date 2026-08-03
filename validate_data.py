@@ -1,9 +1,9 @@
 """
 validate_data.py
-Validasi data dengan pendekatan efisien:
-1. Satu query untuk semua data mencurigakan (duplikat, domain lain, NULL)
-2. Verifikasi sampel (maks 10 per kategori) dengan scraping
-3. Laporan ringkas Markdown
+Validasi data dengan pendekatan:
+1. Query untuk mencari semua data mencurigakan (duplikat, domain lain, NULL)
+2. Verifikasi SEMUA record tersebut dengan scraping halaman asli
+3. Laporan detail hasil verifikasi
 """
 
 import sqlite3
@@ -17,7 +17,6 @@ from bs4 import BeautifulSoup
 
 DB_FILE = "links.db"
 REPORTS_DIR = "reports"
-MAX_SAMPLE = 10  # Maksimal sampel per kategori untuk verifikasi
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -32,15 +31,17 @@ def ensure_reports_dir():
     if not os.path.exists(REPORTS_DIR):
         os.makedirs(REPORTS_DIR)
 
-def get_suspicious_data():
+def get_all_suspicious_records():
     """
-    Query tunggal untuk mendapatkan semua data mencurigakan.
-    Return: dict dengan kategori
+    Ambil SEMUA record yang termasuk dalam 3 kategori mencurigakan.
+    Return: list of dict dengan field: id, url, embed_url, embed_platform, issue_type
     """
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
-    # 1. Duplikat embed_url
+    suspicious = {}  # pakai dict agar id unik
+    
+    # 1. Duplikat embed_url (ambil semua record dari group yang duplikat)
     cursor.execute("""
         SELECT id, url, embed_url, embed_platform
         FROM links
@@ -51,10 +52,18 @@ def get_suspicious_data():
             HAVING COUNT(*) > 1
         )
         AND embed_url IS NOT NULL AND embed_url != ''
-        ORDER BY embed_url, id
-        LIMIT 100
     """)
-    duplicates = cursor.fetchall()
+    for row in cursor.fetchall():
+        id_, url, embed, platform = row
+        if id_ not in suspicious:
+            suspicious[id_] = {
+                'id': id_,
+                'url': url,
+                'embed_url': embed,
+                'embed_platform': platform,
+                'issues': []
+            }
+        suspicious[id_]['issues'].append('duplicate')
     
     # 2. Domain di luar ok.ru dan pulvexa.space
     cursor.execute("""
@@ -63,37 +72,45 @@ def get_suspicious_data():
         WHERE embed_url IS NOT NULL AND embed_url != ''
         AND embed_url NOT LIKE '%ok.ru%'
         AND embed_url NOT LIKE '%pulvexa.space%'
-        LIMIT 100
     """)
-    other_domains = cursor.fetchall()
+    for row in cursor.fetchall():
+        id_, url, embed, platform = row
+        if id_ not in suspicious:
+            suspicious[id_] = {
+                'id': id_,
+                'url': url,
+                'embed_url': embed,
+                'embed_platform': platform,
+                'issues': []
+            }
+        suspicious[id_]['issues'].append('other_domain')
     
     # 3. NULL values (semua field)
     fields = ['url', 'title', 'season', 'episode', 'image', 'description', 'embed_url', 'embed_platform']
-    null_records = []
     for field in fields:
         cursor.execute(f"""
-            SELECT id, url, embed_url, embed_platform, '{field}' as null_field
+            SELECT id, url, embed_url, embed_platform
             FROM links
             WHERE {field} IS NULL OR {field} = ''
-            LIMIT 20
         """)
-        rows = cursor.fetchall()
-        for row in rows:
-            null_records.append({
-                'id': row[0],
-                'url': row[1],
-                'embed_url': row[2],
-                'embed_platform': row[3],
-                'null_field': row[4]
-            })
+        for row in cursor.fetchall():
+            id_, url, embed, platform = row
+            if id_ not in suspicious:
+                suspicious[id_] = {
+                    'id': id_,
+                    'url': url,
+                    'embed_url': embed,
+                    'embed_platform': platform,
+                    'issues': []
+                }
+            suspicious[id_]['issues'].append(f'null_{field}')
     
     conn.close()
     
-    return {
-        'duplicates': duplicates,
-        'other_domains': other_domains,
-        'nulls': null_records
-    }
+    # Konversi ke list
+    result = list(suspicious.values())
+    print(f"🔍 Total record mencurigakan: {len(result)}")
+    return result
 
 def scrape_embed(url):
     """Scrape halaman untuk mendapatkan embed_url yang sebenarnya"""
@@ -122,36 +139,20 @@ def scrape_embed(url):
     except Exception as e:
         return None, str(e)
 
-def verify_sample(records, category):
-    """Verifikasi sampel dengan scraping"""
-    results = []
-    for row in records[:MAX_SAMPLE]:
-        if category == 'null':
-            id_ = row['id']
-            url = row['url']
-            db_embed = row['embed_url']
-            platform = row['embed_platform']
-            null_field = row.get('null_field', 'unknown')
-        else:
-            id_, url, db_embed, platform = row
-            null_field = None
-        
-        print(f"   🔍 Verifikasi ID {id_}...")
-        real_embed, error = scrape_embed(url)
-        
-        results.append({
-            'id': id_,
-            'url': url,
-            'db_embed': db_embed,
-            'db_platform': platform,
-            'real_embed': real_embed,
-            'error': error,
-            'null_field': null_field,
-            'status': 'verified' if real_embed == db_embed else ('mismatch' if real_embed else 'error')
-        })
-        time.sleep(0.5)
-    
-    return results
+def verify_record(record):
+    """Verifikasi satu record dengan scraping"""
+    real_embed, error = scrape_embed(record['url'])
+    result = {
+        'id': record['id'],
+        'url': record['url'],
+        'db_embed': record['embed_url'],
+        'db_platform': record['embed_platform'],
+        'issues': record['issues'],
+        'real_embed': real_embed,
+        'error': error,
+        'status': 'verified' if real_embed == record['embed_url'] else ('mismatch' if real_embed else 'error')
+    }
+    return result
 
 def generate_report():
     """Generate laporan Markdown"""
@@ -162,109 +163,89 @@ def generate_report():
             f.write("# ❌ Error\nlinks.db tidak ditemukan")
         return
     
-    print("📡 Mengambil data mencurigakan...")
-    data = get_suspicious_data()
+    print("📡 Mengambil semua data mencurigakan...")
+    suspicious_records = get_all_suspicious_records()
     
-    print(f"   - Duplikat: {len(data['duplicates'])} record")
-    print(f"   - Domain lain: {len(data['other_domains'])} record")
-    print(f"   - NULL: {len(data['nulls'])} record")
+    if not suspicious_records:
+        print("✅ Tidak ada data mencurigakan!")
+        with open(os.path.join(REPORTS_DIR, "04_data_validation_report.md"), "w") as f:
+            f.write("# ✅ Laporan Validasi Data\n\n**Tidak ada data mencurigakan ditemukan.**")
+        return
     
-    # Verifikasi sampel
-    print("\n🔍 Verifikasi sampel...")
-    verified = {
-        'duplicates': verify_sample(data['duplicates'], 'duplicate'),
-        'other_domains': verify_sample(data['other_domains'], 'other_domain'),
-        'nulls': verify_sample(data['nulls'], 'null')
-    }
+    print(f"🔍 Verifikasi {len(suspicious_records)} record dengan scraping...")
+    results = []
+    for i, rec in enumerate(suspicious_records, 1):
+        print(f"   [{i}/{len(suspicious_records)}] ID {rec['id']}...")
+        result = verify_record(rec)
+        results.append(result)
+        time.sleep(0.5)  # Jeda
+    
+    # Statistik
+    total = len(results)
+    verified = sum(1 for r in results if r['status'] == 'verified')
+    mismatch = sum(1 for r in results if r['status'] == 'mismatch')
+    error = sum(1 for r in results if r['status'] == 'error')
+    
+    # Kategorisasi issues
+    issue_counts = {}
+    for r in results:
+        for issue in r['issues']:
+            issue_counts[issue] = issue_counts.get(issue, 0) + 1
     
     # Buat laporan
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
     md = []
-    md.append("# 📋 Laporan Validasi Data\n")
+    md.append("# 📋 Laporan Validasi Data (Verifikasi Semua Record)\n")
     md.append(f"_Diperbarui: `{now}`_\n")
     
-    # Ringkasan
     md.append("## 📊 Ringkasan\n")
-    md.append("| Kategori | Total Ditemukan | Sampel Verifikasi |")
+    md.append("| Kategori | Jumlah Record |")
+    md.append("| :--- | :---: |")
+    for issue, count in sorted(issue_counts.items()):
+        md.append(f"| `{issue}` | `{count}` |")
+    md.append("")
+    
+    md.append("## 🎯 Hasil Verifikasi Scraping\n")
+    md.append("| Status | Jumlah | Persentase |")
     md.append("| :--- | :---: | :---: |")
-    md.append(f"| **Duplikat embed_url** | `{len(data['duplicates'])}` | `{len(verified['duplicates'])}` |")
-    md.append(f"| **Domain di luar ok.ru/pulvexa** | `{len(data['other_domains'])}` | `{len(verified['other_domains'])}` |")
-    md.append(f"| **NULL / kosong** | `{len(data['nulls'])}` | `{len(verified['nulls'])}` |\n")
+    md.append(f"| ✅ Cocok | `{verified}` | `{verified/total*100:.1f}%` |")
+    md.append(f"| ❌ Tidak Cocok | `{mismatch}` | `{mismatch/total*100:.1f}%` |")
+    md.append(f"| ⚠️ Error Scraping | `{error}` | `{error/total*100:.1f}%` |")
+    md.append("")
     
-    # Duplikat
-    md.append("## 1. Duplikat `embed_url`\n")
-    if data['duplicates']:
-        md.append("| ID | URL Halaman | `embed_url` | `embed_platform` |")
-        md.append("| :---: | :--- | :--- | :--- |")
-        for row in data['duplicates'][:20]:
-            id_, url, embed, platform = row
-            url_short = url[:50] + "..." if len(url) > 50 else url
-            md.append(f"| {id_} | `{url_short}` | `{embed}` | `{platform}` |")
-        if len(data['duplicates']) > 20:
-            md.append(f"| _... dan {len(data['duplicates'])-20} lainnya_ | | | |")
-    else:
-        md.append("> ✅ Tidak ada duplikat.\n")
-    
-    # Domain lain
-    md.append("\n## 2. Domain di Luar `ok.ru` / `pulvexa.space`\n")
-    if data['other_domains']:
-        md.append("| ID | URL Halaman | `embed_url` | `embed_platform` |")
-        md.append("| :---: | :--- | :--- | :--- |")
-        for row in data['other_domains'][:20]:
-            id_, url, embed, platform = row
-            url_short = url[:50] + "..." if len(url) > 50 else url
-            md.append(f"| {id_} | `{url_short}` | `{embed}` | `{platform}` |")
-        if len(data['other_domains']) > 20:
-            md.append(f"| _... dan {len(data['other_domains'])-20} lainnya_ | | | |")
-    else:
-        md.append("> ✅ Semua domain sesuai.\n")
-    
-    # NULL
-    md.append("\n## 3. NULL / Kosong\n")
-    if data['nulls']:
-        md.append("| ID | URL Halaman | Field NULL | `embed_url` |")
-        md.append("| :---: | :--- | :--- | :--- |")
-        for rec in data['nulls'][:20]:
-            url_short = rec['url'][:50] + "..." if len(rec['url']) > 50 else rec['url']
-            embed = rec['embed_url'] or "*(null)*"
-            md.append(f"| {rec['id']} | `{url_short}` | `{rec['null_field']}` | `{embed}` |")
-        if len(data['nulls']) > 20:
-            md.append(f"| _... dan {len(data['nulls'])-20} lainnya_ | | | |")
-    else:
-        md.append("> ✅ Tidak ada NULL.\n")
-    
-    # Hasil verifikasi
-    md.append("\n## 4. Hasil Verifikasi Scraping (Sampel)\n")
-    md.append("| Kategori | Status | Jumlah |")
-    md.append("| :--- | :--- | :---: |")
-    for cat, results in verified.items():
-        ok = sum(1 for r in results if r['status'] == 'verified')
-        mismatch = sum(1 for r in results if r['status'] == 'mismatch')
-        error = sum(1 for r in results if r['status'] == 'error')
-        md.append(f"| **{cat}** | ✅ Cocok | `{ok}` |")
-        md.append(f"| **{cat}** | ❌ Tidak Cocok | `{mismatch}` |")
-        md.append(f"| **{cat}** | ⚠️ Error Scraping | `{error}` |")
-    
-    # Detail mismatch
-    mismatches = []
-    for cat, results in verified.items():
-        for r in results:
-            if r['status'] == 'mismatch':
-                mismatches.append({
-                    'category': cat,
-                    'id': r['id'],
-                    'url': r['url'],
-                    'db_embed': r['db_embed'],
-                    'real_embed': r['real_embed']
-                })
-    
+    # Detail semua record yang tidak cocok
+    mismatches = [r for r in results if r['status'] == 'mismatch']
     if mismatches:
-        md.append("\n### ❌ Detail Ketidakcocokan\n")
-        md.append("| Kategori | ID | URL Halaman | DB `embed_url` | Real `embed_url` |")
-        md.append("| :--- | :---: | :--- | :--- | :--- |")
-        for m in mismatches:
-            url_short = m['url'][:40] + "..." if len(m['url']) > 40 else m['url']
-            md.append(f"| {m['category']} | {m['id']} | `{url_short}` | `{m['db_embed']}` | `{m['real_embed']}` |")
+        md.append("## ❌ Detail Ketidakcocokan\n")
+        md.append("| ID | URL Halaman | DB `embed_url` | Real `embed_url` | Issues |")
+        md.append("| :---: | :--- | :--- | :--- | :--- |")
+        for r in mismatches:
+            url_short = r['url'][:40] + "..." if len(r['url']) > 40 else r['url']
+            issues_str = ", ".join(r['issues'])
+            md.append(f"| {r['id']} | `{url_short}` | `{r['db_embed']}` | `{r['real_embed']}` | `{issues_str}` |")
+        md.append("")
+    
+    # Detail semua record yang error scraping
+    errors = [r for r in results if r['status'] == 'error']
+    if errors:
+        md.append("## ⚠️ Error Scraping\n")
+        md.append("| ID | URL Halaman | DB `embed_url` | Error | Issues |")
+        md.append("| :---: | :--- | :--- | :--- | :--- |")
+        for r in errors:
+            url_short = r['url'][:40] + "..." if len(r['url']) > 40 else r['url']
+            issues_str = ", ".join(r['issues'])
+            md.append(f"| {r['id']} | `{url_short}` | `{r['db_embed']}` | `{r['error']}` | `{issues_str}` |")
+        md.append("")
+    
+    # Detail semua record yang cocok (opsional, bisa dikomentari)
+    if verified > 0 and verified <= 20:
+        md.append("## ✅ Record yang Cocok\n")
+        md.append("| ID | URL Halaman | `embed_url` |")
+        md.append("| :---: | :--- | :--- |")
+        for r in [r for r in results if r['status'] == 'verified']:
+            url_short = r['url'][:40] + "..." if len(r['url']) > 40 else r['url']
+            md.append(f"| {r['id']} | `{url_short}` | `{r['db_embed']}` |")
+        md.append("")
     
     # Simpan
     filepath = os.path.join(REPORTS_DIR, "04_data_validation_report.md")
@@ -272,7 +253,9 @@ def generate_report():
         f.write("\n".join(md))
     
     print(f"\n📄 Laporan disimpan: {filepath}")
-    return filepath
+    print(f"   ✅ Cocok: {verified}")
+    print(f"   ❌ Tidak cocok: {mismatch}")
+    print(f"   ⚠️ Error: {error}")
 
 if __name__ == "__main__":
     generate_report()

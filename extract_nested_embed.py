@@ -23,9 +23,10 @@ from bs4 import BeautifulSoup
 DB_FILE = "links.db"
 JSON_FILE = "links.json"
 BACKUP_DIR = "backups"
-MAX_BACKUPS = 5  # 🔥 Maksimal 5 backup
-BATCH_SIZE = 100
+MAX_BACKUPS = 5
+BATCH_SIZE = 500  # 🔥 Proses 500 link per run
 TARGET_DOMAIN = "blogspherenews.xyz"
+PROGRESS_FILE = "extract_progress.json"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -42,63 +43,42 @@ HEADERS = {
 # ============================================================
 
 def create_backup_dir():
-    """Buat direktori backup jika belum ada"""
     if not os.path.exists(BACKUP_DIR):
         os.makedirs(BACKUP_DIR)
         print(f"📁 Direktori backup dibuat: {BACKUP_DIR}")
 
 def rotate_backups(prefix, max_keep=MAX_BACKUPS):
-    """
-    Rotasi backup: hapus backup lama, hanya pertahankan max_keep terbaru.
-    prefix: 'db_' atau 'json_'
-    """
     pattern = os.path.join(BACKUP_DIR, f"{prefix}*.backup_*")
     files = glob.glob(pattern)
-    
     if len(files) <= max_keep:
         return
-    
-    # Urutkan berdasarkan waktu (yang paling tua dihapus)
     files.sort(key=lambda x: os.path.getmtime(x))
     to_delete = files[:-max_keep]
-    
     for f in to_delete:
         os.remove(f)
         print(f"🗑️  Backup lama dihapus: {f}")
 
 def backup_file_to_repo(filename, prefix=""):
-    """
-    Backup file ke folder backups/ dengan timestamp.
-    Return: path backup
-    """
     create_backup_dir()
     if not os.path.exists(filename):
         print(f"⚠️ File {filename} tidak ditemukan, backup skip")
         return None
-    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     base_name = os.path.basename(filename)
     backup_name = f"{prefix}{base_name}.backup_{timestamp}"
     backup_path = os.path.join(BACKUP_DIR, backup_name)
-    
     shutil.copy2(filename, backup_path)
     print(f"📦 Backup dibuat: {backup_path}")
-    
-    # 🔥 Rotasi backup setelah membuat baru
     rotate_backups(prefix, MAX_BACKUPS)
-    
     return backup_path
 
 def backup_database():
-    """Backup database ke folder backups/"""
     return backup_file_to_repo(DB_FILE, "db_")
 
 def backup_json():
-    """Backup JSON ke folder backups/"""
     return backup_file_to_repo(JSON_FILE, "json_")
 
 def backup_all():
-    """Backup semua file penting"""
     print(f"\n📦 Membuat backup (max {MAX_BACKUPS} per type)...")
     db_backup = backup_database()
     json_backup = backup_json()
@@ -106,14 +86,37 @@ def backup_all():
     return db_backup, json_backup
 
 # ============================================================
-# 3. FUNGSI UTAMA
+# 3. FUNGSI PROGRESS
+# ============================================================
+
+def load_progress():
+    """Load progress dari file"""
+    if not os.path.exists(PROGRESS_FILE):
+        return {'processed_count': 0}
+    try:
+        with open(PROGRESS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return {'processed_count': 0}
+
+def save_progress(processed_count, total, updated, failed):
+    """Simpan progress ke file"""
+    status = {
+        'timestamp': datetime.now().isoformat(),
+        'total': total,
+        'processed': processed_count,
+        'updated': updated,
+        'failed': failed,
+        'remaining': total - processed_count
+    }
+    with open(PROGRESS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(status, f, ensure_ascii=False, indent=2)
+
+# ============================================================
+# 4. FUNGSI UTAMA
 # ============================================================
 
 def get_iframe_from_page(url):
-    """
-    Download halaman dan ekstrak iframe pertama yang ditemukan.
-    Return: iframe_url atau None
-    """
     try:
         scraper = cloudscraper.create_scraper(
             browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
@@ -151,105 +154,109 @@ def get_iframe_from_page(url):
 
 def extract_nested_embeds_from_db():
     """
-    Cari semua link di database yang embed_url-nya mengandung blogspherenews.xyz.
-    Ekstrak iframe sebenarnya dan update database.
-    Batch size: 100 link per run.
+    Proses 500 link per run.
+    Simpan progress agar bisa dilanjutkan di run berikutnya.
     """
     if not os.path.exists(DB_FILE):
         print(f"❌ File {DB_FILE} tidak ditemukan!")
         return
     
-    # 🔥 Backup sebelum perubahan
+    # Backup sebelum proses
     backup_all()
     
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
-    # Cari record yang embed_url mengandung blogspherenews.xyz
+    # Cari semua record yang embed_url mengandung TARGET_DOMAIN
     cursor.execute("SELECT id, url, embed_url FROM links WHERE embed_url LIKE ?", (f'%{TARGET_DOMAIN}%',))
-    rows = cursor.fetchall()
+    all_rows = cursor.fetchall()
     
-    if not rows:
+    if not all_rows:
         print(f"✅ Tidak ada embed yang mengandung {TARGET_DOMAIN}")
         conn.close()
         return
     
-    total = len(rows)
-    print(f"🔍 Ditemukan {total} record dengan embed_url mengandung {TARGET_DOMAIN}")
-    print(f"📌 Batch size: {BATCH_SIZE} link per run")
+    total = len(all_rows)
     
-    updated = 0
-    failed = 0
+    # Load progress
+    progress = load_progress()
+    start_index = progress.get('processed_count', 0)
     
-    # 🔥 Proses dalam batch
-    for batch_start in range(0, total, BATCH_SIZE):
-        batch_end = min(batch_start + BATCH_SIZE, total)
-        batch_rows = rows[batch_start:batch_end]
-        
-        print(f"\n{'='*50}")
-        print(f"📌 BATCH {batch_start//BATCH_SIZE + 1}: link {batch_start+1} - {batch_end} dari {total}")
-        print(f"{'='*50}")
-        
-        for idx, (record_id, page_url, embed_url) in enumerate(batch_rows, batch_start + 1):
-            print(f"\n[{idx}/{total}] ID: {record_id}")
-            print(f"   Page URL: {page_url}")
-            print(f"   Embed URL: {embed_url}")
-            
-            real_embed = get_iframe_from_page(embed_url)
-            
-            if real_embed:
-                print(f"   ✅ Real embed: {real_embed}")
-                cursor.execute("UPDATE links SET embed_url = ? WHERE id = ?", (real_embed, record_id))
-                parsed = urlparse(real_embed)
-                platform = parsed.netloc
-                if platform:
-                    cursor.execute("UPDATE links SET embed_platform = ? WHERE id = ?", (platform, record_id))
-                updated += 1
-            else:
-                print(f"   ⚠️ Tidak ditemukan iframe di halaman tersebut")
-                failed += 1
-        
-        # 🔥 Commit setiap batch
-        conn.commit()
-        
-        # 🔥 Backup setelah setiap batch (incremental backup)
-        print(f"\n📦 Backup setelah batch...")
-        backup_database()
-        export_to_json()
-        print(f"📁 JSON diperbarui setelah batch")
-        
-        # 🔥 Update progress di file status
-        update_progress_file(batch_start + len(batch_rows), total, updated, failed)
+    # Jika sudah selesai semua
+    if start_index >= total:
+        print(f"✅ Semua {total} link sudah diproses sebelumnya.")
+        conn.close()
+        return
     
+    print(f"🔍 Total record: {total}")
+    print(f"📌 Sudah diproses: {start_index}")
+    print(f"📌 Akan diproses: {BATCH_SIZE} link (atau sisa)")
+    
+    # 🔥 Tentukan berapa link yang akan diproses (max BATCH_SIZE)
+    end_index = min(start_index + BATCH_SIZE, total)
+    batch_rows = all_rows[start_index:end_index]
+    
+    print(f"📌 Batch ini: link {start_index+1} - {end_index} dari {total}")
+    
+    updated = progress.get('updated', 0)
+    failed = progress.get('failed', 0)
+    processed_count = start_index
+    
+    for idx, (record_id, page_url, embed_url) in enumerate(batch_rows, start_index + 1):
+        print(f"\n[{idx}/{total}] ID: {record_id}")
+        print(f"   Page URL: {page_url}")
+        print(f"   Embed URL: {embed_url}")
+        
+        real_embed = get_iframe_from_page(embed_url)
+        
+        if real_embed:
+            print(f"   ✅ Real embed: {real_embed}")
+            cursor.execute("UPDATE links SET embed_url = ? WHERE id = ?", (real_embed, record_id))
+            parsed = urlparse(real_embed)
+            platform = parsed.netloc
+            if platform:
+                cursor.execute("UPDATE links SET embed_platform = ? WHERE id = ?", (platform, record_id))
+            updated += 1
+        else:
+            print(f"   ⚠️ Tidak ditemukan iframe di halaman tersebut")
+            failed += 1
+        
+        processed_count = idx
+        
+        # 🔥 Commit setiap 10 link agar tidak kehilangan progress
+        if idx % 10 == 0:
+            conn.commit()
+            save_progress(processed_count, total, updated, failed)
+    
+    # Commit terakhir
+    conn.commit()
     conn.close()
     
+    # 🔥 Update progress final
+    save_progress(processed_count, total, updated, failed)
+    
     print(f"\n{'='*50}")
-    print(f"✅ SELESAI!")
-    print(f"   - Total diproses: {total}")
+    print(f"✅ BATCH SELESAI!")
+    print(f"   - Diproses: {end_index - start_index} link")
+    print(f"   - Total diproses: {processed_count} dari {total}")
     print(f"   - Berhasil diupdate: {updated}")
     print(f"   - Gagal: {failed}")
+    print(f"   - Sisa: {total - processed_count} link")
     print(f"{'='*50}")
     
-    # Final backup
-    backup_all()
+    # 🔥 Backup setelah batch selesai
+    backup_database()
     export_to_json()
-    print("📁 JSON final diperbarui.")
-
-def update_progress_file(processed, total, updated, failed):
-    """Update file status progress"""
-    status = {
-        'timestamp': datetime.now().isoformat(),
-        'total': total,
-        'processed': processed,
-        'updated': updated,
-        'failed': failed,
-        'remaining': total - processed
-    }
-    with open('extract_progress.json', 'w', encoding='utf-8') as f:
-        json.dump(status, f, ensure_ascii=False, indent=2)
+    print("📁 JSON diperbarui.")
+    
+    # 🔥 Jika sudah selesai semua, hapus file progress
+    if processed_count >= total:
+        if os.path.exists(PROGRESS_FILE):
+            os.remove(PROGRESS_FILE)
+            print("✅ Semua link selesai diproses! Progress file dihapus.")
+        print("🎉 SEMUA SELESAI!")
 
 def export_to_json():
-    """Ekspor ulang database ke JSON"""
     if not os.path.exists(DB_FILE):
         return
     conn = sqlite3.connect(DB_FILE)
@@ -276,7 +283,6 @@ def export_to_json():
     print(f"📁 JSON ekspor: {len(links)} link")
 
 def process_single_url(url):
-    """Proses satu URL dan tampilkan iframe yang ditemukan"""
     print(f"🔍 Mengekstrak iframe dari: {url}")
     real_embed = get_iframe_from_page(url)
     if real_embed:
@@ -285,13 +291,11 @@ def process_single_url(url):
         print("❌ Tidak ditemukan iframe di halaman tersebut")
 
 # ============================================================
-# 4. FUNGSI MANAJEMEN BACKUP
+# 5. FUNGSI MANAJEMEN
 # ============================================================
 
 def list_backups():
-    """Tampilkan daftar backup yang tersedia"""
     create_backup_dir()
-    
     db_files = glob.glob(os.path.join(BACKUP_DIR, "db_*.backup_*"))
     json_files = glob.glob(os.path.join(BACKUP_DIR, "json_*.backup_*"))
     
@@ -314,35 +318,43 @@ def list_backups():
         print(f"  {os.path.basename(f)} ({size:.1f} KB) - {timestamp}")
 
 def restore_from_backup(backup_name):
-    """Restore database dari backup"""
     full_path = os.path.join(BACKUP_DIR, backup_name) if not os.path.exists(backup_name) else backup_name
-    
     if not os.path.exists(full_path):
         print(f"❌ File backup tidak ditemukan: {full_path}")
         return False
-    
-    # Backup current database dulu
     backup_database()
-    
-    # Restore
     shutil.copy2(full_path, DB_FILE)
     print(f"✅ Database direstore dari: {full_path}")
     export_to_json()
     return True
 
-def cleanup_old_backups():
-    """Bersihkan semua backup lama (manual cleanup)"""
-    create_backup_dir()
-    
-    # Hapus semua backup
-    for f in glob.glob(os.path.join(BACKUP_DIR, "*.backup_*")):
-        os.remove(f)
-        print(f"🗑️  Dihapus: {f}")
-    
-    print("✅ Semua backup dibersihkan.")
+def show_progress():
+    """Tampilkan progress saat ini"""
+    if not os.path.exists(PROGRESS_FILE):
+        print("✅ Tidak ada progress aktif (semua selesai atau belum dimulai)")
+        return
+    with open(PROGRESS_FILE, 'r', encoding='utf-8') as f:
+        status = json.load(f)
+    print("\n📊 PROGRESS EXTRACT NESTED EMBED")
+    print("-" * 60)
+    print(f"   Total link: {status.get('total', 0)}")
+    print(f"   Diproses: {status.get('processed', 0)}")
+    print(f"   Sisa: {status.get('remaining', 0)}")
+    print(f"   Berhasil: {status.get('updated', 0)}")
+    print(f"   Gagal: {status.get('failed', 0)}")
+    print(f"   Terakhir update: {status.get('timestamp', 'N/A')}")
+    print("-" * 60)
+
+def reset_progress():
+    """Reset progress (hati-hati!)"""
+    if os.path.exists(PROGRESS_FILE):
+        os.remove(PROGRESS_FILE)
+        print("🔄 Progress direset.")
+    else:
+        print("ℹ️ Tidak ada file progress.")
 
 # ============================================================
-# 5. MAIN
+# 6. MAIN
 # ============================================================
 
 if __name__ == "__main__":
@@ -354,7 +366,7 @@ if __name__ == "__main__":
         print("=" * 60)
         print("Penggunaan:")
         print("  python extract_nested_embed.py --all")
-        print("    - Proses semua embed di database yang mengandung blogspherenews.xyz")
+        print("    - Proses 500 link (lanjut dari progress sebelumnya)")
         print("")
         print("  python extract_nested_embed.py <url>")
         print("    - Ekstrak iframe dari satu URL tertentu")
@@ -365,15 +377,18 @@ if __name__ == "__main__":
         print("  python extract_nested_embed.py --restore <backup_file>")
         print("    - Restore database dari backup")
         print("")
-        print("  python extract_nested_embed.py --cleanup")
-        print("    - Hapus semua backup (hati-hati!)")
+        print("  python extract_nested_embed.py --progress")
+        print("    - Tampilkan progress saat ini")
+        print("")
+        print("  python extract_nested_embed.py --reset")
+        print("    - Reset progress (mulai dari awal)")
         print("=" * 60)
         sys.exit(0)
     
     if sys.argv[1] == '--all':
         print("=" * 60)
         print("📡 EXTRACT NESTED EMBED - MODE DATABASE")
-        print(f"📌 Batch size: {BATCH_SIZE} link per cycle")
+        print(f"📌 Batch size: {BATCH_SIZE} link per run")
         print(f"📌 Max backups: {MAX_BACKUPS} per type")
         print("=" * 60)
         extract_nested_embeds_from_db()
@@ -381,20 +396,17 @@ if __name__ == "__main__":
         list_backups()
     elif sys.argv[1] == '--restore' and len(sys.argv) > 2:
         restore_from_backup(sys.argv[2])
-    elif sys.argv[1] == '--cleanup':
-        print("⚠️  Yakin ingin menghapus semua backup? (y/n)")
-        confirm = input()
-        if confirm.lower() == 'y':
-            cleanup_old_backups()
-        else:
-            print("❌ Dibatalkan.")
+    elif sys.argv[1] == '--progress':
+        show_progress()
+    elif sys.argv[1] == '--reset':
+        reset_progress()
     elif sys.argv[1] == '--help':
         print("=" * 60)
         print("🔧 EXTRACT NESTED EMBED - HELP")
         print("=" * 60)
         print("Penggunaan:")
         print("  python extract_nested_embed.py --all")
-        print("    - Proses semua embed di database yang mengandung blogspherenews.xyz")
+        print("    - Proses 500 link (lanjut dari progress sebelumnya)")
         print("")
         print("  python extract_nested_embed.py <url>")
         print("    - Ekstrak iframe dari satu URL tertentu")
@@ -405,8 +417,11 @@ if __name__ == "__main__":
         print("  python extract_nested_embed.py --restore <backup_file>")
         print("    - Restore database dari backup")
         print("")
-        print("  python extract_nested_embed.py --cleanup")
-        print("    - Hapus semua backup (hati-hati!)")
+        print("  python extract_nested_embed.py --progress")
+        print("    - Tampilkan progress saat ini")
+        print("")
+        print("  python extract_nested_embed.py --reset")
+        print("    - Reset progress (mulai dari awal)")
         print("=" * 60)
     else:
         url = sys.argv[1]

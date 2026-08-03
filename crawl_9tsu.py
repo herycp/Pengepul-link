@@ -94,7 +94,7 @@ def reset_processing_state():
     cursor.execute('DELETE FROM processing_state')
     conn.commit()
     conn.close()
-    print("🔄 Status pemrosesan direset (semua sitemap akan diproses ulang)")
+    print("🔄 Status pemrosesan direset")
 
 def is_all_sitemaps_processed():
     sitemap_files = get_sitemap_files()
@@ -284,14 +284,10 @@ def get_url_batch_from_sitemap(sitemap_file, offset, limit):
     return batch, end, total
 
 # ============================================================
-# 4. VERIFIKASI SITEMAP vs DATABASE (DIPERBAIKI)
+# 4. VERIFIKASI SITEMAP vs DATABASE
 # ============================================================
 
 def verify_sitemap_coverage():
-    """
-    Verifikasi apakah semua URL di setiap sitemap sudah ada di database.
-    Jika ada link yang terlewat, reset status sitemap ke pending (offset=0).
-    """
     print("\n" + "=" * 60)
     print("🔍 VERIFIKASI KECOCOKAN SITEMAP vs DATABASE")
     print("=" * 60)
@@ -312,7 +308,6 @@ def verify_sitemap_coverage():
         if not urls:
             continue
         
-        # Hitung berapa URL di sitemap yang ADA di database
         placeholders = ','.join(['?'] * len(urls))
         query = f"SELECT COUNT(*) FROM links WHERE url IN ({placeholders})"
         cursor.execute(query, urls)
@@ -321,7 +316,6 @@ def verify_sitemap_coverage():
         sitemap_count = len(urls)
         missing = sitemap_count - db_count
         
-        # Ambil status dari processing_state
         state = get_processing_state(f)
         is_done = state and state['status'] == 'done'
         
@@ -331,28 +325,34 @@ def verify_sitemap_coverage():
             print(f"   - Ada di database: {db_count}")
             print(f"   - ❌ Terlewat: {missing} link")
             
-            # 🔥 PERBAIKAN: Reset semua sitemap yang memiliki missing, apapun statusnya
-            print(f"   - 🔄 Reset status ke 'pending' (offset 0) untuk memproses ulang")
-            # Hapus dari processed_sitemaps jika ada
-            cursor.execute("DELETE FROM processed_sitemaps WHERE sitemap_file = ?", (f,))
-            # Reset processing_state ke pending offset 0
-            cursor.execute("""
-                INSERT OR REPLACE INTO processing_state (sitemap_file, offset, total, status, updated_at)
-                VALUES (?, 0, ?, 'pending', CURRENT_TIMESTAMP)
-            """, (f, sitemap_count))
-            reset_count += 1
+            if is_done:
+                print(f"   - 🔄 Reset status dari 'done' ke 'pending'")
+                conn.execute("""
+                    UPDATE processing_state 
+                    SET status = 'pending', offset = 0, updated_at = CURRENT_TIMESTAMP
+                    WHERE sitemap_file = ?
+                """, (f,))
+                reset_count += 1
+            else:
+                current_state = get_processing_state(f)
+                if current_state:
+                    current_offset = current_state['offset']
+                    if missing > 10:
+                        print(f"   - 🔄 Reset offset ke 0 karena banyak link terlewat")
+                        conn.execute("""
+                            UPDATE processing_state 
+                            SET offset = 0, updated_at = CURRENT_TIMESTAMP
+                            WHERE sitemap_file = ?
+                        """, (f,))
+                        reset_count += 1
+                    else:
+                        print(f"   - ℹ️  Offset saat ini: {current_offset}, missing: {missing}")
+            
             total_missing += missing
         else:
             if is_done:
                 print(f"✅ {f}: {sitemap_count}/{sitemap_count} link terverifikasi (done)")
             else:
-                # Jika tidak ada missing, update total jika berbeda
-                if state and state['total'] != sitemap_count:
-                    cursor.execute("""
-                        UPDATE processing_state 
-                        SET total = ?, updated_at = CURRENT_TIMESTAMP
-                        WHERE sitemap_file = ?
-                    """, (sitemap_count, f))
                 print(f"✅ {f}: {sitemap_count}/{sitemap_count} link sudah di database")
     
     conn.commit()
@@ -363,7 +363,7 @@ def verify_sitemap_coverage():
         print("✅ SEMUA SITEMAP TERVERIFIKASI - Tidak ada link terlewat")
     else:
         print(f"⚠️ Ditemukan {total_missing} link terlewat di {reset_count} sitemap")
-        print(f"🔄 {reset_count} sitemap direset ke status 'pending' (offset=0)")
+        print(f"🔄 {reset_count} sitemap direset ke status 'pending'")
     print("=" * 60)
     
     return total_missing, reset_count
@@ -603,7 +603,7 @@ def parse_html_page(html_content, url):
     except Exception as e:
         print(f"   ⚠️ BeautifulSoup error: {e}")
         return parse_html_with_regex(html_content, url)
-    # --- TITLE ---
+    
     article_section = soup.find('meta', property='article:section')
     if article_section and article_section.get('content'):
         metadata["title"] = article_section['content'].strip()
@@ -636,7 +636,7 @@ def parse_html_page(html_content, url):
                     cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
                     cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
                     metadata["title"] = cleaned.strip()
-    # --- SEASON & EPISODE ---
+    
     text = soup.get_text()
     match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', text, re.IGNORECASE)
     if match:
@@ -652,11 +652,11 @@ def parse_html_page(html_content, url):
             if match:
                 metadata["season"] = int(match.group(1))
                 metadata["episode"] = int(match.group(2))
-    # --- IMAGE ---
+    
     og_image = soup.find('meta', property='og:image')
     if og_image and og_image.get('content'):
         metadata["image"] = og_image['content'].strip()
-    # --- DESCRIPTION ---
+    
     body_content = soup.find('div', class_='body-content')
     if not body_content:
         body_content = soup.find('div', class_='hidden-content')
@@ -664,7 +664,7 @@ def parse_html_page(html_content, url):
         desc = body_content.get_text(separator=' ', strip=True)
         if desc:
             metadata["description"] = desc
-    # --- EMBED ---
+    
     iframe = soup.find('iframe')
     if iframe and iframe.get('src'):
         embed_url = iframe['src'].strip()
@@ -734,6 +734,7 @@ def parse_html_with_regex(html_content, url):
                     cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
                     cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
                     metadata["title"] = cleaned.strip()
+        
         match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', html_content, re.IGNORECASE)
         if match:
             metadata["season"] = int(match.group(1))
@@ -743,9 +744,11 @@ def parse_html_with_regex(html_content, url):
             if match:
                 metadata["season"] = 1
                 metadata["episode"] = int(match.group(1))
+        
         match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
         if match:
             metadata["image"] = match.group(1).strip()
+        
         match = re.search(r'<div\s+class="body-content[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
         if match:
             desc = re.sub(r'<[^>]+>', '', match.group(1)).strip()
@@ -757,6 +760,7 @@ def parse_html_with_regex(html_content, url):
                 desc = re.sub(r'<[^>]+>', '', match.group(1)).strip()
                 if desc:
                     metadata["description"] = desc
+        
         match = re.search(r'<iframe[^>]+src="([^"]+)"', html_content, re.IGNORECASE)
         if match:
             embed_url = match.group(1).strip()
@@ -788,7 +792,7 @@ def parse_html_with_regex(html_content, url):
     return metadata
 
 # ============================================================
-# 8. FUNGSI UTAMA - 500 DARI SEMUA SITEMAP + LOG DETAIL
+# 8. FUNGSI UTAMA - DIPERBAIKI
 # ============================================================
 
 def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
@@ -797,13 +801,12 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     if reset:
         reset_processing_state()
     
-    # 🔥 VERIFIKASI SETIAP RUN
+    # 🔥 VERIFIKASI
     total_missing, reset_count = verify_sitemap_coverage()
-    
     if reset_count > 0:
         print(f"📡 {reset_count} sitemap direset, akan diproses ulang.")
     
-    # Auto reset jika semua sitemap selesai
+    # Auto reset
     if is_all_sitemaps_processed():
         print("=" * 60)
         print("🔄 SEMUA SITEMAP SUDAH DIPROSES 100%")
@@ -835,7 +838,7 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
             if all_urls:
                 upsert_processing_state(f, 0, len(all_urls), 'pending')
     
-    # Dapatkan daftar sitemap yang belum selesai (status pending/processing)
+    # Dapatkan daftar sitemap yang belum selesai
     unprocessed = get_unprocessed_sitemaps()
     if not unprocessed:
         print("✅ Semua sitemap sudah diproses. Selesai.")
@@ -845,7 +848,7 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     for f, off, tot in unprocessed:
         print(f"   - {f}: offset={off}, total={tot}")
     
-    # Kumpulkan URL baru dari semua sitemap hingga mencapai BATCH_SIZE
+    # Kumpulkan URL baru
     target_count = BATCH_SIZE
     if max_pages and max_pages < target_count:
         target_count = max_pages
@@ -856,11 +859,13 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     
     remaining = target_count
     for sitemap_file, offset, total in unprocessed:
+        # 🔥 PERBAIKAN: Cek di awal loop sebelum ambil batch
         if remaining <= 0:
             break
+        
         print(f"\n📌 Memproses sitemap: {sitemap_file}, offset={offset}, total={total}, remaining={remaining}")
         
-        # Ambil batch dari sitemap ini
+        # 🔥 Ambil batch sebesar remaining (bukan 500)
         batch, new_offset, total_urls = get_url_batch_from_sitemap(sitemap_file, offset, remaining)
         print(f"   Batch diambil: {len(batch)} URL (dari offset {offset} sampai {new_offset})")
         
@@ -875,7 +880,6 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         print(f"   URL baru: {len(new_urls)} link")
         
         if not new_urls:
-            # Semua URL di batch ini sudah ada, update offset ke new_offset
             if new_offset >= total_urls:
                 print(f"   ✅ Sitemap {sitemap_file} selesai (semua URL sudah ada)")
                 mark_sitemap_processed(sitemap_file)
@@ -887,9 +891,10 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         # Simpan URL baru
         for url in new_urls:
             all_new_urls.append((url, sitemap_file))
-        # Update sisa kuota
+        
+        # 🔥 Update remaining setelah ambil batch
         remaining -= len(new_urls)
-        print(f"   📊 Sisa kuota: {remaining} link")
+        print(f"   📊 Sisa kuota setelah filter: {remaining} link")
         
         # Simpan informasi untuk update state nanti
         processed_sitemap_info.append({
@@ -901,7 +906,6 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     
     if not all_new_urls:
         print("✅ Tidak ada URL baru ditemukan di semua sitemap.")
-        # Tandai semua sitemap yang sudah habis sebagai done
         for sitemap_file, offset, total in unprocessed:
             if offset >= total:
                 mark_sitemap_processed(sitemap_file)
@@ -949,7 +953,7 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     new_count = save_to_database(results)
     print(f"\n💾 Database: {new_count} link baru ditambahkan")
     
-    # Update state setiap sitemap yang sudah diambil
+    # Update state
     for info in processed_sitemap_info:
         sitemap_file = info['sitemap_file']
         new_offset = info['new_offset']

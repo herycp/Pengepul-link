@@ -1,11 +1,8 @@
-name: Crawl 9tsu Links (Auto Reset - Batch 500)
+name: Crawl 9tsu Links (500 dari semua sitemap)
 
 on:
   schedule:
-    # Setiap hari jam 00:00 UTC (07:00 WIB)
     - cron: '0 0 * * *'
-  
-  # Workflow manual dari tab Actions
   workflow_dispatch:
     inputs:
       force_download:
@@ -31,46 +28,31 @@ permissions:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     
     steps:
-      # ============================================================
-      # STEP 1: Checkout repository
-      # ============================================================
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      # ============================================================
-      # STEP 2: Setup Python
-      # ============================================================
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
       
-      # ============================================================
-      # STEP 3: Install dependencies
-      # ============================================================
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install requests cloudscraper beautifulsoup4 lxml
       
-      # ============================================================
-      # STEP 4: Ensure sitemaps directory exists
-      # ============================================================
       - name: Ensure sitemaps directory
         run: |
           mkdir -p sitemaps
           touch sitemaps/.gitkeep
       
-      # ============================================================
-      # STEP 5: Run crawler
-      # ============================================================
       - name: Run crawler
         id: crawler
         env:
@@ -90,9 +72,6 @@ jobs:
           echo "Running: python crawl_9tsu.py $ARGS"
           python crawl_9tsu.py $ARGS
       
-      # ============================================================
-      # STEP 6: Check for changes
-      # ============================================================
       - name: Check for changes
         id: check_changes
         run: |
@@ -105,37 +84,22 @@ jobs:
             echo "✅ No changes detected"
           fi
       
-      # ============================================================
-      # STEP 7: Commit and push changes (jika ada perubahan)
-      # ============================================================
       - name: Commit and push changes
         if: steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: |
-            chore: update database and json [skip ci]
+            chore: update database, json, and sitemaps [skip ci]
             
             - Total links: $(jq '.total' links.json 2>/dev/null || echo "unknown")
             - Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-          file_pattern: '*.db *.json sitemaps/*'
+          file_pattern: '*.db *.json sitemaps/* sitemaps/*.xml'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
           push_options: '--force'
           skip_fetch: true
       
-      # ============================================================
-      # STEP 8: No changes
-      # ============================================================
       - name: No changes
         if: steps.check_changes.outputs.changes == 'false'
         run: echo "✅ Tidak ada perubahan, skip commit"
-      
-      # ============================================================
-      # STEP 9: Notification (opsional - jika ada perubahan)
-      # ============================================================
-      - name: Notification
-        if: steps.check_changes.outputs.changes == 'true'
-        run: |
-          TOTAL=$(jq '.total' links.json 2>/dev/null || echo "?")
-          echo "✅ Crawl selesai. Total link: $TOTAL"

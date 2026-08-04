@@ -4,6 +4,17 @@ on:
   schedule:
     - cron: '0 6 * * *'
   workflow_dispatch:
+    inputs:
+      validation_mode:
+        description: 'Pilih mode validasi'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - validate_in
+          - validate_vip
+          - integrity_only
 
 permissions:
   contents: write
@@ -36,12 +47,21 @@ jobs:
           touch reports/.gitkeep
 
       - name: Run data validation (9tsu.in)
+        if: github.event.inputs.validation_mode == 'both' || github.event.inputs.validation_mode == 'validate_in'
         run: python validate_data.py
 
       - name: Run data validation (9tsu.vip)
+        if: github.event.inputs.validation_mode == 'both' || github.event.inputs.validation_mode == 'validate_vip'
         run: python validate_data2.py
 
       - name: Run integrity reports (2 & 3)
+        if: github.event.inputs.validation_mode != 'validate_in' && github.event.inputs.validation_mode != 'validate_vip'
+        run: |
+          python check_integrity.py --report2
+          python check_integrity.py --report3
+
+      - name: Run integrity reports (2 & 3) - always if both
+        if: github.event.inputs.validation_mode == 'both'
         run: |
           python check_integrity.py --report2
           python check_integrity.py --report3

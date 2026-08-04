@@ -1,0 +1,320 @@
+"""
+validate_data2.py
+Validasi data dengan pendekatan:
+1. Query untuk mencari semua data mencurigakan (duplikat, domain lain, NULL)
+2. Verifikasi SEMUA record tersebut dengan scraping di domain 9tsu.vip
+3. Laporan detail hasil verifikasi (reports/05_data_validation_report.md)
+
+Perbedaan dengan validate_data.py:
+- Menggunakan domain 9tsu.vip untuk verifikasi
+- URL ditransformasi: 9tsu.in/douga/* -> 9tsu.vip/*
+"""
+
+import sqlite3
+import os
+import json
+import cloudscraper
+import time
+import re
+from datetime import datetime
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup
+
+DB_FILE = "links.db"
+REPORTS_DIR = "reports"
+OUTPUT_FILE = "05_data_validation_report.md"
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+    "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "identity",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1"
+}
+
+def ensure_reports_dir():
+    if not os.path.exists(REPORTS_DIR):
+        os.makedirs(REPORTS_DIR)
+
+def transform_url(url):
+    """
+    Transformasi URL dari 9tsu.in/douga/* ke 9tsu.vip/*
+    Contoh: https://9tsu.in/douga/125645.html -> https://9tsu.vip/125645.html
+    """
+    # Ganti domain
+    url = url.replace('9tsu.in', '9tsu.vip')
+    # Hapus /douga/ jika ada
+    url = re.sub(r'/douga/', '/', url)
+    return url
+
+def get_all_suspicious_records():
+    """
+    Ambil SEMUA record yang termasuk dalam 3 kategori mencurigakan.
+    Return: list of dict dengan field: id, url, embed_url, embed_platform, issues
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    
+    suspicious = {}  # pakai dict agar id unik
+    
+    # 1. Duplikat embed_url (ambil semua record dari group yang duplikat)
+    cursor.execute("""
+        SELECT id, url, embed_url, embed_platform
+        FROM links
+        WHERE embed_url IN (
+            SELECT embed_url FROM links
+            WHERE embed_url IS NOT NULL AND embed_url != ''
+            GROUP BY embed_url
+            HAVING COUNT(*) > 1
+        )
+        AND embed_url IS NOT NULL AND embed_url != ''
+    """)
+    for row in cursor.fetchall():
+        id_, url, embed, platform = row
+        if id_ not in suspicious:
+            suspicious[id_] = {
+                'id': id_,
+                'url': url,
+                'embed_url': embed,
+                'embed_platform': platform,
+                'issues': []
+            }
+        suspicious[id_]['issues'].append('duplicate')
+    
+    # 2. Domain di luar ok.ru dan pulvexa.space
+    cursor.execute("""
+        SELECT id, url, embed_url, embed_platform
+        FROM links
+        WHERE embed_url IS NOT NULL AND embed_url != ''
+        AND embed_url NOT LIKE '%ok.ru%'
+        AND embed_url NOT LIKE '%pulvexa.space%'
+    """)
+    for row in cursor.fetchall():
+        id_, url, embed, platform = row
+        if id_ not in suspicious:
+            suspicious[id_] = {
+                'id': id_,
+                'url': url,
+                'embed_url': embed,
+                'embed_platform': platform,
+                'issues': []
+            }
+        suspicious[id_]['issues'].append('other_domain')
+    
+    # 3. NULL values (semua field)
+    fields = ['url', 'title', 'season', 'episode', 'image', 'description', 'embed_url', 'embed_platform']
+    for field in fields:
+        cursor.execute(f"""
+            SELECT id, url, embed_url, embed_platform
+            FROM links
+            WHERE {field} IS NULL OR {field} = ''
+        """)
+        for row in cursor.fetchall():
+            id_, url, embed, platform = row
+            if id_ not in suspicious:
+                suspicious[id_] = {
+                    'id': id_,
+                    'url': url,
+                    'embed_url': embed,
+                    'embed_platform': platform,
+                    'issues': []
+                }
+            suspicious[id_]['issues'].append(f'null_{field}')
+    
+    conn.close()
+    
+    # Konversi ke list
+    result = list(suspicious.values())
+    print(f"🔍 Total record mencurigakan: {len(result)}")
+    return result
+
+def scrape_embed_vip(url):
+    """
+    Scrape halaman di 9tsu.vip untuk mendapatkan embed_url yang sebenarnya.
+    URL sudah ditransformasi ke format 9tsu.vip.
+    """
+    vip_url = transform_url(url)
+    print(f"   🔄 Transformasi URL: {url} -> {vip_url}")
+    try:
+        scraper = cloudscraper.create_scraper(
+            browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
+            delay=True,
+            interpreter='native'
+        )
+        scraper.headers.update(HEADERS)
+        response = scraper.get(vip_url, timeout=60)
+        if response.status_code != 200:
+            return None, f"HTTP {response.status_code} (URL: {vip_url})"
+        soup = BeautifulSoup(response.text, 'html.parser')
+        iframe = soup.find('iframe')
+        if iframe and iframe.get('src'):
+            embed_url = iframe['src'].strip()
+            if embed_url.startswith('//'):
+                embed_url = 'https:' + embed_url
+            return embed_url, None
+        for a in soup.find_all('a', href=True):
+            href = a['href']
+            if any(x in href for x in ['dailymotion', 'youtube', 'ok.ru', 'vimeo', 'pulvexa']):
+                return href, None
+        return None, "Tidak ditemukan embed"
+    except Exception as e:
+        return None, str(e)
+
+def verify_record(record):
+    """Verifikasi satu record dengan scraping di 9tsu.vip"""
+    real_embed, error = scrape_embed_vip(record['url'])
+    result = {
+        'id': record['id'],
+        'url': record['url'],
+        'vip_url': transform_url(record['url']),
+        'db_embed': record['embed_url'],
+        'db_platform': record['embed_platform'],
+        'issues': record['issues'],
+        'real_embed': real_embed,
+        'error': error,
+        'status': 'verified' if real_embed == record['embed_url'] else ('mismatch' if real_embed else 'error')
+    }
+    return result
+
+def generate_report():
+    """Generate laporan Markdown ke reports/05_data_validation_report.md"""
+    ensure_reports_dir()
+    
+    if not os.path.exists(DB_FILE):
+        filepath = os.path.join(REPORTS_DIR, OUTPUT_FILE)
+        with open(filepath, "w") as f:
+            f.write("# ❌ Error\nlinks.db tidak ditemukan")
+        return
+    
+    print("=" * 60)
+    print("📡 VALIDASI DATA (9tsu.vip) - Mencari data mencurigakan...")
+    print("=" * 60)
+    
+    suspicious_records = get_all_suspicious_records()
+    
+    if not suspicious_records:
+        print("✅ Tidak ada data mencurigakan!")
+        filepath = os.path.join(REPORTS_DIR, OUTPUT_FILE)
+        with open(filepath, "w") as f:
+            f.write("# ✅ Laporan Validasi Data (9tsu.vip)\n\n**Tidak ada data mencurigakan ditemukan.**")
+        print(f"📄 Laporan disimpan: {filepath}")
+        return
+    
+    print(f"🔍 Verifikasi {len(suspicious_records)} record dengan scraping di 9tsu.vip...")
+    results = []
+    for i, rec in enumerate(suspicious_records, 1):
+        print(f"   [{i}/{len(suspicious_records)}] ID {rec['id']}...")
+        result = verify_record(rec)
+        results.append(result)
+        time.sleep(0.5)  # Jeda
+    
+    # Statistik
+    total = len(results)
+    verified = sum(1 for r in results if r['status'] == 'verified')
+    mismatch = sum(1 for r in results if r['status'] == 'mismatch')
+    error = sum(1 for r in results if r['status'] == 'error')
+    
+    # Kategorisasi issues
+    issue_counts = {}
+    for r in results:
+        for issue in r['issues']:
+            issue_counts[issue] = issue_counts.get(issue, 0) + 1
+    
+    # Buat laporan
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+    md = []
+    md.append("# 📋 Laporan Validasi Data (9tsu.vip)\n")
+    md.append(f"_Diperbarui: `{now}`_\n")
+    md.append(f"**Domain yang diverifikasi:** `https://9tsu.vip`\n")
+    md.append(f"**Total record mencurigakan:** `{total}`\n")
+    
+    md.append("## 📊 Ringkasan Kategori\n")
+    md.append("| Kategori | Jumlah Record |")
+    md.append("| :--- | :---: |")
+    for issue, count in sorted(issue_counts.items()):
+        md.append(f"| `{issue}` | `{count}` |")
+    md.append("")
+    
+    md.append("## 🎯 Hasil Verifikasi Scraping (9tsu.vip)\n")
+    md.append("| Status | Jumlah | Persentase |")
+    md.append("| :--- | :---: | :---: |")
+    md.append(f"| ✅ Cocok | `{verified}` | `{verified/total*100:.1f}%` |")
+    md.append(f"| ❌ Tidak Cocok | `{mismatch}` | `{mismatch/total*100:.1f}%` |")
+    md.append(f"| ⚠️ Error Scraping | `{error}` | `{error/total*100:.1f}%` |")
+    md.append("")
+    
+    # 1. Detail Duplikat (kelompokkan berdasarkan embed_url)
+    duplicate_groups = {}
+    for r in results:
+        if 'duplicate' in r['issues']:
+            key = r['db_embed']
+            if key not in duplicate_groups:
+                duplicate_groups[key] = []
+            duplicate_groups[key].append(r)
+    
+    if duplicate_groups:
+        md.append("## 1. Detail Duplikat (Kelompok)\n")
+        for embed_url, group in duplicate_groups.items():
+            md.append(f"### `{embed_url}` ({len(group)} record)\n")
+            md.append("| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |")
+            md.append("| :---: | :--- | :--- | :---: | :--- |")
+            for r in group:
+                status_icon = "✅" if r['status'] == 'verified' else ("❌" if r['status'] == 'mismatch' else "⚠️")
+                real_display = r['real_embed'] if r['real_embed'] else f"Error: {r['error']}"
+                md.append(f"| {r['id']} | `{r['url']}` | `{r['vip_url']}` | {status_icon} | `{real_display}` |")
+            md.append("")
+    
+    # 2. Detail Domain Lain (other_domain) + NULL
+    other_and_null = [r for r in results if 'other_domain' in r['issues'] or any(k.startswith('null_') for k in r['issues'])]
+    if other_and_null:
+        md.append("## 2. Detail Domain Lain / NULL\n")
+        md.append("| ID | URL Asli (9tsu.in) | URL 9tsu.vip | DB `embed_url` | Real `embed_url` | Issues | Status |")
+        md.append("| :---: | :--- | :--- | :--- | :--- | :--- | :---: |")
+        for r in other_and_null:
+            issues_str = ", ".join(r['issues'])
+            status_icon = "✅" if r['status'] == 'verified' else ("❌" if r['status'] == 'mismatch' else "⚠️")
+            real_display = r['real_embed'] if r['real_embed'] else f"Error: {r['error']}"
+            md.append(f"| {r['id']} | `{r['url']}` | `{r['vip_url']}` | `{r['db_embed']}` | `{real_display}` | `{issues_str}` | {status_icon} |")
+        md.append("")
+    
+    # 3. Detail Error Scraping
+    errors = [r for r in results if r['status'] == 'error']
+    if errors:
+        md.append("## 3. Error Scraping (9tsu.vip)\n")
+        md.append("| ID | URL 9tsu.vip | DB `embed_url` | Error | Issues |")
+        md.append("| :---: | :--- | :--- | :--- | :--- |")
+        for r in errors:
+            issues_str = ", ".join(r['issues'])
+            md.append(f"| {r['id']} | `{r['vip_url']}` | `{r['db_embed']}` | `{r['error']}` | `{issues_str}` |")
+        md.append("")
+    
+    # 4. Ringkasan akhir
+    md.append("## 📌 Ringkasan Akhir\n")
+    md.append("| Metrik | Nilai |")
+    md.append("| :--- | :---: |")
+    md.append(f"| Total record mencurigakan | `{total}` |")
+    md.append(f"| Cocok (valid) | `{verified}` |")
+    md.append(f"| Tidak cocok (tidak valid) | `{mismatch}` |")
+    md.append(f"| Error scraping | `{error}` |")
+    if mismatch > 0:
+        md.append("")
+        md.append("> ⚠️ **Perhatian:** Terdapat data yang tidak valid. Periksa detail di atas.")
+    else:
+        md.append("")
+        md.append("> ✅ **Semua data valid.**")
+    
+    # Simpan
+    filepath = os.path.join(REPORTS_DIR, OUTPUT_FILE)
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(md))
+    
+    print("\n" + "=" * 60)
+    print(f"📄 Laporan disimpan: {filepath}")
+    print(f"   ✅ Cocok: {verified}")
+    print(f"   ❌ Tidak cocok: {mismatch}")
+    print(f"   ⚠️ Error: {error}")
+    print("=" * 60)
+
+if __name__ == "__main__":
+    generate_report()

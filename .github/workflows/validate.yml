@@ -35,8 +35,11 @@ jobs:
           mkdir -p reports
           touch reports/.gitkeep
 
-      - name: Run data validation
+      - name: Run data validation (9tsu.in)
         run: python validate_data.py
+
+      - name: Run data validation (9tsu.vip)
+        run: python validate_data2.py
 
       - name: Run integrity reports (2 & 3)
         run: |

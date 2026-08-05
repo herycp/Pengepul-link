@@ -2,8 +2,8 @@ name: Clean Null Embed URL
 
 on:
   # 🔄 Jadwal: setiap hari jam 03:00 UTC (setelah crawl & update domain)
-  schedule:
-    - cron: '0 3 * * *'
+  #schedule:
+    #- cron: '0 3 * * *'
   
   # 🔘 Manual: bisa dijalankan dari tab Actions
   workflow_dispatch:

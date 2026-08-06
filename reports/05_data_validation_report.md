@@ -1,6 +1,6 @@
 # 📋 Laporan Validasi Data (9tsu.vip)
 
-_Diperbarui: `2026-08-05 07:09:34 UTC`_
+_Diperbarui: `2026-08-06 20:39:19 UTC`_
 
 **Domain yang diverifikasi:** `https://9tsu.vip`
 
@@ -17,8 +17,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | Status | Jumlah | Persentase |
 | :--- | :---: | :---: |
-| ✅ Cocok | `78` | `13.4%` |
-| ❌ Tidak Cocok | `472` | `81.0%` |
+| ✅ Cocok | `24` | `4.1%` |
+| ❌ Tidak Cocok | `526` | `90.2%` |
 | ⚠️ Error Scraping | `33` | `5.7%` |
 
 ## 1. Detail Duplikat (Kelompok)
@@ -65,7 +65,7 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 2574 | `https://9tsu.in/douga/117521.html` | `https://9tsu.vip/117521.html` | ❌ | `https://pulvexa.space/embed/CQd1TrmBvc?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 2574 | `https://9tsu.in/douga/117521.html` | `https://9tsu.vip/117521.html` | ❌ | `https://norqeli.space/embed/CQd1TrmBvc?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 2598 | `https://9tsu.in/douga/117452.html` | `https://9tsu.vip/117452.html` | ❌ | `https://ok.ru/videoembed/9891756444229` |
 
 ### `https://ok.ru/videoembed/8784620227076` (2 record)
@@ -93,7 +93,7 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 4166 | `https://9tsu.in/douga/112568.html` | `https://9tsu.vip/112568.html` | ✅ | `https://pulvexa.space/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 4166 | `https://9tsu.in/douga/112568.html` | `https://9tsu.vip/112568.html` | ❌ | `https://norqeli.space/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 4179 | `https://9tsu.in/douga/112526.html` | `https://9tsu.vip/112526.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/112526.html)` |
 
 ### `https://ok.ru/videoembed/9331209538209` (2 record)
@@ -469,8 +469,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 4986 | `https://9tsu.in/douga/56742.html` | `https://9tsu.vip/56742.html` | ✅ | `https://pulvexa.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19920 | `https://9tsu.in/douga/56727.html` | `https://9tsu.vip/56727.html` | ✅ | `https://pulvexa.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 4986 | `https://9tsu.in/douga/56742.html` | `https://9tsu.vip/56742.html` | ❌ | `https://norqeli.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19920 | `https://9tsu.in/douga/56727.html` | `https://9tsu.vip/56727.html` | ❌ | `https://norqeli.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
@@ -484,7 +484,7 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 5263 | `https://9tsu.in/douga/109578.html` | `https://9tsu.vip/109578.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109578.html)` |
-| 5308 | `https://9tsu.in/douga/109453.html` | `https://9tsu.vip/109453.html` | ❌ | `https://pulvexa.space/embed/1bgTNimyig?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 5308 | `https://9tsu.in/douga/109453.html` | `https://9tsu.vip/109453.html` | ❌ | `https://norqeli.space/embed/1bgTNimyig?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 5337 | `https://9tsu.in/douga/109371.html` | `https://9tsu.vip/109371.html` | ✅ | `https://ok.ru/videoembed/6660443081376` |
 
 ### `https://ok.ru/videoembed/8812365089284` (2 record)
@@ -513,7 +513,7 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 6010 | `https://9tsu.in/douga/105463.html` | `https://9tsu.vip/105463.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/105463.html)` |
-| 7212 | `https://9tsu.in/douga/104448.html` | `https://9tsu.vip/104448.html` | ✅ | `https://pulvexa.space/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 7212 | `https://9tsu.in/douga/104448.html` | `https://9tsu.vip/104448.html` | ❌ | `https://norqeli.space/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8770697104040` (2 record)
 
@@ -533,7 +533,7 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 6177 | `https://9tsu.in/douga/107041.html` | `https://9tsu.vip/107041.html` | ❌ | `https://pulvexa.space/embed/y68k0XqWR0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 6177 | `https://9tsu.in/douga/107041.html` | `https://9tsu.vip/107041.html` | ❌ | `https://norqeli.space/embed/y68k0XqWR0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 6266 | `https://9tsu.in/douga/106808.html` | `https://9tsu.vip/106808.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/106808.html)` |
 
 ### `https://ok.ru/videoembed/8168092731951` (2 record)
@@ -568,8 +568,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 7165 | `https://9tsu.in/douga/43718.html` | `https://9tsu.vip/43718.html` | ✅ | `https://pulvexa.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 17065 | `https://9tsu.in/douga/43781.html` | `https://9tsu.vip/43781.html` | ✅ | `https://pulvexa.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 7165 | `https://9tsu.in/douga/43718.html` | `https://9tsu.vip/43718.html` | ❌ | `https://norqeli.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 17065 | `https://9tsu.in/douga/43781.html` | `https://9tsu.vip/43781.html` | ❌ | `https://norqeli.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/9095335512777` (2 record)
 
@@ -680,8 +680,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 10264 | `https://9tsu.in/douga/74500.html` | `https://9tsu.vip/74500.html` | ✅ | `https://pulvexa.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 15632 | `https://9tsu.in/douga/74493.html` | `https://9tsu.vip/74493.html` | ✅ | `https://pulvexa.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 10264 | `https://9tsu.in/douga/74500.html` | `https://9tsu.vip/74500.html` | ❌ | `https://norqeli.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 15632 | `https://9tsu.in/douga/74493.html` | `https://9tsu.vip/74493.html` | ❌ | `https://norqeli.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7347156093658` (2 record)
 
@@ -708,8 +708,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 11062 | `https://9tsu.in/douga/93910.html` | `https://9tsu.vip/93910.html` | ✅ | `https://pulvexa.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 11073 | `https://9tsu.in/douga/93847.html` | `https://9tsu.vip/93847.html` | ✅ | `https://pulvexa.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11062 | `https://9tsu.in/douga/93910.html` | `https://9tsu.vip/93910.html` | ❌ | `https://norqeli.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11073 | `https://9tsu.in/douga/93847.html` | `https://9tsu.vip/93847.html` | ❌ | `https://norqeli.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/2507337042653` (2 record)
 
@@ -729,8 +729,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 11444 | `https://9tsu.in/douga/92564.html` | `https://9tsu.vip/92564.html` | ✅ | `https://pulvexa.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 11456 | `https://9tsu.in/douga/92560.html` | `https://9tsu.vip/92560.html` | ✅ | `https://pulvexa.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11444 | `https://9tsu.in/douga/92564.html` | `https://9tsu.vip/92564.html` | ❌ | `https://norqeli.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11456 | `https://9tsu.in/douga/92560.html` | `https://9tsu.vip/92560.html` | ❌ | `https://norqeli.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8569014848114` (2 record)
 
@@ -757,15 +757,15 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 12419 | `https://9tsu.in/douga/89167.html` | `https://9tsu.vip/89167.html` | ✅ | `https://pulvexa.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 12513 | `https://9tsu.in/douga/88778.html` | `https://9tsu.vip/88778.html` | ✅ | `https://pulvexa.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12419 | `https://9tsu.in/douga/89167.html` | `https://9tsu.vip/89167.html` | ❌ | `https://norqeli.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12513 | `https://9tsu.in/douga/88778.html` | `https://9tsu.vip/88778.html` | ❌ | `https://norqeli.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 12420 | `https://9tsu.in/douga/89169.html` | `https://9tsu.vip/89169.html` | ✅ | `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 12514 | `https://9tsu.in/douga/88780.html` | `https://9tsu.vip/88780.html` | ✅ | `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12420 | `https://9tsu.in/douga/89169.html` | `https://9tsu.vip/89169.html` | ❌ | `https://norqeli.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12514 | `https://9tsu.in/douga/88780.html` | `https://9tsu.vip/88780.html` | ❌ | `https://norqeli.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7469682330151` (2 record)
 
@@ -792,15 +792,15 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 13910 | `https://9tsu.in/douga/82389.html` | `https://9tsu.vip/82389.html` | ✅ | `https://pulvexa.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 13923 | `https://9tsu.in/douga/82346.html` | `https://9tsu.vip/82346.html` | ✅ | `https://pulvexa.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13910 | `https://9tsu.in/douga/82389.html` | `https://9tsu.vip/82389.html` | ❌ | `https://norqeli.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13923 | `https://9tsu.in/douga/82346.html` | `https://9tsu.vip/82346.html` | ❌ | `https://norqeli.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 13931 | `https://9tsu.in/douga/82252.html` | `https://9tsu.vip/82252.html` | ✅ | `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 13980 | `https://9tsu.in/douga/82002.html` | `https://9tsu.vip/82002.html` | ✅ | `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13931 | `https://9tsu.in/douga/82252.html` | `https://9tsu.vip/82252.html` | ❌ | `https://norqeli.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13980 | `https://9tsu.in/douga/82002.html` | `https://9tsu.vip/82002.html` | ❌ | `https://norqeli.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7468735859239` (2 record)
 
@@ -862,8 +862,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 15249 | `https://9tsu.in/douga/76258.html` | `https://9tsu.vip/76258.html` | ✅ | `https://pulvexa.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 15283 | `https://9tsu.in/douga/75916.html` | `https://9tsu.vip/75916.html` | ✅ | `https://pulvexa.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 15249 | `https://9tsu.in/douga/76258.html` | `https://9tsu.vip/76258.html` | ❌ | `https://norqeli.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 15283 | `https://9tsu.in/douga/75916.html` | `https://9tsu.vip/75916.html` | ❌ | `https://norqeli.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8090512525839` (2 record)
 
@@ -940,8 +940,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 16422 | `https://9tsu.in/douga/70920.html` | `https://9tsu.vip/70920.html` | ✅ | `https://pulvexa.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 16509 | `https://9tsu.in/douga/70521.html` | `https://9tsu.vip/70521.html` | ✅ | `https://pulvexa.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 16422 | `https://9tsu.in/douga/70920.html` | `https://9tsu.vip/70920.html` | ❌ | `https://norqeli.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 16509 | `https://9tsu.in/douga/70521.html` | `https://9tsu.vip/70521.html` | ❌ | `https://norqeli.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7277801638558` (2 record)
 
@@ -1024,22 +1024,22 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 18578 | `https://9tsu.in/douga/59862.html` | `https://9tsu.vip/59862.html` | ✅ | `https://pulvexa.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19292 | `https://9tsu.in/douga/59860.html` | `https://9tsu.vip/59860.html` | ✅ | `https://pulvexa.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 18578 | `https://9tsu.in/douga/59862.html` | `https://9tsu.vip/59862.html` | ❌ | `https://norqeli.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19292 | `https://9tsu.in/douga/59860.html` | `https://9tsu.vip/59860.html` | ❌ | `https://norqeli.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 18585 | `https://9tsu.in/douga/57555.html` | `https://9tsu.vip/57555.html` | ✅ | `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19191 | `https://9tsu.in/douga/60356.html` | `https://9tsu.vip/60356.html` | ✅ | `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 18585 | `https://9tsu.in/douga/57555.html` | `https://9tsu.vip/57555.html` | ❌ | `https://norqeli.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19191 | `https://9tsu.in/douga/60356.html` | `https://9tsu.vip/60356.html` | ❌ | `https://norqeli.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 18907 | `https://9tsu.in/douga/61268.html` | `https://9tsu.vip/61268.html` | ✅ | `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 18921 | `https://9tsu.in/douga/60692.html` | `https://9tsu.vip/60692.html` | ✅ | `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 18907 | `https://9tsu.in/douga/61268.html` | `https://9tsu.vip/61268.html` | ❌ | `https://norqeli.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 18921 | `https://9tsu.in/douga/60692.html` | `https://9tsu.vip/60692.html` | ❌ | `https://norqeli.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/9594661767819` (2 record)
 
@@ -1059,15 +1059,15 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 19194 | `https://9tsu.in/douga/60324.html` | `https://9tsu.vip/60324.html` | ✅ | `https://pulvexa.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19195 | `https://9tsu.in/douga/60322.html` | `https://9tsu.vip/60322.html` | ✅ | `https://pulvexa.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19194 | `https://9tsu.in/douga/60324.html` | `https://9tsu.vip/60324.html` | ❌ | `https://norqeli.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19195 | `https://9tsu.in/douga/60322.html` | `https://9tsu.vip/60322.html` | ❌ | `https://norqeli.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 19349 | `https://9tsu.in/douga/59560.html` | `https://9tsu.vip/59560.html` | ✅ | `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19350 | `https://9tsu.in/douga/59558.html` | `https://9tsu.vip/59558.html` | ✅ | `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19349 | `https://9tsu.in/douga/59560.html` | `https://9tsu.vip/59560.html` | ❌ | `https://norqeli.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19350 | `https://9tsu.in/douga/59558.html` | `https://9tsu.vip/59558.html` | ❌ | `https://norqeli.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8740277258797` (2 record)
 
@@ -1080,8 +1080,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 19953 | `https://9tsu.in/douga/56563.html` | `https://9tsu.vip/56563.html` | ✅ | `https://pulvexa.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 23760 | `https://9tsu.in/douga/33588.html` | `https://9tsu.vip/33588.html` | ✅ | `https://pulvexa.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19953 | `https://9tsu.in/douga/56563.html` | `https://9tsu.vip/56563.html` | ❌ | `https://norqeli.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23760 | `https://9tsu.in/douga/33588.html` | `https://9tsu.vip/33588.html` | ❌ | `https://norqeli.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://9tsu.in/youtube-baraeti` (9 record)
 
@@ -1101,15 +1101,15 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 20409 | `https://9tsu.in/douga/54149.html` | `https://9tsu.vip/54149.html` | ✅ | `https://pulvexa.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 20653 | `https://9tsu.in/douga/52321.html` | `https://9tsu.vip/52321.html` | ✅ | `https://pulvexa.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 20409 | `https://9tsu.in/douga/54149.html` | `https://9tsu.vip/54149.html` | ❌ | `https://norqeli.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 20653 | `https://9tsu.in/douga/52321.html` | `https://9tsu.vip/52321.html` | ❌ | `https://norqeli.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 21108 | `https://9tsu.in/douga/49382.html` | `https://9tsu.vip/49382.html` | ✅ | `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 21223 | `https://9tsu.in/douga/48875.html` | `https://9tsu.vip/48875.html` | ✅ | `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21108 | `https://9tsu.in/douga/49382.html` | `https://9tsu.vip/49382.html` | ❌ | `https://norqeli.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21223 | `https://9tsu.in/douga/48875.html` | `https://9tsu.vip/48875.html` | ❌ | `https://norqeli.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/2683595066009` (2 record)
 
@@ -1122,15 +1122,15 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 21632 | `https://9tsu.in/douga/46633.html` | `https://9tsu.vip/46633.html` | ✅ | `https://pulvexa.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 21654 | `https://9tsu.in/douga/46601.html` | `https://9tsu.vip/46601.html` | ✅ | `https://pulvexa.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21632 | `https://9tsu.in/douga/46633.html` | `https://9tsu.vip/46633.html` | ❌ | `https://norqeli.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21654 | `https://9tsu.in/douga/46601.html` | `https://9tsu.vip/46601.html` | ❌ | `https://norqeli.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 21916 | `https://9tsu.in/douga/45004.html` | `https://9tsu.vip/45004.html` | ✅ | `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 21919 | `https://9tsu.in/douga/44469.html` | `https://9tsu.vip/44469.html` | ✅ | `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21916 | `https://9tsu.in/douga/45004.html` | `https://9tsu.vip/45004.html` | ❌ | `https://norqeli.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21919 | `https://9tsu.in/douga/44469.html` | `https://9tsu.vip/44469.html` | ❌ | `https://norqeli.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/2513415441149` (2 record)
 
@@ -1150,36 +1150,36 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 22183 | `https://9tsu.in/douga/42460.html` | `https://9tsu.vip/42460.html` | ✅ | `https://pulvexa.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 22290 | `https://9tsu.in/douga/42464.html` | `https://9tsu.vip/42464.html` | ✅ | `https://pulvexa.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22183 | `https://9tsu.in/douga/42460.html` | `https://9tsu.vip/42460.html` | ❌ | `https://norqeli.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22290 | `https://9tsu.in/douga/42464.html` | `https://9tsu.vip/42464.html` | ❌ | `https://norqeli.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 22186 | `https://9tsu.in/douga/43506.html` | `https://9tsu.vip/43506.html` | ✅ | `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 22302 | `https://9tsu.in/douga/42964.html` | `https://9tsu.vip/42964.html` | ✅ | `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22186 | `https://9tsu.in/douga/43506.html` | `https://9tsu.vip/43506.html` | ❌ | `https://norqeli.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22302 | `https://9tsu.in/douga/42964.html` | `https://9tsu.vip/42964.html` | ❌ | `https://norqeli.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 23591 | `https://9tsu.in/douga/36109.html` | `https://9tsu.vip/36109.html` | ✅ | `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 23606 | `https://9tsu.in/douga/35126.html` | `https://9tsu.vip/35126.html` | ✅ | `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23591 | `https://9tsu.in/douga/36109.html` | `https://9tsu.vip/36109.html` | ❌ | `https://norqeli.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23606 | `https://9tsu.in/douga/35126.html` | `https://9tsu.vip/35126.html` | ❌ | `https://norqeli.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 23824 | `https://9tsu.in/douga/28913.html` | `https://9tsu.vip/28913.html` | ✅ | `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 23833 | `https://9tsu.in/douga/18567.html` | `https://9tsu.vip/18567.html` | ✅ | `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23824 | `https://9tsu.in/douga/28913.html` | `https://9tsu.vip/28913.html` | ❌ | `https://norqeli.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23833 | `https://9tsu.in/douga/18567.html` | `https://9tsu.vip/18567.html` | ❌ | `https://norqeli.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 24019 | `https://9tsu.in/douga/31054.html` | `https://9tsu.vip/31054.html` | ✅ | `https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 24029 | `https://9tsu.in/douga/20121.html` | `https://9tsu.vip/20121.html` | ✅ | `https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 24019 | `https://9tsu.in/douga/31054.html` | `https://9tsu.vip/31054.html` | ❌ | `https://norqeli.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 24029 | `https://9tsu.in/douga/20121.html` | `https://9tsu.vip/20121.html` | ❌ | `https://norqeli.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/1535947377341` (2 record)
 
@@ -1260,8 +1260,8 @@ _Diperbarui: `2026-08-05 07:09:34 UTC`_
 | Metrik | Nilai |
 | :--- | :---: |
 | Total record mencurigakan | `583` |
-| Cocok (valid) | `78` |
-| Tidak cocok (tidak valid) | `472` |
+| Cocok (valid) | `24` |
+| Tidak cocok (tidak valid) | `526` |
 | Error scraping | `33` |
 
 > ⚠️ **Perhatian:** Terdapat data yang tidak valid. Periksa detail di atas.

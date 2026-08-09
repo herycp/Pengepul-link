@@ -1,4 +1,4 @@
-name: Update Domain (dremoxa.space -> pulvexa.space)
+name: Update Domain (pulvexa.space -> norqeli.space)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
@@ -11,12 +11,12 @@ on:
       old_domain:
         description: 'Domain lama yang akan diganti'
         required: false
-        default: 'dremoxa.space'
+        default: 'pulvexa.space'
         type: string
       new_domain:
         description: 'Domain baru pengganti'
         required: false
-        default: 'pulvexa.space'
+        default: 'norqeli.space'
         type: string
 
 permissions:

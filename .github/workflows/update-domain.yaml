@@ -2,8 +2,8 @@ name: Update Domain (pulvexa.space -> norqeli.space)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
-  schedule:
-    - cron: '0 2 * * *'
+  #schedule:
+   # - cron: '0 2 * * *'
   
   # 🔘 Manual: bisa dijalankan dari tab Actions
   workflow_dispatch:

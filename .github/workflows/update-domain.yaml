@@ -1,4 +1,4 @@
-name: Update Domain (pulvexa.space -> norqeli.space)
+name: Update Domain (pulvexa.space -> qevrinto.guru)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
@@ -16,7 +16,7 @@ on:
       new_domain:
         description: 'Domain baru pengganti'
         required: false
-        default: 'norqeli.space'
+        default: 'qevrinto.guru'
         type: string
 
 permissions:

@@ -72,13 +72,18 @@ jobs:
           echo "Running: python crawl_9tsu.py $ARGS"
           python crawl_9tsu.py $ARGS
       
-      - name: Check for changes
+      - name: Check for changes and Prepare Env
         id: check_changes
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
             echo "📝 Changes detected:"
             git status --porcelain
+            
+            # Ekstrak variabel bash ke Environment variables Github
+            TOTAL=$(jq '.total' links.json 2>/dev/null || echo "unknown")
+            echo "TOTAL_LINKS=$TOTAL" >> $GITHUB_ENV
+            echo "TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
           else
             echo "changes=false" >> $GITHUB_OUTPUT
             echo "✅ No changes detected"
@@ -91,8 +96,8 @@ jobs:
           commit_message: |
             chore: update database, json, and sitemaps [skip ci]
             
-            - Total links: $(jq '.total' links.json 2>/dev/null || echo "unknown")
-            - Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            - Total links: ${{ env.TOTAL_LINKS }}
+            - Timestamp: ${{ env.TIMESTAMP }}
           file_pattern: '*.db *.json sitemaps/* sitemaps/*.xml'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'

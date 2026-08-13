@@ -7,6 +7,7 @@ import time
 import os
 import gzip
 import subprocess
+import concurrent.futures
 from datetime import datetime
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -21,6 +22,7 @@ DB_FILE = "links.db"
 JSON_FILE = "links.json"
 SITEMAP_DIR = "sitemaps"
 BATCH_SIZE = 500
+MAX_WORKERS = 15  # Eksekusi 15 download paralel bersamaan
 
 ALTERNATIVE_DOMAINS = ["https://9tsu.vip", "https://9tsu.cc"]
 
@@ -133,14 +135,13 @@ def save_to_database(metadata_list):
     if not new_urls:
         return 0
     new_data = [data for data in metadata_list if data.get('url') in new_urls]
+    
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    new_count = 0
-    for data in new_data:
-        cursor.execute('''
-            INSERT INTO links (url, title, season, episode, image, description, embed_url, embed_platform)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
+    
+    # BATCH INSERT (Memasukkan data sekaligus dalam satu transaksi)
+    insert_payload = [
+        (
             data.get('url'),
             data.get('title'),
             data.get('season'),
@@ -149,8 +150,16 @@ def save_to_database(metadata_list):
             data.get('description'),
             data.get('embed_url'),
             data.get('embed_platform')
-        ))
-        new_count += 1
+        )
+        for data in new_data
+    ]
+    
+    cursor.executemany('''
+        INSERT OR IGNORE INTO links (url, title, season, episode, image, description, embed_url, embed_platform)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', insert_payload)
+    
+    new_count = cursor.rowcount
     conn.commit()
     conn.close()
     return new_count
@@ -450,7 +459,7 @@ def download_html_page(url, retry=3):
         html, status = download_html_with_cloudscraper(url)
         if status == 200 and html: return html, 200
         if status == 403:
-            time.sleep(3 + attempt * 2)
+            time.sleep(2)
             continue
         if status != 403: break
     html, status = download_html_with_curl(url)
@@ -458,7 +467,7 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 7. PARSING HTML (FIX LOOKAHEAD UNTUK SEASON vs EPISODE)
+# 7. PARSING HTML
 # ============================================================
 
 def parse_html_page(html_content, url):
@@ -474,7 +483,6 @@ def parse_html_page(html_content, url):
     except Exception:
         return metadata
     
-    # 🛑 Validasi Halaman (Anti Soft-block / Redirect ke Homepage)
     body_content = soup.find('div', class_='body-content') or soup.find('div', class_='hidden-content')
     if not body_content:
         return metadata
@@ -494,30 +502,21 @@ def parse_html_page(html_content, url):
         metadata["season"] = 1
         metadata["episode"] = None
 
-        # 🎯 1. REGEX SEASON
-        # Menangkap Season, シリーズ, 期, atau 部 (Contoh: 第2シリーズ -> Season 2)
         match_s = re.search(r'(?:Season|シーズン)\s*(\d+)|第\s*(\d+)\s*(?:期|シリーズ|部)|[sS](\d+)', raw_title, re.IGNORECASE)
         if match_s:
             season_num = match_s.group(1) or match_s.group(2) or match_s.group(3)
             if season_num:
                 metadata["season"] = int(season_num)
 
-        # 🎯 2. REGEX EPISODE (Dengan Negative Lookahead)
-        # Mematikan pencarian jika angka setelah 第 ternyata diikuti kriteria Season (期/シリーズ/部)
         match_e = re.search(r'(?:第|#|EP|ep)\s*(\d+)(?!\s*(?:期|シリーズ|部))\s*(?:話|回)?|[sS]\d+[eE](\d+)', raw_title, re.IGNORECASE)
         if match_e:
             episode_num = match_e.group(1) or match_e.group(2)
             if episode_num:
                 metadata["episode"] = int(episode_num)
 
-        # 🧹 3. PEMBERSIHAN JUDUL
-        # Hapus bagian Episode
         cleaned = re.sub(r'(?:第|#|EP|ep)\s*\d+(?!\s*(?:期|シリーズ|部))\s*(?:話|回)?', '', raw_title, flags=re.IGNORECASE)
-        # Hapus bagian Season
         cleaned = re.sub(r'(?:Season|シーズン)\s*\d+|第\s*\d+\s*(?:期|シリーズ|部)', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'[sS]\d+[eE]\d+', '', cleaned, flags=re.IGNORECASE)
-        
-        # Hapus nama domain
         cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned, flags=re.IGNORECASE)
@@ -561,7 +560,25 @@ def parse_html_with_regex(html_content, url):
     return parse_html_page(html_content, url)
 
 # ============================================================
-# 8. FUNGSI UTAMA
+# 8. FUNGSI WORKER MULTI-THREADING
+# ============================================================
+
+def process_single_url(item):
+    """Fungsi pekerja mandiri untuk mendownload dan mem-parsing 1 URL"""
+    url, sitemap_file = item
+    html_content, status = download_html_page(url)
+    if status == 200 and html_content:
+        metadata = parse_html_page(html_content, url)
+        return metadata, status
+    else:
+        return {
+            "url": url, "title": None, "season": None, "episode": None,
+            "image": None, "description": None, "embed_url": None,
+            "embed_platform": None
+        }, status
+
+# ============================================================
+# 9. FUNGSI UTAMA
 # ============================================================
 
 def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
@@ -617,20 +634,27 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         if offset >= total: mark_sitemap_processed(sitemap_file)
         else: upsert_processing_state(sitemap_file, offset, total, 'pending')
     
-    if not all_new_urls: return
+    if not all_new_urls: 
+        print("✅ Tidak ada URL baru untuk diproses.")
+        return
+    
+    print(f"🚀 Memulai CRAWLING {len(all_new_urls)} link menggunakan Multi-Threading ({MAX_WORKERS} Workers)...")
+    start_time = time.time()
     
     results = []
-    for i, (url, sitemap_file) in enumerate(all_new_urls, 1):
-        html_content, status = download_html_page(url)
-        if status == 200 and html_content:
-            metadata = parse_html_page(html_content, url)
+    # MULTI-THREADING EXECUTOR
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(process_single_url, item) for item in all_new_urls]
+        for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
+            metadata, status = future.result()
             results.append(metadata)
-        else:
-            metadata = {"url": url, "title": None, "season": None, "episode": None, "image": None, "description": None, "embed_url": None, "embed_platform": None}
-            results.append(metadata)
-        time.sleep(1)
+            if status == 200 and metadata.get('title'):
+                print(f"[{i}/{len(all_new_urls)}] ✅ [{metadata.get('title')}] S{metadata.get('season')}E{metadata.get('episode')}")
+            else:
+                print(f"[{i}/{len(all_new_urls)}] ⚠️ Gagal/Invalid ({status}): {metadata.get('url')}")
     
-    save_to_database(results)
+    print("\n💾 Menyimpan hasil ke database secara massal...")
+    new_count = save_to_database(results)
     
     for info in processed_sitemap_info:
         sitemap_file = info['sitemap_file']
@@ -640,6 +664,8 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
                 mark_sitemap_processed(sitemap_file)
     
     export_to_json()
+    elapsed = time.time() - start_time
+    print(f"\n⏱️ Crawling Selesai! Waktu: {elapsed:.2f} detik ({elapsed/60:.2f} menit). {new_count} link baru disimpan.")
 
 if __name__ == "__main__":
     import sys

@@ -1,0 +1,66 @@
+name: 🛠️ Mitigasi DB 9tsu (Fix Season/Episode)
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [run-mitigasi] # Webhook trigger
+
+permissions:
+  contents: write
+
+jobs:
+  mitigasi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests cloudscraper beautifulsoup4 lxml
+      
+      - name: Run Mitigasi Program
+        env:
+          PYTHONUNBUFFERED: 1
+        run: |
+          echo "🚀 Memulai proses perbaikan database batch 1000..."
+          python mitigasi_db.py
+          
+      - name: Check output and set vars
+        id: check
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            TOTAL=$(jq '.total' links.json 2>/dev/null || echo "unknown")
+            echo "TOTAL_LINKS=$TOTAL" >> $GITHUB_ENV
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.check.outputs.changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            fix: mitigasi database season/episode (batch mode) [skip ci]
+            
+            - Updated total links: ${{ env.TOTAL_LINKS }}
+          file_pattern: 'links.db links.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          
+      - name: No changes
+        if: steps.check.outputs.changes == 'false'
+        run: echo "✅ Batch ini tidak menghasilkan perubahan atau mitigasi sudah tuntas sepenuhnya."

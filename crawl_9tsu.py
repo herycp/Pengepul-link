@@ -40,6 +40,16 @@ HEADERS = {
 }
 
 # ============================================================
+# 1.5 KONFIGURASI GLOBAL SCRAPER (PERBAIKAN PERFORMA)
+# ============================================================
+global_scraper = cloudscraper.create_scraper(
+    browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
+    delay=True,
+    interpreter='native'
+)
+global_scraper.headers.update(HEADERS)
+
+# ============================================================
 # 2. DATABASE SQLITE
 # ============================================================
 
@@ -85,7 +95,6 @@ def init_database():
     
     conn.commit()
     conn.close()
-    print("✅ Database siap")
 
 def reset_processing_state():
     conn = sqlite3.connect(DB_FILE)
@@ -102,14 +111,6 @@ def is_all_sitemaps_processed():
         return False
     processed = get_processed_sitemaps()
     return all(f in processed for f in sitemap_files)
-
-def is_url_exists(url):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT 1 FROM links WHERE url = ?", (url,))
-    exists = cursor.fetchone() is not None
-    conn.close()
-    return exists
 
 def get_existing_urls(url_list):
     if not url_list:
@@ -176,7 +177,6 @@ def export_to_json():
     output = {'timestamp': datetime.now().isoformat(), 'total': len(links), 'links': links}
     with open(JSON_FILE, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
-    print(f"📁 JSON ekspor: {len(links)} link")
 
 def get_database_count():
     conn = sqlite3.connect(DB_FILE)
@@ -269,7 +269,6 @@ def get_urls_from_local_sitemap(sitemap_filename):
                 urls.append(url)
         return urls
     except Exception as e:
-        print(f"❌ Error parsing sitemap lokal {sitemap_filename}: {e}")
         return []
 
 def get_url_batch_from_sitemap(sitemap_file, offset, limit):
@@ -288,25 +287,17 @@ def get_url_batch_from_sitemap(sitemap_file, offset, limit):
 # ============================================================
 
 def verify_sitemap_coverage():
-    print("\n" + "=" * 60)
-    print("🔍 VERIFIKASI KECOCOKAN SITEMAP vs DATABASE")
-    print("=" * 60)
-    
     sitemap_files = get_sitemap_files()
-    if not sitemap_files:
-        print("❌ Tidak ada sitemap ditemukan.")
-        return 0, 0
+    if not sitemap_files: return 0, 0
     
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    
     total_missing = 0
     reset_count = 0
     
     for f in sitemap_files:
         urls = get_urls_from_local_sitemap(f)
-        if not urls:
-            continue
+        if not urls: continue
         
         placeholders = ','.join(['?'] * len(urls))
         query = f"SELECT COUNT(*) FROM links WHERE url IN ({placeholders})"
@@ -315,57 +306,23 @@ def verify_sitemap_coverage():
         
         sitemap_count = len(urls)
         missing = sitemap_count - db_count
-        
         state = get_processing_state(f)
         is_done = state and state['status'] == 'done'
         
         if missing > 0:
-            print(f"\n📌 {f}:")
-            print(f"   - Total di sitemap: {sitemap_count}")
-            print(f"   - Ada di database: {db_count}")
-            print(f"   - ❌ Terlewat: {missing} link")
-            
             if is_done:
-                print(f"   - 🔄 Reset status dari 'done' ke 'pending', offset 0")
-                conn.execute("""
-                    UPDATE processing_state 
-                    SET status = 'pending', offset = 0, updated_at = CURRENT_TIMESTAMP
-                    WHERE sitemap_file = ?
-                """, (f,))
+                conn.execute("UPDATE processing_state SET status = 'pending', offset = 0, updated_at = CURRENT_TIMESTAMP WHERE sitemap_file = ?", (f,))
                 reset_count += 1
             else:
                 current_state = get_processing_state(f)
                 if current_state:
-                    current_offset = current_state['offset']
-                    if missing > 10 or current_offset == 0:
-                        print(f"   - 🔄 Reset offset ke 0 karena banyak link terlewat")
-                        conn.execute("""
-                            UPDATE processing_state 
-                            SET offset = 0, updated_at = CURRENT_TIMESTAMP
-                            WHERE sitemap_file = ?
-                        """, (f,))
+                    if missing > 10 or current_state['offset'] == 0:
+                        conn.execute("UPDATE processing_state SET offset = 0, updated_at = CURRENT_TIMESTAMP WHERE sitemap_file = ?", (f,))
                         reset_count += 1
-                    else:
-                        print(f"   - ℹ️  Offset saat ini: {current_offset}, missing: {missing}")
-            
             total_missing += missing
-        else:
-            if is_done:
-                print(f"✅ {f}: {sitemap_count}/{sitemap_count} link terverifikasi (done)")
-            else:
-                print(f"✅ {f}: {sitemap_count}/{sitemap_count} link sudah di database")
-    
+            
     conn.commit()
     conn.close()
-    
-    print("\n" + "=" * 60)
-    if total_missing == 0:
-        print("✅ SEMUA SITEMAP TERVERIFIKASI - Tidak ada link terlewat")
-    else:
-        print(f"⚠️ Ditemukan {total_missing} link terlewat di {reset_count} sitemap")
-        print(f"🔄 {reset_count} sitemap direset ke status 'pending'")
-    print("=" * 60)
-    
     return total_missing, reset_count
 
 # ============================================================
@@ -375,39 +332,19 @@ def verify_sitemap_coverage():
 def create_sitemap_dir():
     if not os.path.exists(SITEMAP_DIR):
         os.makedirs(SITEMAP_DIR)
-        print(f"📁 Direktori sitemap dibuat: {SITEMAP_DIR}")
 
 def download_sitemap_with_cloudscraper(url, retry=3):
     for attempt in range(retry):
         try:
-            scraper = cloudscraper.create_scraper(
-                browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
-                delay=True,
-                interpreter='native'
-            )
-            scraper.headers.update({
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-                "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Accept-Encoding": "identity",
-                "Connection": "keep-alive",
-                "Cache-Control": "max-age=0",
-            })
-            response = scraper.get(url, timeout=60)
+            response = global_scraper.get(url, timeout=60)
             if response.status_code == 200:
                 return response.text, 200
             else:
-                print(f"   ⚠️ Attempt {attempt+1}/{retry} - Status: {response.status_code}")
-                if attempt < retry - 1:
-                    time.sleep(2)
-                else:
-                    return None, response.status_code
-        except Exception as e:
-            print(f"   ⚠️ Attempt {attempt+1}/{retry} - Error: {e}")
-            if attempt < retry - 1:
-                time.sleep(2)
-            else:
-                return None, 0
+                if attempt < retry - 1: time.sleep(2)
+                else: return None, response.status_code
+        except Exception:
+            if attempt < retry - 1: time.sleep(2)
+            else: return None, 0
     return None, 0
 
 def get_sitemap_index_content():
@@ -415,35 +352,16 @@ def get_sitemap_index_content():
     for domain in domains_to_try:
         try:
             sitemap_url = f"{domain}/sitemap_index.xml"
-            print(f"🔄 Mencoba: {sitemap_url}")
-            scraper = cloudscraper.create_scraper(
-                browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
-                delay=True,
-                interpreter='native'
-            )
-            scraper.headers.update({
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-                "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Accept-Encoding": "identity",
-                "Connection": "keep-alive",
-                "Cache-Control": "max-age=0",
-            })
-            response = scraper.get(sitemap_url, timeout=60)
+            response = global_scraper.get(sitemap_url, timeout=60)
             if response.status_code == 200:
-                print(f"✅ Berhasil menggunakan domain: {domain}")
                 return response.content, domain
-            else:
-                print(f"   ❌ Gagal: HTTP {response.status_code}")
-        except Exception as e:
-            print(f"   ❌ Gagal: {e}")
+        except Exception:
             continue
     return None, None
 
 def get_online_sitemap_list():
     content, domain = get_sitemap_index_content()
-    if content is None:
-        return []
+    if content is None: return []
     try:
         root = ET.fromstring(content)
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -453,8 +371,7 @@ def get_online_sitemap_list():
             if url and 'post-sitemap' in url.lower():
                 sitemap_urls.append(url)
         return sitemap_urls
-    except Exception as e:
-        print(f"❌ Error parsing online sitemap index: {e}")
+    except Exception:
         return []
 
 def download_all_sitemaps():
@@ -462,30 +379,21 @@ def download_all_sitemaps():
     for f in os.listdir(SITEMAP_DIR):
         if f.startswith('post-sitemap') and f.endswith('.xml'):
             os.remove(os.path.join(SITEMAP_DIR, f))
-            print(f"🗑️  Hapus: {f}")
     online_urls = get_online_sitemap_list()
-    if not online_urls:
-        print("❌ Gagal mendapatkan daftar sitemap online.")
-        return
+    if not online_urls: return
     for url in online_urls:
         filename = url.split('/')[-1]
         filepath = os.path.join(SITEMAP_DIR, filename)
-        print(f"⬇️  Download {filename}")
         content, status = download_sitemap_with_cloudscraper(url)
         if status == 200 and content:
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"   ✅ Tersimpan: {filepath}")
-        else:
-            print(f"   ❌ Gagal download {filename}")
         time.sleep(0.5)
-    print("✅ Semua sitemap selesai diunduh")
 
 def get_sitemap_files():
     create_sitemap_dir()
     files = [f for f in os.listdir(SITEMAP_DIR) if f.startswith('post-sitemap') and f.endswith('.xml')]
-    if not files:
-        return []
+    if not files: return []
     files.sort(key=lambda x: int(re.search(r'(\d+)', x).group(1)) if re.search(r'(\d+)', x) else 0)
     return files
 
@@ -495,39 +403,20 @@ def get_sitemap_files():
 
 def download_html_with_cloudscraper(url):
     try:
-        scraper = cloudscraper.create_scraper(
-            browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
-            delay=True,
-            interpreter='native'
-        )
-        scraper.headers.update(HEADERS)
-        response = scraper.get(url, timeout=60)
+        response = global_scraper.get(url, timeout=30)
         if response.status_code == 200:
             raw = response.content
             if len(raw) >= 2 and raw[0] == 0x1F and raw[1] == 0x8B:
-                try:
-                    raw = gzip.decompress(raw)
-                except:
-                    pass
-            try:
-                html = raw.decode('utf-8')
-            except:
-                html = raw.decode('latin-1', errors='ignore')
-            if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
+                try: raw = gzip.decompress(raw)
+                except: pass
+            try: html = raw.decode('utf-8')
+            except: html = raw.decode('latin-1', errors='ignore')
+            if html and len(html) > 100:
                 return html, 200
-            else:
-                try:
-                    response.encoding = 'utf-8'
-                    html2 = response.text
-                    if html2 and len(html2) > 100 and any(tag in html2[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
-                        return html2, 200
-                except:
-                    pass
-                return None, 403
+            return None, 403
         else:
             return None, response.status_code
-    except Exception as e:
-        print(f"   ❌ Cloudscraper error: {e}")
+    except Exception:
         return None, 0
 
 def download_html_with_curl(url):
@@ -536,447 +425,215 @@ def download_html_with_curl(url):
             'curl', '-s', '-L',
             '-H', f'User-Agent: {HEADERS["User-Agent"]}',
             '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9',
-            '-H', 'Accept-Language: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
             '-H', 'Accept-Encoding: identity',
             '-H', 'Connection: keep-alive',
             '-H', 'Upgrade-Insecure-Requests: 1',
             '-H', f'Referer: {BASE_URL}',
-            '--max-time', '30',
-            url
+            '--max-time', '30', url
         ]
         result = subprocess.run(cmd, capture_output=True, timeout=35)
         if result.returncode == 0:
             content = result.stdout
             if len(content) >= 2 and content[0] == 0x1F and content[1] == 0x8B:
-                try:
-                    content = gzip.decompress(content)
-                except:
-                    pass
-            try:
-                html = content.decode('utf-8')
-            except:
-                html = content.decode('latin-1', errors='ignore')
-            if html and len(html) > 100 and any(tag in html[:200] for tag in ['<html', '<!DOCTYPE', '<title', '<body']):
-                return html, 200
-            else:
-                return None, 403
-        else:
-            return None, result.returncode
-    except Exception as e:
-        print(f"   ❌ Curl error: {e}")
+                try: content = gzip.decompress(content)
+                except: pass
+            try: html = content.decode('utf-8')
+            except: html = content.decode('latin-1', errors='ignore')
+            if html and len(html) > 100: return html, 200
+            return None, 403
+        return None, result.returncode
+    except Exception:
         return None, 0
 
 def download_html_page(url, retry=3):
     for attempt in range(retry):
         html, status = download_html_with_cloudscraper(url)
-        if status == 200 and html:
-            return html, 200
+        if status == 200 and html: return html, 200
         if status == 403:
             time.sleep(3 + attempt * 2)
             continue
-        if status != 403:
-            break
+        if status != 403: break
     html, status = download_html_with_curl(url)
-    if status == 200 and html:
-        return html, 200
+    if status == 200 and html: return html, 200
     return None, 403
 
 # ============================================================
-# 7. PARSING HTML
+# 7. PARSING HTML (DENGAN ANTI-SOFTBLOCK & REGEX DIPERKETAT)
 # ============================================================
 
 def parse_html_page(html_content, url):
     metadata = {
-        "url": url,
-        "title": None,
-        "season": None,
-        "episode": None,
-        "image": None,
-        "description": None,
-        "embed_url": None,
-        "embed_platform": None
+        "url": url, "title": None, "season": None,
+        "episode": None, "image": None, "description": None,
+        "embed_url": None, "embed_platform": None
     }
-    if not html_content:
-        return metadata
+    if not html_content: return metadata
+    
     try:
-        soup = BeautifulSoup(html_content, 'html.parser')
-    except Exception as e:
-        print(f"   ⚠️ BeautifulSoup error: {e}")
-        return parse_html_with_regex(html_content, url)
+        soup = BeautifulSoup(html_content, 'lxml') 
+    except Exception:
+        return metadata
     
-    article_section = soup.find('meta', property='article:section')
-    if article_section and article_section.get('content'):
-        metadata["title"] = article_section['content'].strip()
-    else:
-        og_title = soup.find('meta', property='og:title')
-        if og_title and og_title.get('content'):
-            raw = og_title['content'].strip()
-            cleaned = re.sub(r'\s*第\d+話\s*', '', raw)
-            cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-            cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
-            cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
-            metadata["title"] = cleaned.strip()
-        else:
-            h1 = soup.find('h1')
-            if h1:
-                raw = h1.get_text(strip=True)
-                cleaned = re.sub(r'\s*第\d+話\s*', '', raw)
-                cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-                metadata["title"] = cleaned.strip()
-            else:
-                title_tag = soup.find('title')
-                if title_tag:
-                    raw = title_tag.get_text(strip=True)
-                    cleaned = re.sub(r'\s*第\d+話\s*', '', raw)
-                    cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-                    cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
-                    cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
-                    cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
-                    cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
-                    metadata["title"] = cleaned.strip()
-    
-    text = soup.get_text()
-    match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', text, re.IGNORECASE)
-    if match:
-        metadata["season"] = int(match.group(1))
-        metadata["episode"] = int(match.group(2))
-    else:
-        match = re.search(r'第(\d+)話', text)
-        if match:
-            metadata["season"] = 1
-            metadata["episode"] = int(match.group(1))
-        else:
-            match = re.search(r'[sS](\d+)[eE](\d+)', text)
-            if match:
-                metadata["season"] = int(match.group(1))
-                metadata["episode"] = int(match.group(2))
-    
-    og_image = soup.find('meta', property='og:image')
-    if og_image and og_image.get('content'):
-        metadata["image"] = og_image['content'].strip()
-    
-    body_content = soup.find('div', class_='body-content')
+    # 🛑 Validasi Halaman (Anti Soft-block / Redirect ke Homepage)
+    body_content = soup.find('div', class_='body-content') or soup.find('div', class_='hidden-content')
     if not body_content:
-        body_content = soup.find('div', class_='hidden-content')
-    if body_content:
-        desc = body_content.get_text(separator=' ', strip=True)
-        if desc:
-            metadata["description"] = desc
+        return metadata
+
+    raw_title = ""
+    og_title = soup.find('meta', property='og:title')
+    h1 = soup.find('h1')
+    
+    if og_title and og_title.get('content'):
+        raw_title = og_title['content'].strip()
+    elif h1:
+        raw_title = h1.get_text(strip=True)
+    elif soup.title:
+        raw_title = soup.title.get_text(strip=True)
+
+    if raw_title:
+        metadata["season"] = 1
+        metadata["episode"] = None
+
+        # 🎯 Regex Season Diperketat (Wajib ada kata Season/シーズン atau 第...期/シリーズ)
+        match_s = re.search(r'(?:Season|シーズン)\s*(\d+)|第\s*(\d+)\s*(?:期|シリーズ)|[sS](\d+)', raw_title, re.IGNORECASE)
+        if match_s:
+            season_num = match_s.group(1) or match_s.group(2) or match_s.group(3)
+            if season_num:
+                metadata["season"] = int(season_num)
+
+        # 🎯 Regex Episode Diperketat (Mengakomodir 第...話, 第...回, #, atau EP)
+        match_e = re.search(r'(?:第|#|EP|ep)\s*(\d+)\s*(?:話|回)?|[sS]\d+[eE](\d+)', raw_title, re.IGNORECASE)
+        if match_e:
+            episode_num = match_e.group(1) or match_e.group(2)
+            if episode_num:
+                metadata["episode"] = int(episode_num)
+
+        # 🧹 Pembersihan Judul
+        cleaned = re.sub(r'(?:第|#|EP|ep)\s*\d+\s*(?:話|回)?', '', raw_title, flags=re.IGNORECASE)
+        cleaned = re.sub(r'(?:Season|シーズン|第)\s*\d+\s*(?:期|シリーズ)?', '', cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r'[sS]\d+[eE]\d+', '', cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned, flags=re.IGNORECASE)
+        
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        cleaned = re.sub(r'^[-|~]+\s*|\s*[-|~]+$', '', cleaned).strip()
+        metadata["title"] = cleaned
+
+    og_image = soup.find('meta', property='og:image')
+    if og_image: metadata["image"] = og_image.get('content', '').strip()
+    if body_content: metadata["description"] = body_content.get_text(separator=' ', strip=True)
     
     iframe = soup.find('iframe')
     if iframe and iframe.get('src'):
         embed_url = iframe['src'].strip()
-        if embed_url.startswith('//'):
-            embed_url = 'https:' + embed_url
+        if embed_url.startswith('//'): embed_url = 'https:' + embed_url
         metadata["embed_url"] = embed_url
-        parsed = urlparse(embed_url)
-        metadata["embed_platform"] = parsed.netloc
+        metadata["embed_platform"] = urlparse(embed_url).netloc
     else:
         video = soup.find('video')
         if video:
             source = video.find('source')
             if source and source.get('src'):
                 embed_url = source['src'].strip()
-                if embed_url.startswith('//'):
-                    embed_url = 'https:' + embed_url
+                if embed_url.startswith('//'): embed_url = 'https:' + embed_url
                 metadata["embed_url"] = embed_url
-                parsed = urlparse(embed_url)
-                metadata["embed_platform"] = parsed.netloc
+                metadata["embed_platform"] = urlparse(embed_url).netloc
         else:
             for a in soup.find_all('a', href=True):
                 href = a['href']
                 if any(x in href for x in ['dailymotion', 'youtube', 'ok.ru', 'vimeo']):
                     embed_url = href.strip()
-                    if embed_url.startswith('//'):
-                        embed_url = 'https:' + embed_url
+                    if embed_url.startswith('//'): embed_url = 'https:' + embed_url
                     metadata["embed_url"] = embed_url
-                    parsed = urlparse(embed_url)
-                    metadata["embed_platform"] = parsed.netloc
+                    metadata["embed_platform"] = urlparse(embed_url).netloc
                     break
     return metadata
 
 def parse_html_with_regex(html_content, url):
-    metadata = {
-        "url": url,
-        "title": None,
-        "season": None,
-        "episode": None,
-        "image": None,
-        "description": None,
-        "embed_url": None,
-        "embed_platform": None
-    }
-    try:
-        match = re.search(r'<meta\s+property="article:section"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-        if match:
-            metadata["title"] = match.group(1).strip()
-        else:
-            match = re.search(r'<meta\s+property="og:title"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-            if match:
-                raw = match.group(1).strip()
-                cleaned = re.sub(r'\s*第\d+話\s*', '', raw)
-                cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-                cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
-                cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
-                cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
-                cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
-                metadata["title"] = cleaned.strip()
-            else:
-                match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE | re.DOTALL)
-                if match:
-                    raw = match.group(1).strip()
-                    cleaned = re.sub(r'\s*第\d+話\s*', '', raw)
-                    cleaned = re.sub(r'\s*Season\s*\d+\s*', '', cleaned, flags=re.IGNORECASE)
-                    cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned)
-                    cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned)
-                    cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned)
-                    cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned)
-                    metadata["title"] = cleaned.strip()
-        
-        match = re.search(r'Season\s*(\d+)\s*[　]?\s*第(\d+)話', html_content, re.IGNORECASE)
-        if match:
-            metadata["season"] = int(match.group(1))
-            metadata["episode"] = int(match.group(2))
-        else:
-            match = re.search(r'第(\d+)話', html_content)
-            if match:
-                metadata["season"] = 1
-                metadata["episode"] = int(match.group(1))
-        
-        match = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html_content, re.IGNORECASE)
-        if match:
-            metadata["image"] = match.group(1).strip()
-        
-        match = re.search(r'<div\s+class="body-content[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
-        if match:
-            desc = re.sub(r'<[^>]+>', '', match.group(1)).strip()
-            if desc:
-                metadata["description"] = desc
-        else:
-            match = re.search(r'<div\s+class="hidden-content[^"]*"[^>]*>(.*?)</div>', html_content, re.IGNORECASE | re.DOTALL)
-            if match:
-                desc = re.sub(r'<[^>]+>', '', match.group(1)).strip()
-                if desc:
-                    metadata["description"] = desc
-        
-        match = re.search(r'<iframe[^>]+src="([^"]+)"', html_content, re.IGNORECASE)
-        if match:
-            embed_url = match.group(1).strip()
-            if embed_url.startswith('//'):
-                embed_url = 'https:' + embed_url
-            metadata["embed_url"] = embed_url
-            parsed = urlparse(embed_url)
-            metadata["embed_platform"] = parsed.netloc
-        else:
-            match = re.search(r'<video[^>]*>.*?<source[^>]+src="([^"]+)"', html_content, re.IGNORECASE | re.DOTALL)
-            if match:
-                embed_url = match.group(1).strip()
-                if embed_url.startswith('//'):
-                    embed_url = 'https:' + embed_url
-                metadata["embed_url"] = embed_url
-                parsed = urlparse(embed_url)
-                metadata["embed_platform"] = parsed.netloc
-            else:
-                match = re.search(r'href="([^"]*(?:dailymotion|youtube|ok\.ru|vimeo)[^"]*)"', html_content, re.IGNORECASE)
-                if match:
-                    embed_url = match.group(1).strip()
-                    if embed_url.startswith('//'):
-                        embed_url = 'https:' + embed_url
-                    metadata["embed_url"] = embed_url
-                    parsed = urlparse(embed_url)
-                    metadata["embed_platform"] = parsed.netloc
-    except Exception as e:
-        print(f"   ❌ Regex fallback error: {e}")
-    return metadata
+    return parse_html_page(html_content, url)
 
 # ============================================================
-# 8. FUNGSI UTAMA - DENGAN LOOP INTERNAL PER SITEMAP
+# 8. FUNGSI UTAMA
 # ============================================================
 
 def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     init_database()
-    
-    if reset:
-        reset_processing_state()
-    
-    # Verifikasi
+    if reset: reset_processing_state()
     total_missing, reset_count = verify_sitemap_coverage()
-    if reset_count > 0:
-        print(f"📡 {reset_count} sitemap direset, akan diproses ulang.")
     
-    # Auto reset
     if is_all_sitemaps_processed():
-        print("=" * 60)
-        print("🔄 SEMUA SITEMAP SUDAH DIPROSES 100%")
-        print("📡 Melakukan AUTO RESET dan download ulang semua sitemap...")
-        print("=" * 60)
         reset_processing_state()
         download_all_sitemaps()
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
-            if all_urls:
-                upsert_processing_state(f, 0, len(all_urls), 'pending')
-        print("✅ Reset selesai. Memulai proses dari awal...")
-        print("=" * 60)
-    
+            if all_urls: upsert_processing_state(f, 0, len(all_urls), 'pending')
     elif force_download:
         download_all_sitemaps()
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
-            if all_urls:
-                upsert_processing_state(f, 0, len(all_urls), 'pending')
+            if all_urls: upsert_processing_state(f, 0, len(all_urls), 'pending')
     
-    # Pastikan sitemap tersedia
     sitemap_files = get_sitemap_files()
     if not sitemap_files:
-        print("📂 Tidak ada sitemap lokal. Download semua...")
         download_all_sitemaps()
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
-            if all_urls:
-                upsert_processing_state(f, 0, len(all_urls), 'pending')
+            if all_urls: upsert_processing_state(f, 0, len(all_urls), 'pending')
     
-    # Dapatkan daftar sitemap yang belum selesai
     unprocessed = get_unprocessed_sitemaps()
-    if not unprocessed:
-        print("✅ Semua sitemap sudah diproses. Selesai.")
-        return
-    
-    print(f"\n📋 Daftar sitemap yang akan diproses:")
-    for f, off, tot in unprocessed:
-        print(f"   - {f}: offset={off}, total={tot}")
+    if not unprocessed: return
     
     target_count = BATCH_SIZE
-    if max_pages and max_pages < target_count:
-        target_count = max_pages
-        print(f"🔢 Testing: target {target_count} link")
+    if max_pages and max_pages < target_count: target_count = max_pages
     
     all_new_urls = []
     processed_sitemap_info = []
     remaining = target_count
     
-    # 🔥 Loop per sitemap dengan internal loop untuk memproses sampai selesai
     for sitemap_file, offset, total in unprocessed:
-        if remaining <= 0:
-            break
-        
-        print(f"\n📌 Memproses sitemap: {sitemap_file}, offset={offset}, total={total}, remaining={remaining}")
-        
-        # 🔥 Internal loop: proses sitemap ini sampai habis atau remaining habis
+        if remaining <= 0: break
         while offset < total and remaining > 0:
-            # Ambil batch sebesar remaining
             batch, new_offset, total_urls = get_url_batch_from_sitemap(sitemap_file, offset, remaining)
-            print(f"   Batch diambil: {len(batch)} URL (dari offset {offset} sampai {new_offset})")
-            
             if not batch:
-                # Tidak ada URL di sitemap ini, tandai selesai
-                print(f"   ⚠️ Batch kosong, tandai selesai")
                 mark_sitemap_processed(sitemap_file)
                 break
-            
-            # Filter URL yang sudah ada
             existing, new_urls = get_existing_urls(batch)
-            print(f"   Sudah ada di database: {len(existing)} link")
-            print(f"   URL baru: {len(new_urls)} link")
-            
             if new_urls:
-                # Simpan URL baru
-                for url in new_urls:
-                    all_new_urls.append((url, sitemap_file))
+                for url in new_urls: all_new_urls.append((url, sitemap_file))
                 remaining -= len(new_urls)
-                print(f"   📊 Sisa kuota: {remaining} link")
-                # Catat info untuk update state nanti
                 processed_sitemap_info.append({
-                    'sitemap_file': sitemap_file,
-                    'new_offset': new_offset,
-                    'total': total_urls,
-                    'taken': len(new_urls)
+                    'sitemap_file': sitemap_file, 'new_offset': new_offset,
+                    'total': total_urls, 'taken': len(new_urls)
                 })
-            else:
-                print(f"   ℹ️  Tidak ada URL baru di batch ini, lanjut ke batch berikutnya")
-            
-            # Update offset untuk lanjut ke batch berikutnya
             offset = new_offset
-        
-        # Setelah loop internal selesai (sitemap habis atau remaining habis)
-        # Update state sitemap
-        if offset >= total:
-            print(f"✅ Sitemap {sitemap_file} selesai ({total} link)")
-            mark_sitemap_processed(sitemap_file)
-        else:
-            # Jika masih ada sisa (remaining habis)
-            print(f"📌 Progress {sitemap_file}: {offset}/{total} link diproses, remaining={remaining}")
-            upsert_processing_state(sitemap_file, offset, total, 'pending')
+        if offset >= total: mark_sitemap_processed(sitemap_file)
+        else: upsert_processing_state(sitemap_file, offset, total, 'pending')
     
-    if not all_new_urls:
-        print("✅ Tidak ada URL baru ditemukan di semua sitemap.")
-        return
+    if not all_new_urls: return
     
-    print(f"\n📌 Mengumpulkan {len(all_new_urls)} URL baru dari {len(set(s for _, s in all_new_urls))} sitemap")
-    
-    # Proses setiap URL baru
     results = []
     for i, (url, sitemap_file) in enumerate(all_new_urls, 1):
-        print(f"\n🔄 [{i}/{len(all_new_urls)}] {url} (dari {sitemap_file})")
-        print("-" * 60)
         html_content, status = download_html_page(url)
         if status == 200 and html_content:
-            print(f"   ✅ HTML berhasil di-download ({len(html_content)} bytes)")
             metadata = parse_html_page(html_content, url)
-            print(f"   📝 Hasil parsing:")
-            print(f"      - Title: {metadata['title']}")
-            print(f"      - Season: {metadata['season']}")
-            print(f"      - Episode: {metadata['episode']}")
-            print(f"      - Embed Platform: {metadata['embed_platform']}")
-            print(f"      - Embed URL: {metadata['embed_url']}")
-            if metadata['description']:
-                desc_preview = metadata['description'][:100] + '...' if len(metadata['description']) > 100 else metadata['description']
-                print(f"      - Description: {desc_preview}")
-            else:
-                print(f"      - Description: None")
             results.append(metadata)
         else:
-            print(f"   ❌ Gagal download (status {status})")
-            metadata = {
-                "url": url,
-                "title": None,
-                "season": None,
-                "episode": None,
-                "image": None,
-                "description": None,
-                "embed_url": None,
-                "embed_platform": None,
-                "error": f"HTTP {status}"
-            }
+            metadata = {"url": url, "title": None, "season": None, "episode": None, "image": None, "description": None, "embed_url": None, "embed_platform": None}
             results.append(metadata)
         time.sleep(1)
     
-    new_count = save_to_database(results)
-    print(f"\n💾 Database: {new_count} link baru ditambahkan")
+    save_to_database(results)
     
-    # Update state setiap sitemap yang sudah diambil (jika belum diupdate di loop internal)
-    # Tapi karena di loop internal kita sudah update state, kita hanya perlu pastikan
-    # semua sitemap di processed_sitemap_info sudah terupdate.
-    # Sebenarnya state sudah diupdate di loop internal, jadi tidak perlu lagi.
-    # Tapi kita tetap lakukan untuk sitemap yang belum terupdate.
     for info in processed_sitemap_info:
         sitemap_file = info['sitemap_file']
-        # Cek apakah sitemap sudah ditandai done
         state = get_processing_state(sitemap_file)
         if state and state['status'] != 'done':
-            # Jika offset sudah mencapai total, tandai done
             if state['offset'] >= state['total']:
                 mark_sitemap_processed(sitemap_file)
     
     export_to_json()
-    total_db = get_database_count()
-    print(f"\n📊 Total link di database: {total_db}")
-
-# ============================================================
-# 9. EKSEKUSI
-# ============================================================
 
 if __name__ == "__main__":
     import sys
@@ -986,27 +643,12 @@ if __name__ == "__main__":
     i = 1
     while i < len(sys.argv):
         arg = sys.argv[i].lower()
-        if arg == '--download':
-            force_download = True
-            print("🔧 Mode: Download ulang semua sitemap")
-        elif arg == '--reset':
-            reset = True
-            print("🔧 Mode: Reset semua status pemrosesan")
+        if arg == '--download': force_download = True
+        elif arg == '--reset': reset = True
         elif arg == '--max-pages' and i + 1 < len(sys.argv):
             try:
                 max_pages = int(sys.argv[i + 1])
-                print(f"🔧 Mode testing: hanya {max_pages} link")
                 i += 1
-            except ValueError:
-                print(f"⚠️ Argumen --max-pages harus berupa angka")
-        else:
-            print(f"⚠️ Argumen tidak dikenal: {sys.argv[i]}")
-            print("Gunakan --download, --reset, atau --max-pages N")
+            except: pass
         i += 1
-    print("=" * 60)
-    print("🚀 PENGEPUL-LINK - Crawler 9tsu.in")
-    print(f"📌 Target: {BATCH_SIZE} link per run")
-    if max_pages:
-        print(f"🔢 Max pages: {max_pages}")
-    print("=" * 60)
     crawl_one_sitemap(force_download, reset, max_pages)

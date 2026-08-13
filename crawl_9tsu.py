@@ -268,7 +268,7 @@ def get_urls_from_local_sitemap(sitemap_filename):
             if url and (url.endswith('.html') or '/drama/' in url):
                 urls.append(url)
         return urls
-    except Exception as e:
+    except Exception:
         return []
 
 def get_url_batch_from_sitemap(sitemap_file, offset, limit):
@@ -458,7 +458,7 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 7. PARSING HTML (DENGAN ANTI-SOFTBLOCK & REGEX DIPERKETAT)
+# 7. PARSING HTML (FIX LOOKAHEAD UNTUK SEASON vs EPISODE)
 # ============================================================
 
 def parse_html_page(html_content, url):
@@ -494,24 +494,30 @@ def parse_html_page(html_content, url):
         metadata["season"] = 1
         metadata["episode"] = None
 
-        # 🎯 Regex Season Diperketat (Wajib ada kata Season/シーズン atau 第...期/シリーズ)
-        match_s = re.search(r'(?:Season|シーズン)\s*(\d+)|第\s*(\d+)\s*(?:期|シリーズ)|[sS](\d+)', raw_title, re.IGNORECASE)
+        # 🎯 1. REGEX SEASON
+        # Menangkap Season, シリーズ, 期, atau 部 (Contoh: 第2シリーズ -> Season 2)
+        match_s = re.search(r'(?:Season|シーズン)\s*(\d+)|第\s*(\d+)\s*(?:期|シリーズ|部)|[sS](\d+)', raw_title, re.IGNORECASE)
         if match_s:
             season_num = match_s.group(1) or match_s.group(2) or match_s.group(3)
             if season_num:
                 metadata["season"] = int(season_num)
 
-        # 🎯 Regex Episode Diperketat (Mengakomodir 第...話, 第...回, #, atau EP)
-        match_e = re.search(r'(?:第|#|EP|ep)\s*(\d+)\s*(?:話|回)?|[sS]\d+[eE](\d+)', raw_title, re.IGNORECASE)
+        # 🎯 2. REGEX EPISODE (Dengan Negative Lookahead)
+        # Mematikan pencarian jika angka setelah 第 ternyata diikuti kriteria Season (期/シリーズ/部)
+        match_e = re.search(r'(?:第|#|EP|ep)\s*(\d+)(?!\s*(?:期|シリーズ|部))\s*(?:話|回)?|[sS]\d+[eE](\d+)', raw_title, re.IGNORECASE)
         if match_e:
             episode_num = match_e.group(1) or match_e.group(2)
             if episode_num:
                 metadata["episode"] = int(episode_num)
 
-        # 🧹 Pembersihan Judul
-        cleaned = re.sub(r'(?:第|#|EP|ep)\s*\d+\s*(?:話|回)?', '', raw_title, flags=re.IGNORECASE)
-        cleaned = re.sub(r'(?:Season|シーズン|第)\s*\d+\s*(?:期|シリーズ)?', '', cleaned, flags=re.IGNORECASE)
+        # 🧹 3. PEMBERSIHAN JUDUL
+        # Hapus bagian Episode
+        cleaned = re.sub(r'(?:第|#|EP|ep)\s*\d+(?!\s*(?:期|シリーズ|部))\s*(?:話|回)?', '', raw_title, flags=re.IGNORECASE)
+        # Hapus bagian Season
+        cleaned = re.sub(r'(?:Season|シーズン)\s*\d+|第\s*\d+\s*(?:期|シリーズ|部)', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'[sS]\d+[eE]\d+', '', cleaned, flags=re.IGNORECASE)
+        
+        # Hapus nama domain
         cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned, flags=re.IGNORECASE)

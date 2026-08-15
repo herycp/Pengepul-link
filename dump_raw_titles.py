@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 OUTPUT_JSON = 'raw_titles.json'
 MAX_WORKERS = 15
+BATCH_SIZE = 2500  # Eksekusi 2500 judul per run agar aman di Github Actions
 
 def get_existing_data():
     if os.path.exists(OUTPUT_JSON):
@@ -44,17 +45,20 @@ def main():
     all_urls = [row[0] for row in cursor.fetchall()]
     conn.close()
     
-    print(f"Total link di database: {len(all_urls)}")
-    
     existing_data = get_existing_data()
-    print(f"Judul yang sudah diekstrak sebelumnya: {len(existing_data)}")
+    print(f"Total link di DB: {len(all_urls)}")
+    print(f"Judul yang sudah diekstrak: {len(existing_data)}")
     
     # Filter URL yang belum ada di JSON
     urls_to_process = [url for url in all_urls if url not in existing_data]
-    print(f"Link yang akan diproses: {len(urls_to_process)}")
+    
+    # POTONG menjadi ukuran BATCH_SIZE (2500)
+    urls_to_process = urls_to_process[:BATCH_SIZE]
+    
+    print(f"Target batch run kali ini: {len(urls_to_process)} link")
     
     if not urls_to_process:
-        print("✅ Semua URL sudah berhasil diekstrak judul mentahnya.")
+        print("✅ SEMUA TUNTAS! Tidak ada lagi URL yang perlu diekstrak judul mentahnya.")
         return
 
     print(f"🚀 Memulai scraping {len(urls_to_process)} raw titles dengan {MAX_WORKERS} workers...")
@@ -72,20 +76,15 @@ def main():
                 print(f"[{count}/{len(urls_to_process)}] ✅ {title}")
             else:
                 print(f"[{count}/{len(urls_to_process)}] ❌ Gagal mendapatkan title dari URL ini")
-            
-            # Auto-save setiap 500 data agar progres aman jika Action terputus
-            if count % 500 == 0:
-                with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
-                    json.dump(existing_data, f, ensure_ascii=False, indent=2)
-                print(f"💾 Auto-save {len(existing_data)} data ke JSON...")
 
-    # Save final ketika semua selesai
+    # Save hasil dari batch ini ke JSON agar siap di-push oleh Github Actions
+    print("\n💾 Menyimpan hasil batch ke file JSON...")
     with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
         json.dump(existing_data, f, ensure_ascii=False, indent=2)
         
     elapsed = time.time() - start_time
-    print(f"\n🎉 Selesai! Waktu: {elapsed/60:.2f} menit. Total data tersimpan: {len(existing_data)}")
+    print(f"🎉 Batch selesai! Waktu eksekusi: {elapsed/60:.2f} menit. Total raw titles terkumpul: {len(existing_data)}")
 
 if __name__ == '__main__':
-    print("=== PROGRAM DUMP RAW TITLES ===")
+    print("=== PROGRAM DUMP RAW TITLES (BATCH MODE) ===")
     main()

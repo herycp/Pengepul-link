@@ -2,6 +2,7 @@ import sqlite3
 import time
 from datetime import datetime
 import concurrent.futures
+import sys
 
 # Import dari script utama Anda
 from crawl_9tsu import download_html_page, parse_html_page, DB_FILE, export_to_json
@@ -43,7 +44,7 @@ def process_url(row):
         new_episode = metadata.get('episode')
         
         # Cek apakah hasil parser baru berbeda dengan data lama
-        if new_season != old_season or new_episode != old_episode:
+        if new_season != old_season or str(new_episode) != str(old_episode):
             result['new_season'] = new_season
             result['new_episode'] = new_episode
             result['changed'] = True
@@ -51,6 +52,16 @@ def process_url(row):
     return result
 
 def mitigasi_database():
+    # Fitur Reset Log Mitigasi
+    if '--reset' in sys.argv:
+        print("🔄 Opsi --reset terdeteksi. Menghapus rekaman mitigasi_log...")
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute('DROP TABLE IF EXISTS mitigasi_log')
+        conn.commit()
+        conn.close()
+        print("✅ Log berhasil dibersihkan. Semua data akan dimitigasi ulang dari awal.")
+
     init_mitigasi_table()
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -66,7 +77,7 @@ def mitigasi_database():
     rows = cursor.fetchall()
     
     if not rows:
-        print("✅ LUAR BIASA! Semua 24.000+ data sudah selesai dimitigasi!")
+        print("✅ LUAR BIASA! Semua data sudah selesai dimitigasi!")
         conn.close()
         return
         
@@ -107,7 +118,7 @@ def mitigasi_database():
         
         # Kumpulkan data yang butuh diupdate
         if res['changed']:
-            update_data.append((res['new_season'], res['new_episode'], res['db_id']))
+            update_data.append((res['new_season'], str(res['new_episode']), res['db_id']))
             total_diperbaiki += 1
             
     # Eksekusi database secara borongan

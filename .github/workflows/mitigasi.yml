@@ -2,6 +2,12 @@ name: 🛠️ Mitigasi DB 9tsu (Fix Season/Episode)
 
 on:
   workflow_dispatch:
+    inputs:
+      reset_progress:
+        description: '🔄 Reset progress mitigasi (Hapus log dan ulangi dari awal)'
+        required: false
+        default: false
+        type: boolean
   repository_dispatch:
     types: [run-mitigasi] # Webhook trigger
 
@@ -35,8 +41,14 @@ jobs:
         env:
           PYTHONUNBUFFERED: 1
         run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.reset_progress }}" == "true" ]; then
+            ARGS="--reset"
+          fi
+          
           echo "🚀 Memulai proses perbaikan database batch 1000..."
-          python mitigasi_db.py
+          echo "Running: python mitigasi_db.py $ARGS"
+          python mitigasi_db.py $ARGS
           
       - name: Check output and set vars
         id: check

@@ -537,6 +537,11 @@ def extract_season_episode(title):
         (r'(\d+)\s*シーズン', 'season_ja_simple'),
         (r'Season\s*([0-9]+)', 'season_eng'),
         (r'Ｓｅａｓｏｎ\s*(\d+)', 'season_fullwidth'),
+        # TAMBAHAN: untuk menangkap "シリーズ" (series) seperti pada "御宿かわせみ 第２シリーズ#23"
+        (r'第\s*(\d+)\s*シリーズ', 'season_series'),
+        (r'(\d+)\s*シリーズ', 'season_series_simple'),
+        # TAMBAHAN: untuk menangkap "シリーズ" dengan spasi opsional dan karakter opsional
+        (r'シリーズ\s*(\d+)', 'season_series_alt'),
     ]
     
     for pattern, _ in season_patterns:

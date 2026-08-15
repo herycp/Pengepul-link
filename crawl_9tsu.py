@@ -467,8 +467,14 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 7. PARSING HTML
+# 7. PARSING HTML & REGEX TERBARU
 # ============================================================
+
+def normalize_zenkaku_to_hankaku(text):
+    """Mengubah angka full-width (０-９) menjadi half-width (0-9) untuk mempermudah regex"""
+    if not text:
+        return text
+    return text.translate(str.maketrans('０１２３４５６７８９', '0123456789'))
 
 def parse_html_page(html_content, url):
     metadata = {
@@ -499,24 +505,31 @@ def parse_html_page(html_content, url):
         raw_title = soup.title.get_text(strip=True)
 
     if raw_title:
+        # Default fallback
         metadata["season"] = 1
-        metadata["episode"] = None
+        metadata["episode"] = "Unmapped"
 
-        match_s = re.search(r'(?:Season|シーズン)\s*(\d+)|第\s*(\d+)\s*(?:期|シリーズ|部)|[sS](\d+)', raw_title, re.IGNORECASE)
+        # Mitigasi: Normalisasi angka Jepang (full-width ke ASCII)
+        normalized_title = normalize_zenkaku_to_hankaku(raw_title)
+
+        # 1. Ekstraksi Season (Fokus: Season X, 第Xシーズン, Lesson X)
+        match_s = re.search(r'(?:Season|season)\s*(\d+)|第\s*(\d+)\s*シーズン|Lesson\s*(\d+)', normalized_title, re.IGNORECASE)
         if match_s:
             season_num = match_s.group(1) or match_s.group(2) or match_s.group(3)
             if season_num:
                 metadata["season"] = int(season_num)
 
-        match_e = re.search(r'(?:第|#|EP|ep)\s*(\d+)(?!\s*(?:期|シリーズ|部))\s*(?:話|回)?|[sS]\d+[eE](\d+)', raw_title, re.IGNORECASE)
+        # 2. Ekstraksi Episode (Fokus: 第X話, 第X,Y話, 第X.Y話, X貫, 第X夜, 前編/後編)
+        match_e = re.search(r'第\s*([\d.,]+)\s*(?:話|夜)|(\d+)\s*貫|(前編|後編)', normalized_title)
         if match_e:
-            episode_num = match_e.group(1) or match_e.group(2)
-            if episode_num:
-                metadata["episode"] = int(episode_num)
+            episode_val = match_e.group(1) or match_e.group(2) or match_e.group(3)
+            if episode_val:
+                metadata["episode"] = episode_val # Simpan sebagai string
 
-        cleaned = re.sub(r'(?:第|#|EP|ep)\s*\d+(?!\s*(?:期|シリーズ|部))\s*(?:話|回)?', '', raw_title, flags=re.IGNORECASE)
-        cleaned = re.sub(r'(?:Season|シーズン)\s*\d+|第\s*\d+\s*(?:期|シリーズ|部)', '', cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r'[sS]\d+[eE]\d+', '', cleaned, flags=re.IGNORECASE)
+        # 3. Membersihkan Judul
+        cleaned = re.sub(r'(?:Season|season)\s*\d+|第\s*\d+\s*シーズン|Lesson\s*\d+', '', normalized_title, flags=re.IGNORECASE)
+        cleaned = re.sub(r'第\s*[\d.,]+\s*(?:話|夜)|\d+\s*貫|前編|後編', '', cleaned)
+        
         cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned, flags=re.IGNORECASE)
@@ -564,7 +577,6 @@ def parse_html_with_regex(html_content, url):
 # ============================================================
 
 def process_single_url(item):
-    """Fungsi pekerja mandiri untuk mendownload dan mem-parsing 1 URL"""
     url, sitemap_file = item
     html_content, status = download_html_page(url)
     if status == 200 and html_content:
@@ -642,7 +654,6 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     start_time = time.time()
     
     results = []
-    # MULTI-THREADING EXECUTOR
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(process_single_url, item) for item in all_new_urls]
         for i, future in enumerate(concurrent.futures.as_completed(futures), 1):

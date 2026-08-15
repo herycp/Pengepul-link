@@ -1,0 +1,44 @@
+name: 📥 Dump Raw Titles (Untuk Analisis Pattern)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dump_titles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180 
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests cloudscraper beautifulsoup4 lxml
+
+      - name: Run Dumper Script
+        env:
+          PYTHONUNBUFFERED: 1
+        run: |
+          python dump_raw_titles.py
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update raw_titles.json untuk analisis pola [skip ci]"
+          file_pattern: 'raw_titles.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'

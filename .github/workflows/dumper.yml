@@ -2,6 +2,8 @@ name: 📥 Dump Raw Titles (Untuk Analisis Pattern)
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [run-dump] # Webhook trigger agar bisa diotomatisasi dengan cron-job.org
 
 permissions:
   contents: write
@@ -9,7 +11,7 @@ permissions:
 jobs:
   dump_titles:
     runs-on: ubuntu-latest
-    timeout-minutes: 180 
+    timeout-minutes: 60  # Diturunkan ke 60 menit karena 2500 link via multi-thread akan selesai cepat
 
     steps:
       - name: Checkout repository
@@ -34,11 +36,27 @@ jobs:
           PYTHONUNBUFFERED: 1
         run: |
           python dump_raw_titles.py
+          
+      - name: Check for changes and Set Output
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            TOTAL=$(jq 'length' raw_titles.json 2>/dev/null || echo "unknown")
+            echo "TOTAL_TITLES=$TOTAL" >> $GITHUB_ENV
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "✅ Tidak ada penambahan raw title baru"
+          fi
 
       - name: Commit and push changes
+        if: steps.check_changes.outputs.changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update raw_titles.json untuk analisis pola [skip ci]"
+          commit_message: |
+            chore: update raw_titles.json batch 2500 [skip ci]
+            
+            - Total raw titles collected: ${{ env.TOTAL_TITLES }}
           file_pattern: 'raw_titles.json'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'

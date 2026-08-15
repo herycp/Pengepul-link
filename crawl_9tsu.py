@@ -64,7 +64,7 @@ def init_database():
             url TEXT UNIQUE,
             title TEXT,
             season INTEGER,
-            episode INTEGER,
+            episode TEXT,
             image TEXT,
             description TEXT,
             embed_url TEXT,
@@ -144,7 +144,7 @@ def save_to_database(metadata_list):
         (
             data.get('url'),
             data.get('title'),
-            data.get('season'),
+            data.get('season', 1),
             data.get('episode'),
             data.get('image'),
             data.get('description'),
@@ -467,25 +467,151 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 7. PARSING HTML & REGEX TERBARU
+# 7. PARSING HTML & REGEX TERBARU (DITINGKATKAN)
 # ============================================================
 
 def normalize_zenkaku_to_hankaku(text):
     """Mengubah angka full-width (０-９) menjadi half-width (0-9) untuk mempermudah regex"""
     if not text:
         return text
-    return text.translate(str.maketrans('０１２３４５６７８９', '0123456789'))
+    # Konversi full-width angka ke half-width
+    text = text.translate(str.maketrans('０１２３４５６７８９', '0123456789'))
+    # Konversi full-width huruf A-Z, a-z ke half-width (opsional, untuk Season)
+    text = text.translate(str.maketrans(
+        'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ',
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    ))
+    return text
+
+def clean_title(title):
+    """Membersihkan judul dari suffix, tanggal, dan noise"""
+    if not title:
+        return title
+    
+    # 1. Hapus suffix standar (tanpa pemisah)
+    title = re.sub(r'\s*9tsu\s+Dailymotion\s+Miomio\s+Youtube\s+9tsu\.in', '', title, flags=re.I)
+    title = re.sub(r'\s*[-|]\s*9tsu.*$', '', title, flags=re.I)
+    title = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', title, flags=re.I)
+    title = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', title, flags=re.I)
+    title = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', title, flags=re.I)
+    
+    # 2. Hapus tanggal (YYYY年MM月DD日)
+    title = re.sub(r'\d{4}年\d{1,2}月\d{1,2}日', '', title)
+    
+    # 3. Hapus kata-kata noise umum
+    title = re.sub(r'\s*(?:動画|ドラマ|スペシャル|完全版|再放送|新シリーズ|続編|最新話|最終回|特別編|傑作選)\s*', ' ', title)
+    title = re.sub(r'[\[\(]?(?:再|字|解|デ|SS|終|新|初)[\]\)]?', '', title)
+    title = re.sub(r'\s*\([^)]*\d{4}[^)]*\)', '', title)  # (2024)
+    
+    # 4. Hapus "Just a moment..." (dari error)
+    title = re.sub(r'^Just a moment\.\.\.$', '', title, flags=re.I)
+    
+    # 5. Hapus spasi ganda & strip
+    title = re.sub(r'\s+', ' ', title).strip()
+    title = re.sub(r'^[-|~]+\s*|\s*[-|~]+$', '', title).strip()
+    
+    return title
+
+def extract_season_episode(title):
+    """
+    Mengekstrak season dan episode dari judul menggunakan regex yang ditingkatkan
+    Returns: (cleaned_title, season, episode)
+    """
+    if not title:
+        return title, 1, None
+    
+    # Normalisasi untuk parsing
+    norm_title = normalize_zenkaku_to_hankaku(title)
+    original_title = title  # Simpan untuk fallback
+    
+    season = None
+    episode = None
+    remaining = norm_title
+    
+    # ---- EKSTRAKSI SEASON ----
+    season_patterns = [
+        # Pattern dengan spasi atau tanpa spasi
+        (r'(?:Season|season)\s*(\d+)', 'season_with_space'),
+        (r'(?:Season|season)(\d+)', 'season_no_space'),
+        (r'第\s*(\d+)\s*シーズン', 'season_ja'),
+        (r'(\d+)\s*シーズン', 'season_ja_simple'),
+        (r'Season\s*([0-9]+)', 'season_eng'),
+        (r'Ｓｅａｓｏｎ\s*(\d+)', 'season_fullwidth'),
+    ]
+    
+    for pattern, _ in season_patterns:
+        match = re.search(pattern, remaining, re.IGNORECASE)
+        if match:
+            try:
+                season = int(match.group(1))
+                # Hapus pola dari string
+                remaining = re.sub(pattern, '', remaining, flags=re.IGNORECASE)
+                break
+            except (ValueError, TypeError):
+                continue
+    
+    # ---- EKSTRAKSI EPISODE ----
+    episode_patterns = [
+        # Pola paling spesifik dulu
+        (r'第\s*([\d.,-]+)\s*(?:話|夜|話・夜)', 'ep_chapter'),  # 第1話, 第1,2話, 第1-3話, 第3夜
+        (r'([\d.,-]+)\s*(?:話|夜|話・夜)', 'ep_simple'),         # 1話, 1,2話
+        (r'(?:#|EP|ep)\s*(\d+)', 'ep_hash'),                    # #6, EP2
+        (r'(\d+)\s*(?:貫|話・貫)', 'ep_kan'),                   # 7貫
+        (r'(前編|後編|中編|前篇|後篇)', 'ep_part'),             # 前編/後編
+        (r'(\d+)\s*(?:の\s*)?(?:話|エピソード)', 'ep_no'),      # 1の話
+        (r'第\s*([\d.,-]+)\s*話', 'ep_chapter_alt'),            # fallback
+    ]
+    
+    for pattern, _ in episode_patterns:
+        match = re.search(pattern, remaining)
+        if match:
+            episode_val = match.group(1).strip() if match.group(1) else match.group(0)
+            # Jika episode berupa angka saja, simpan sebagai string (untuk fleksibilitas)
+            episode = episode_val
+            # Hapus pola dari string
+            remaining = re.sub(pattern, '', remaining)
+            break
+    
+    # Jika tidak ada episode, coba cari pola "第X話" di judul asli (fallback)
+    if episode is None:
+        match = re.search(r'第\s*([\d.,-]+)\s*話', remaining)
+        if match:
+            episode = match.group(1).strip()
+            remaining = re.sub(r'第\s*[\d.,-]+\s*話', '', remaining)
+    
+    # ---- BERSIHKAN REMAINING ----
+    remaining = clean_title(remaining)
+    
+    # Jika remaining kosong, gunakan original title yang sudah dibersihkan
+    if not remaining or remaining.strip() == '':
+        remaining = clean_title(original_title)
+        # Jika masih kosong, gunakan original title
+        if not remaining:
+            remaining = original_title
+    
+    # Default season = 1 jika tidak ditemukan
+    if season is None:
+        season = 1
+    
+    return remaining, season, episode
 
 def parse_html_page(html_content, url):
     metadata = {
-        "url": url, "title": None, "season": None,
-        "episode": None, "image": None, "description": None,
-        "embed_url": None, "embed_platform": None
+        "url": url,
+        "title": None,
+        "season": 1,
+        "episode": None,
+        "image": None,
+        "description": None,
+        "embed_url": None,
+        "embed_platform": None
     }
-    if not html_content: return metadata
+    
+    if not html_content:
+        return metadata
     
     try:
-        soup = BeautifulSoup(html_content, 'lxml') 
+        soup = BeautifulSoup(html_content, 'lxml')
     except Exception:
         return metadata
     
@@ -505,48 +631,27 @@ def parse_html_page(html_content, url):
         raw_title = soup.title.get_text(strip=True)
 
     if raw_title:
-        # Default fallback
-        metadata["season"] = 1
-        metadata["episode"] = "Unmapped"
+        # Ekstrak season, episode, dan judul bersih
+        cleaned_title, season, episode = extract_season_episode(raw_title)
+        metadata["title"] = cleaned_title
+        metadata["season"] = season
+        metadata["episode"] = episode
 
-        # Mitigasi: Normalisasi angka Jepang (full-width ke ASCII)
-        normalized_title = normalize_zenkaku_to_hankaku(raw_title)
-
-        # 1. Ekstraksi Season (Fokus: Season X, 第Xシーズン, Lesson X)
-        match_s = re.search(r'(?:Season|season)\s*(\d+)|第\s*(\d+)\s*シーズン|Lesson\s*(\d+)', normalized_title, re.IGNORECASE)
-        if match_s:
-            season_num = match_s.group(1) or match_s.group(2) or match_s.group(3)
-            if season_num:
-                metadata["season"] = int(season_num)
-
-        # 2. Ekstraksi Episode (Fokus: 第X話, 第X,Y話, 第X.Y話, X貫, 第X夜, 前編/後編)
-        match_e = re.search(r'第\s*([\d.,]+)\s*(?:話|夜)|(\d+)\s*貫|(前編|後編)', normalized_title)
-        if match_e:
-            episode_val = match_e.group(1) or match_e.group(2) or match_e.group(3)
-            if episode_val:
-                metadata["episode"] = episode_val # Simpan sebagai string
-
-        # 3. Membersihkan Judul
-        cleaned = re.sub(r'(?:Season|season)\s*\d+|第\s*\d+\s*シーズン|Lesson\s*\d+', '', normalized_title, flags=re.IGNORECASE)
-        cleaned = re.sub(r'第\s*[\d.,]+\s*(?:話|夜)|\d+\s*貫|前編|後編', '', cleaned)
-        
-        cleaned = re.sub(r'\s*[-|]\s*9tsu.*$', '', cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r'\s*[-|]\s*[Dd]ailymotion.*$', '', cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r'\s*[-|]\s*[Mm]iomio.*$', '', cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r'\s*[-|]\s*[Yy]outube.*$', '', cleaned, flags=re.IGNORECASE)
-        
-        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-        cleaned = re.sub(r'^[-|~]+\s*|\s*[-|~]+$', '', cleaned).strip()
-        metadata["title"] = cleaned
-
+    # Ekstrak image
     og_image = soup.find('meta', property='og:image')
-    if og_image: metadata["image"] = og_image.get('content', '').strip()
-    if body_content: metadata["description"] = body_content.get_text(separator=' ', strip=True)
+    if og_image:
+        metadata["image"] = og_image.get('content', '').strip()
     
+    # Ekstrak deskripsi
+    if body_content:
+        metadata["description"] = body_content.get_text(separator=' ', strip=True)
+    
+    # Ekstrak embed
     iframe = soup.find('iframe')
     if iframe and iframe.get('src'):
         embed_url = iframe['src'].strip()
-        if embed_url.startswith('//'): embed_url = 'https:' + embed_url
+        if embed_url.startswith('//'):
+            embed_url = 'https:' + embed_url
         metadata["embed_url"] = embed_url
         metadata["embed_platform"] = urlparse(embed_url).netloc
     else:
@@ -555,7 +660,8 @@ def parse_html_page(html_content, url):
             source = video.find('source')
             if source and source.get('src'):
                 embed_url = source['src'].strip()
-                if embed_url.startswith('//'): embed_url = 'https:' + embed_url
+                if embed_url.startswith('//'):
+                    embed_url = 'https:' + embed_url
                 metadata["embed_url"] = embed_url
                 metadata["embed_platform"] = urlparse(embed_url).netloc
         else:
@@ -563,10 +669,12 @@ def parse_html_page(html_content, url):
                 href = a['href']
                 if any(x in href for x in ['dailymotion', 'youtube', 'ok.ru', 'vimeo']):
                     embed_url = href.strip()
-                    if embed_url.startswith('//'): embed_url = 'https:' + embed_url
+                    if embed_url.startswith('//'):
+                        embed_url = 'https:' + embed_url
                     metadata["embed_url"] = embed_url
                     metadata["embed_platform"] = urlparse(embed_url).netloc
                     break
+    
     return metadata
 
 def parse_html_with_regex(html_content, url):
@@ -584,8 +692,13 @@ def process_single_url(item):
         return metadata, status
     else:
         return {
-            "url": url, "title": None, "season": None, "episode": None,
-            "image": None, "description": None, "embed_url": None,
+            "url": url,
+            "title": None,
+            "season": 1,
+            "episode": None,
+            "image": None,
+            "description": None,
+            "embed_url": None,
             "embed_platform": None
         }, status
 
@@ -595,7 +708,8 @@ def process_single_url(item):
 
 def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     init_database()
-    if reset: reset_processing_state()
+    if reset:
+        reset_processing_state()
     total_missing, reset_count = verify_sitemap_coverage()
     
     if is_all_sitemaps_processed():
@@ -603,32 +717,39 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         download_all_sitemaps()
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
-            if all_urls: upsert_processing_state(f, 0, len(all_urls), 'pending')
+            if all_urls:
+                upsert_processing_state(f, 0, len(all_urls), 'pending')
     elif force_download:
         download_all_sitemaps()
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
-            if all_urls: upsert_processing_state(f, 0, len(all_urls), 'pending')
+            if all_urls:
+                upsert_processing_state(f, 0, len(all_urls), 'pending')
     
     sitemap_files = get_sitemap_files()
     if not sitemap_files:
         download_all_sitemaps()
         for f in get_sitemap_files():
             all_urls = get_urls_from_local_sitemap(f)
-            if all_urls: upsert_processing_state(f, 0, len(all_urls), 'pending')
+            if all_urls:
+                upsert_processing_state(f, 0, len(all_urls), 'pending')
     
     unprocessed = get_unprocessed_sitemaps()
-    if not unprocessed: return
+    if not unprocessed:
+        print("✅ Semua sitemap sudah diproses.")
+        return
     
     target_count = BATCH_SIZE
-    if max_pages and max_pages < target_count: target_count = max_pages
+    if max_pages and max_pages < target_count:
+        target_count = max_pages
     
     all_new_urls = []
     processed_sitemap_info = []
     remaining = target_count
     
     for sitemap_file, offset, total in unprocessed:
-        if remaining <= 0: break
+        if remaining <= 0:
+            break
         while offset < total and remaining > 0:
             batch, new_offset, total_urls = get_url_batch_from_sitemap(sitemap_file, offset, remaining)
             if not batch:
@@ -636,17 +757,22 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
                 break
             existing, new_urls = get_existing_urls(batch)
             if new_urls:
-                for url in new_urls: all_new_urls.append((url, sitemap_file))
+                for url in new_urls:
+                    all_new_urls.append((url, sitemap_file))
                 remaining -= len(new_urls)
                 processed_sitemap_info.append({
-                    'sitemap_file': sitemap_file, 'new_offset': new_offset,
-                    'total': total_urls, 'taken': len(new_urls)
+                    'sitemap_file': sitemap_file,
+                    'new_offset': new_offset,
+                    'total': total_urls,
+                    'taken': len(new_urls)
                 })
             offset = new_offset
-        if offset >= total: mark_sitemap_processed(sitemap_file)
-        else: upsert_processing_state(sitemap_file, offset, total, 'pending')
+        if offset >= total:
+            mark_sitemap_processed(sitemap_file)
+        else:
+            upsert_processing_state(sitemap_file, offset, total, 'pending')
     
-    if not all_new_urls: 
+    if not all_new_urls:
         print("✅ Tidak ada URL baru untuk diproses.")
         return
     
@@ -660,9 +786,10 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
             metadata, status = future.result()
             results.append(metadata)
             if status == 200 and metadata.get('title'):
-                print(f"[{i}/{len(all_new_urls)}] ✅ [{metadata.get('title')}] S{metadata.get('season')}E{metadata.get('episode')}")
+                ep_display = metadata.get('episode', '?')
+                print(f"[{i}/{len(all_new_urls)}] ✅ [{metadata.get('title')}] S{metadata.get('season', 1)}E{ep_display}")
             else:
-                print(f"[{i}/{len(all_new_urls)}] ⚠️ Gagal/Invalid ({status}): {metadata.get('url')}")
+                print(f"[{i}/{len(all_new_urls)}] ⚠️ Gagal/Invalid ({status}): {metadata.get('url', 'unknown')}")
     
     print("\n💾 Menyimpan hasil ke database secara massal...")
     new_count = save_to_database(results)
@@ -677,6 +804,11 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     export_to_json()
     elapsed = time.time() - start_time
     print(f"\n⏱️ Crawling Selesai! Waktu: {elapsed:.2f} detik ({elapsed/60:.2f} menit). {new_count} link baru disimpan.")
+    print(f"📊 Total link di database: {get_database_count()}")
+
+# ============================================================
+# 10. ENTRY POINT
+# ============================================================
 
 if __name__ == "__main__":
     import sys
@@ -686,12 +818,15 @@ if __name__ == "__main__":
     i = 1
     while i < len(sys.argv):
         arg = sys.argv[i].lower()
-        if arg == '--download': force_download = True
-        elif arg == '--reset': reset = True
+        if arg == '--download':
+            force_download = True
+        elif arg == '--reset':
+            reset = True
         elif arg == '--max-pages' and i + 1 < len(sys.argv):
             try:
                 max_pages = int(sys.argv[i + 1])
                 i += 1
-            except: pass
+            except ValueError:
+                pass
         i += 1
     crawl_one_sitemap(force_download, reset, max_pages)

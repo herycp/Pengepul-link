@@ -22,12 +22,14 @@ def init_mitigasi_table():
     conn.close()
 
 def process_url(row):
+    # Kueri mengambil: id, url, title, season, episode
     db_id, url, old_title, old_season, old_episode = row
     html_content, status = download_html_page(url)
     
     result = {
         'db_id': db_id,
         'url': url,
+        'new_title': old_title,
         'new_season': old_season,
         'new_episode': old_episode,
         'status': status,
@@ -36,11 +38,16 @@ def process_url(row):
     
     if status == 200 and html_content:
         metadata = parse_html_page(html_content, url)
+        new_title = metadata.get('title')
         new_season = metadata.get('season')
         new_episode = metadata.get('episode')
         
-        # Bandingkan sebagai string untuk mencegah bypass error tipe (misal: "1,2" vs 1)
-        if new_season != old_season or str(new_episode) != str(old_episode):
+        def safe_str(val):
+            return str(val) if val is not None else None
+
+        # Bandingkan Judul, Season, dan Episode
+        if new_title != old_title or new_season != old_season or safe_str(new_episode) != safe_str(old_episode):
+            result['new_title'] = new_title
             result['new_season'] = new_season
             result['new_episode'] = new_episode
             result['changed'] = True
@@ -63,6 +70,7 @@ def mitigasi_database():
     
     print(f"Mencari maksimal {BATCH_SIZE} data yang belum dimitigasi...")
     
+    # Ambil kolom title juga untuk divalidasi
     cursor.execute(f'''
         SELECT id, url, title, season, episode 
         FROM links 
@@ -86,7 +94,9 @@ def mitigasi_database():
             res = future.result()
             results.append(res)
             if res['changed']:
-                print(f"[{i}/{len(rows)}] 🔄 KOREKSI: {res['url']} -> S{res['new_season']}E{res['new_episode']}")
+                s_log = res['new_season'] if res['new_season'] is not None else "NULL"
+                e_log = res['new_episode'] if res['new_episode'] is not None else "NULL"
+                print(f"[{i}/{len(rows)}] 🔄 UPDATE: {res['url']} -> [{res['new_title']}] S{s_log}E{e_log}")
             else:
                 print(f"[{i}/{len(rows)}] ✅ OK / HTTP {res['status']}")
                 
@@ -98,12 +108,13 @@ def mitigasi_database():
     for res in results:
         log_data.append((res['db_id'],))
         if res['changed']:
-            # Menyimpan episode sebagai string secara paksa
-            update_data.append((res['new_season'], str(res['new_episode']), res['db_id']))
+            ep_val = str(res['new_episode']) if res['new_episode'] is not None else None
+            # Parameter sekarang berjumlah 4 (title, season, episode, id)
+            update_data.append((res['new_title'], res['new_season'], ep_val, res['db_id']))
             total_diperbaiki += 1
             
     if update_data:
-        cursor.executemany('UPDATE links SET season = ?, episode = ? WHERE id = ?', update_data)
+        cursor.executemany('UPDATE links SET title = ?, season = ?, episode = ? WHERE id = ?', update_data)
     
     cursor.executemany('INSERT OR IGNORE INTO mitigasi_log (link_id) VALUES (?)', log_data)
     conn.commit()
@@ -111,7 +122,7 @@ def mitigasi_database():
     
     elapsed = time.time() - start_time
     print(f"\n⏱️ Selesai! Waktu eksekusi: {elapsed:.2f} detik ({elapsed/60:.2f} menit).")
-    print(f"Berhasil mengoreksi {total_diperbaiki} baris dari batch ini.")
+    print(f"Berhasil mengoreksi {total_diperbaiki} baris dari batch ini (termasuk pembersihan Judul).")
     
     print("Memperbarui file links.json...")
     export_to_json()

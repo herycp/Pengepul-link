@@ -7,8 +7,8 @@ import sys
 # Mengambil fungsi parser yang sudah diupdate dari file crawl
 from crawl_9tsu import download_html_page, parse_html_page, DB_FILE, export_to_json
 
-BATCH_SIZE = 1000      
-MAX_WORKERS = 15       
+BATCH_SIZE = 2500      
+MAX_WORKERS = 25       
 
 def init_mitigasi_table():
     conn = sqlite3.connect(DB_FILE)

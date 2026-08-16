@@ -22,7 +22,6 @@ def init_mitigasi_table():
     conn.close()
 
 def process_url(row):
-    # Kueri mengambil: id, url, title, season, episode
     db_id, url, old_title, old_season, old_episode = row
     html_content, status = download_html_page(url)
     

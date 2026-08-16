@@ -4,11 +4,11 @@ from datetime import datetime
 import concurrent.futures
 import sys
 
-# Import dari script utama Anda
+# Mengambil fungsi parser yang sudah diupdate dari file crawl
 from crawl_9tsu import download_html_page, parse_html_page, DB_FILE, export_to_json
 
-BATCH_SIZE = 1000      # Jumlah link yang diproses per eksekusi
-MAX_WORKERS = 15       # Membuka 15 koneksi download secara bersamaan (Aman untuk bypass CF)
+BATCH_SIZE = 1000      
+MAX_WORKERS = 15       
 
 def init_mitigasi_table():
     conn = sqlite3.connect(DB_FILE)
@@ -22,10 +22,6 @@ def init_mitigasi_table():
     conn.close()
 
 def process_url(row):
-    """
-    Fungsi ini berjalan secara independen di dalam thread terpisah.
-    Tugasnya murni hanya download dan parsing, tanpa menyentuh database agar tidak bentrok.
-    """
     db_id, url, old_title, old_season, old_episode = row
     html_content, status = download_html_page(url)
     
@@ -43,7 +39,7 @@ def process_url(row):
         new_season = metadata.get('season')
         new_episode = metadata.get('episode')
         
-        # Cek apakah hasil parser baru berbeda dengan data lama
+        # Bandingkan sebagai string untuk mencegah bypass error tipe (misal: "1,2" vs 1)
         if new_season != old_season or str(new_episode) != str(old_episode):
             result['new_season'] = new_season
             result['new_episode'] = new_episode
@@ -52,7 +48,6 @@ def process_url(row):
     return result
 
 def mitigasi_database():
-    # Fitur Reset Log Mitigasi
     if '--reset' in sys.argv:
         print("🔄 Opsi --reset terdeteksi. Menghapus rekaman mitigasi_log...")
         conn = sqlite3.connect(DB_FILE)
@@ -60,7 +55,7 @@ def mitigasi_database():
         cursor.execute('DROP TABLE IF EXISTS mitigasi_log')
         conn.commit()
         conn.close()
-        print("✅ Log berhasil dibersihkan. Semua data akan dimitigasi ulang dari awal.")
+        print("✅ Log berhasil dibersihkan. Semua data akan dimitigasi ulang.")
 
     init_mitigasi_table()
     conn = sqlite3.connect(DB_FILE)
@@ -83,54 +78,37 @@ def mitigasi_database():
         
     print(f"🚀 Memulai pemrosesan Multi-Threading dengan {MAX_WORKERS} pekerja...")
     start_time = time.time()
-    
     results = []
     
-    # ==========================================
-    # EKSEKUSI MULTI-THREADING PENGUNDUHAN
-    # ==========================================
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        # Lempar semua pekerjaan ke pekerja (threads)
         futures = [executor.submit(process_url, row) for row in rows]
-        
-        # Tangkap hasilnya begitu ada yang selesai
         for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
             res = future.result()
             results.append(res)
-            
-            # Print log progres sederhana
             if res['changed']:
                 print(f"[{i}/{len(rows)}] 🔄 KOREKSI: {res['url']} -> S{res['new_season']}E{res['new_episode']}")
             else:
                 print(f"[{i}/{len(rows)}] ✅ OK / HTTP {res['status']}")
                 
-    # ==========================================
-    # BATCH DATABASE UPDATE (SUPER CEPAT)
-    # ==========================================
     print("\n💾 Menyimpan hasil ke database SQLite secara massal...")
     update_data = []
     log_data = []
     total_diperbaiki = 0
     
     for res in results:
-        # Kumpulkan ID untuk ditandai sudah diproses
         log_data.append((res['db_id'],))
-        
-        # Kumpulkan data yang butuh diupdate
         if res['changed']:
+            # Menyimpan episode sebagai string secara paksa
             update_data.append((res['new_season'], str(res['new_episode']), res['db_id']))
             total_diperbaiki += 1
             
-    # Eksekusi database secara borongan
     if update_data:
         cursor.executemany('UPDATE links SET season = ?, episode = ? WHERE id = ?', update_data)
     
     cursor.executemany('INSERT OR IGNORE INTO mitigasi_log (link_id) VALUES (?)', log_data)
-    
     conn.commit()
     conn.close()
     
-    # Hitung waktu
     elapsed = time.time() - start_time
     print(f"\n⏱️ Selesai! Waktu eksekusi: {elapsed:.2f} detik ({elapsed/60:.2f} menit).")
     print(f"Berhasil mengoreksi {total_diperbaiki} baris dari batch ini.")

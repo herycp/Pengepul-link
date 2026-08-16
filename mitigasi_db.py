@@ -7,8 +7,8 @@ import sys
 # Mengambil fungsi parser yang sudah diupdate dari file crawl
 from crawl_9tsu import download_html_page, parse_html_page, DB_FILE, export_to_json
 
-BATCH_SIZE = 2500      
-MAX_WORKERS = 18       
+BATCH_SIZE = 1000      
+MAX_WORKERS = 15       
 
 def init_mitigasi_table():
     conn = sqlite3.connect(DB_FILE)
@@ -32,7 +32,8 @@ def process_url(row):
         'new_season': old_season,
         'new_episode': old_episode,
         'status': status,
-        'changed': False
+        'changed': False,
+        'failed_parsing': False # Flag proteksi baru
     }
     
     if status == 200 and html_content:
@@ -44,12 +45,18 @@ def process_url(row):
         def safe_str(val):
             return str(val) if val is not None else None
 
-        # Bandingkan Judul, Season, dan Episode
-        if new_title != old_title or new_season != old_season or safe_str(new_episode) != safe_str(old_episode):
-            result['new_title'] = new_title
-            result['new_season'] = new_season
-            result['new_episode'] = new_episode
-            result['changed'] = True
+        # PROTEKSI FATAL: Hanya proses jika new_title valid (Tidak None/Kosong)
+        if new_title:
+            if new_title != old_title or new_season != old_season or safe_str(new_episode) != safe_str(old_episode):
+                result['new_title'] = new_title
+                result['new_season'] = new_season
+                result['new_episode'] = new_episode
+                result['changed'] = True
+        else:
+            # Jika mendapat 200 tapi title kosong (Misal diblokir Cloudflare Captcha)
+            result['failed_parsing'] = True
+    else:
+        result['failed_parsing'] = True
             
     return result
 
@@ -69,7 +76,6 @@ def mitigasi_database():
     
     print(f"Mencari maksimal {BATCH_SIZE} data yang belum dimitigasi...")
     
-    # Ambil kolom title juga untuk divalidasi
     cursor.execute(f'''
         SELECT id, url, title, season, episode 
         FROM links 
@@ -92,10 +98,14 @@ def mitigasi_database():
         for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
             res = future.result()
             results.append(res)
+            
+            # Log output disesuaikan
             if res['changed']:
                 s_log = res['new_season'] if res['new_season'] is not None else "NULL"
                 e_log = res['new_episode'] if res['new_episode'] is not None else "NULL"
                 print(f"[{i}/{len(rows)}] 🔄 UPDATE: {res['url']} -> [{res['new_title']}] S{s_log}E{e_log}")
+            elif res.get('failed_parsing'):
+                print(f"[{i}/{len(rows)}] ⚠️ GAGAL PARSING/BLOKIR: {res['url']} (Dilewati)")
             else:
                 print(f"[{i}/{len(rows)}] ✅ OK / HTTP {res['status']}")
                 
@@ -105,23 +115,29 @@ def mitigasi_database():
     total_diperbaiki = 0
     
     for res in results:
+        # Jika gagal parsing / koneksi, JANGAN masukkan ke log agar dieksekusi ulang di batch berikutnya
+        if res.get('failed_parsing'):
+            continue
+            
         log_data.append((res['db_id'],))
+        
         if res['changed']:
             ep_val = str(res['new_episode']) if res['new_episode'] is not None else None
-            # Parameter sekarang berjumlah 4 (title, season, episode, id)
             update_data.append((res['new_title'], res['new_season'], ep_val, res['db_id']))
             total_diperbaiki += 1
             
     if update_data:
         cursor.executemany('UPDATE links SET title = ?, season = ?, episode = ? WHERE id = ?', update_data)
     
-    cursor.executemany('INSERT OR IGNORE INTO mitigasi_log (link_id) VALUES (?)', log_data)
+    if log_data:
+        cursor.executemany('INSERT OR IGNORE INTO mitigasi_log (link_id) VALUES (?)', log_data)
+        
     conn.commit()
     conn.close()
     
     elapsed = time.time() - start_time
     print(f"\n⏱️ Selesai! Waktu eksekusi: {elapsed:.2f} detik ({elapsed/60:.2f} menit).")
-    print(f"Berhasil mengoreksi {total_diperbaiki} baris dari batch ini (termasuk pembersihan Judul).")
+    print(f"Berhasil mengoreksi {total_diperbaiki} baris dari batch ini.")
     
     print("Memperbarui file links.json...")
     export_to_json()

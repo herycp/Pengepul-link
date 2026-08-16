@@ -413,7 +413,7 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 5. PARSER & REGEX (PRIORITAS ANGKA & JUDUL)
+# 5. PARSER & REGEX 
 # ============================================================
 
 def normalize_zenkaku_to_hankaku(text):
@@ -458,7 +458,7 @@ def parse_html_page(html_content, url):
                 metadata["season"] = int(season_num)
                 season_found = True
 
-        # 2. Ekstraksi Episode (Sistem Prioritas)
+        # 2. Ekstraksi Episode
         regex_ep_num = r'(?i)第?\s*([\d.,-]+)\s*(?:話|夜|貫|話・夜)|(?:#|EP)\s*([\d.,-]+)'
         regex_ep_text = r'(前編|後編|中編|前篇|後篇)'
         
@@ -480,12 +480,11 @@ def parse_html_page(html_content, url):
 
         # 4. Membersihkan Judul
         cleaned = re.sub(season_regex, '', normalized_title)
-        
-        # Gabungkan regex pembersih episode (hapus angka & teks secara bersamaan)
         regex_ep_clean = r'(?i)第?\s*[\d.,-]+\s*(?:話|夜|貫|話・夜)|(?:#|EP)\s*[\d.,-]+|前編|後編|中編|前篇|後篇'
         cleaned = re.sub(regex_ep_clean, '', cleaned)
         
-        cleaned = re.sub(r'(?i)\s*[-|]\s*(?:9tsu|Dailymotion|Miomio|Youtube).*$', '', cleaned)
+        # PERBAIKAN: Strip/Pipa/Tilde sekarang opsional (?:[-|~]\s*)? sehingga spasi biasa pun akan terpotong
+        cleaned = re.sub(r'(?i)\s*(?:[-|~]\s*)?(?:9tsu|Dailymotion|Miomio|Youtube).*$', '', cleaned)
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
         cleaned = re.sub(r'^[-|~]+\s*|\s*[-|~]+$', '', cleaned).strip()
         metadata["title"] = cleaned

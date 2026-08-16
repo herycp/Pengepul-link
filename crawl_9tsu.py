@@ -141,7 +141,7 @@ def save_to_database(metadata_list):
             data.get('url'),
             data.get('title'),
             data.get('season'),
-            str(data.get('episode')) if data.get('episode') else None, # Memaksa tipe string untuk sqlite
+            str(data.get('episode')) if data.get('episode') is not None else None, # Memaksa tipe string jika ada nilainya, atau None (NULL)
             data.get('image'),
             data.get('description'),
             data.get('embed_url'),
@@ -413,7 +413,7 @@ def download_html_page(url, retry=3):
     return None, 403
 
 # ============================================================
-# 5. PARSER & REGEX (REFINED)
+# 5. PARSER & REGEX (REFINED & LOGIKA NULL)
 # ============================================================
 
 def normalize_zenkaku_to_hankaku(text):
@@ -444,31 +444,45 @@ def parse_html_page(html_content, url):
     elif soup.title: raw_title = soup.title.get_text(strip=True)
 
     if raw_title:
-        metadata["season"] = 1
-        metadata["episode"] = "Unmapped"
+        # Default initialization di awal
+        metadata["season"] = None
+        metadata["episode"] = None
+        season_found = False
 
         normalized_title = normalize_zenkaku_to_hankaku(raw_title)
 
-        # 1. Ekstraksi Season (Menangani Season, Lesson, Seri, dan Siizun)
+        # 1. Ekstraksi Season
         season_regex = r'(?i)(?:Season|Lesson)\s*(\d+)|第\s*(\d+)\s*(?:シーズン|シリーズ)|(?:シリーズ|シリ－ズ)\s*(\d+)'
         match_s = re.search(season_regex, normalized_title)
         if match_s:
             season_num = match_s.group(1) or match_s.group(2) or match_s.group(3)
-            if season_num: metadata["season"] = int(season_num)
+            if season_num: 
+                metadata["season"] = int(season_num)
+                season_found = True
 
-        # 2. Ekstraksi Episode (Menangani Episode Ganda/Pecahan dan Teks Murni)
+        # 2. Ekstraksi Episode
         episode_regex = r'(?i)第?\s*([\d.,-]+)\s*(?:話|夜|貫|話・夜)|(?:#|EP)\s*([\d.,-]+)|(前編|後編|中編|前篇|後篇)'
         match_e = re.search(episode_regex, normalized_title)
         if match_e:
             episode_val = match_e.group(1) or match_e.group(2) or match_e.group(3)
-            if episode_val: metadata["episode"] = str(episode_val) # Diperlakukan sebagai String
+            if episode_val: 
+                metadata["episode"] = str(episode_val)
 
-        # 3. Membersihkan Judul
+        # 3. Logika Korelasi Season & Episode (Baru)
+        # Jika Season TIDAK ditemukan dari regex:
+        if not season_found:
+            if metadata["episode"] is None:
+                # Jika Episode juga NULL -> Ini video/film lepas, jadi season dibuat NULL.
+                metadata["season"] = None
+            else:
+                # Jika ada Episode -> Asumsikan sebagai Season 1
+                metadata["season"] = 1
+
+        # 4. Membersihkan Judul
         cleaned = re.sub(season_regex, '', normalized_title)
         cleaned = re.sub(episode_regex, '', cleaned)
         cleaned = re.sub(r'(?i)\s*[-|]\s*(?:9tsu|Dailymotion|Miomio|Youtube).*$', '', cleaned)
         
-        # Membersihkan simbol sisa secara akurat
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
         cleaned = re.sub(r'^[-|~]+\s*|\s*[-|~]+$', '', cleaned).strip()
         metadata["title"] = cleaned
@@ -575,7 +589,10 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
             metadata, status = future.result()
             results.append(metadata)
             if status == 200 and metadata.get('title'):
-                print(f"[{i}/{len(all_new_urls)}] ✅ [{metadata.get('title')}] S{metadata.get('season')}E{metadata.get('episode')}")
+                # Membuat formatting agar di log console mencetak 'NULL' jika nilainya kosong (agar lebih enak dilihat)
+                s_log = metadata.get('season') if metadata.get('season') is not None else "NULL"
+                e_log = metadata.get('episode') if metadata.get('episode') is not None else "NULL"
+                print(f"[{i}/{len(all_new_urls)}] ✅ [{metadata.get('title')}] S{s_log}E{e_log}")
             else:
                 print(f"[{i}/{len(all_new_urls)}] ⚠️ Gagal/Invalid ({status}): {metadata.get('url')}")
     

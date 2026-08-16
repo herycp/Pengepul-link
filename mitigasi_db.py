@@ -8,7 +8,7 @@ import sys
 from crawl_9tsu import download_html_page, parse_html_page, DB_FILE, export_to_json
 
 BATCH_SIZE = 2500      
-MAX_WORKERS = 25       
+MAX_WORKERS = 20       
 
 def init_mitigasi_table():
     conn = sqlite3.connect(DB_FILE)

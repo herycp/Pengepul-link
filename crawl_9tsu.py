@@ -131,8 +131,13 @@ def save_to_database(metadata_list):
     existing, new_urls = get_existing_urls(urls)
     if not new_urls:
         return 0
-    new_data = [data for data in metadata_list if data.get('url') in new_urls]
+        
+    # PROTEKSI: Hanya data dengan judul valid (title tidak None/kosong) yang boleh masuk ke Database
+    new_data = [data for data in metadata_list if data.get('url') in new_urls and data.get('title')]
     
+    if not new_data:
+        return 0
+        
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
@@ -483,7 +488,6 @@ def parse_html_page(html_content, url):
         regex_ep_clean = r'(?i)第?\s*[\d.,-]+\s*(?:話|夜|貫|話・夜)|(?:#|EP)\s*[\d.,-]+|前編|後編|中編|前篇|後篇'
         cleaned = re.sub(regex_ep_clean, '', cleaned)
         
-        # PERBAIKAN: Strip/Pipa/Tilde sekarang opsional (?:[-|~]\s*)? sehingga spasi biasa pun akan terpotong
         cleaned = re.sub(r'(?i)\s*(?:[-|~]\s*)?(?:9tsu|Dailymotion|Miomio|Youtube).*$', '', cleaned)
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
         cleaned = re.sub(r'^[-|~]+\s*|\s*[-|~]+$', '', cleaned).strip()

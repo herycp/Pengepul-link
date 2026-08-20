@@ -1,0 +1,71 @@
+name: 🚑 Fix Data dari VIP Clone
+
+on:
+  workflow_dispatch:
+    inputs:
+      db_ids:
+        description: 'Masukkan ID Database (Pisahkan dengan koma, misal: 1024, 1025, 1026)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  fix-vip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests cloudscraper beautifulsoup4 lxml
+      
+      - name: Run VIP Fixer Script
+        env:
+          PYTHONUNBUFFERED: 1
+        run: |
+          echo "🚀 Memulai perbaikan data menggunakan source 9tsu.vip..."
+          echo "Target IDs: ${{ github.event.inputs.db_ids }}"
+          python fix_vip.py "${{ github.event.inputs.db_ids }}"
+          
+      - name: Check output and set vars
+        id: check
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            TOTAL=$(jq '.total' links.json 2>/dev/null || echo "unknown")
+            echo "TOTAL_LINKS=$TOTAL" >> $GITHUB_ENV
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.check.outputs.changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            fix: update data metadata from 9tsu.vip fallback [skip ci]
+            
+            - Target IDs: ${{ github.event.inputs.db_ids }}
+            - Updated total links: ${{ env.TOTAL_LINKS }}
+          file_pattern: 'links.db links.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          
+      - name: No changes
+        if: steps.check.outputs.changes == 'false'
+        run: echo "✅ Eksekusi selesai, namun tidak ada perubahan data yang tersimpan."

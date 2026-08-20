@@ -1,6 +1,6 @@
 # 📋 Laporan Validasi Data (9tsu.vip)
 
-_Diperbarui: `2026-08-20 11:55:01 UTC`_
+_Diperbarui: `2026-08-20 12:17:10 UTC`_
 
 **Domain yang diverifikasi:** `https://9tsu.vip`
 
@@ -43,7 +43,7 @@ _Diperbarui: `2026-08-20 11:55:01 UTC`_
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 1821 | `https://9tsu.in/douga/346584.html` | `https://9tsu.vip/346584.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/346584.html)` |
-| 11842 | `https://9tsu.in/douga/69658.html` | `https://9tsu.vip/69658.html` | ⚠️ | `Error: HTTPSConnectionPool(host='9tsu.vip', port=443): Read timed out. (read timeout=15)` |
+| 11842 | `https://9tsu.in/douga/69658.html` | `https://9tsu.vip/69658.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/69658.html)` |
 
 ### `https://muxalor.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
@@ -1233,7 +1233,7 @@ _Diperbarui: `2026-08-20 11:55:01 UTC`_
 | 6266 | `https://9tsu.vip/106808.html` | `https://ok.ru/videoembed/8425524234881` | `HTTP 404 (URL: https://9tsu.vip/106808.html)` | `duplicate` |
 | 6787 | `https://9tsu.vip/105695.html` | `https://ok.ru/videoembed/9367181724175` | `HTTP 404 (URL: https://9tsu.vip/105695.html)` | `duplicate` |
 | 7776 | `https://9tsu.vip/41549.html` | `https://www.dailymotion.com/dorama9tsu` | `Tidak ditemukan embed` | `duplicate, other_domain` |
-| 11842 | `https://9tsu.vip/69658.html` | `https://muxalor.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTPSConnectionPool(host='9tsu.vip', port=443): Read timed out. (read timeout=15)` | `duplicate` |
+| 11842 | `https://9tsu.vip/69658.html` | `https://muxalor.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/69658.html)` | `duplicate` |
 | 13692 | `https://9tsu.vip/54008.html` | `https://ok.ru/videoembed/` | `Tidak ditemukan embed` | `duplicate` |
 | 14743 | `https://9tsu.vip/78536.html` | `https://ok.ru/videoembed/7627359652442` | `HTTP 404 (URL: https://9tsu.vip/78536.html)` | `duplicate` |
 | 17428 | `https://9tsu.vip/40879.html` | `https://ok.ru/videoembed/` | `Tidak ditemukan embed` | `duplicate` |

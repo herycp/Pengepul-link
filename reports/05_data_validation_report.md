@@ -1,26 +1,26 @@
 # 📋 Laporan Validasi Data (9tsu.vip)
 
-_Diperbarui: `2026-08-20 11:38:26 UTC`_
+_Diperbarui: `2026-08-20 11:55:01 UTC`_
 
 **Domain yang diverifikasi:** `https://9tsu.vip`
 
-**Total record mencurigakan:** `581` (Terdiri dari `581` URL Unik)
+**Total record mencurigakan:** `571` (Terdiri dari `571` URL Unik)
 
 ## 📊 Ringkasan Kategori
 
 | Kategori | Jumlah Record |
 | :--- | :---: |
-| `duplicate` | `578` |
-| `null_embed_platform` | `4` |
-| `other_domain` | `22` |
+| `duplicate` | `568` |
+| `null_embed_platform` | `5` |
+| `other_domain` | `23` |
 
 ## 🎯 Hasil Verifikasi Scraping (9tsu.vip)
 
 | Status | Jumlah | Persentase |
 | :--- | :---: | :---: |
-| ✅ Cocok | `78` | `13.4%` |
-| ❌ Tidak Cocok | `470` | `80.9%` |
-| ⚠️ Error Scraping | `33` | `5.7%` |
+| ✅ Cocok | `78` | `13.7%` |
+| ❌ Tidak Cocok | `460` | `80.6%` |
+| ⚠️ Error Scraping | `33` | `5.8%` |
 
 ## 1. Detail Duplikat (Kelompok)
 
@@ -43,7 +43,7 @@ _Diperbarui: `2026-08-20 11:38:26 UTC`_
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 1821 | `https://9tsu.in/douga/346584.html` | `https://9tsu.vip/346584.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/346584.html)` |
-| 11842 | `https://9tsu.in/douga/69658.html` | `https://9tsu.vip/69658.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/69658.html)` |
+| 11842 | `https://9tsu.in/douga/69658.html` | `https://9tsu.vip/69658.html` | ⚠️ | `Error: HTTPSConnectionPool(host='9tsu.vip', port=443): Read timed out. (read timeout=15)` |
 
 ### `https://muxalor.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
@@ -119,12 +119,13 @@ _Diperbarui: `2026-08-20 11:38:26 UTC`_
 | 18359 | `https://9tsu.in/douga/63062.html` | `https://9tsu.vip/63062.html` | ⚠️ | `Error: Tidak ditemukan embed` |
 | 21569 | `https://9tsu.in/douga/45486.html` | `https://9tsu.vip/45486.html` | ⚠️ | `Error: Tidak ditemukan embed` |
 
-### `<iframe width=` (4 record)
+### `<iframe width=` (5 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 4929 | `https://9tsu.in/douga/57468.html` | `https://9tsu.vip/57468.html` | ❌ | `https://ok.ru/videoembed/2195872352989` |
 | 4931 | `https://9tsu.in/douga/56418.html` | `https://9tsu.vip/56418.html` | ❌ | `https://ok.ru/videoembed/2094752598749` |
+| 4941 | `https://9tsu.in/douga/57341.html` | `https://9tsu.vip/57341.html` | ❌ | `https://ok.ru/videoembed/2694591285905` |
 | 6447 | `https://9tsu.in/douga/58255.html` | `https://9tsu.vip/58255.html` | ❌ | `https://ok.ru/videoembed/2268912028381` |
 | 6530 | `https://9tsu.in/douga/55984.html` | `https://9tsu.vip/55984.html` | ❌ | `https://ok.ru/videoembed/2056365411037` |
 
@@ -135,22 +136,40 @@ _Diperbarui: `2026-08-20 11:38:26 UTC`_
 | 4936 | `https://9tsu.in/douga/38944.html` | `https://9tsu.vip/38944.html` | ❌ | `https://blogspherenews.xyz/embed/670de54d172b884e34dbc22c` |
 | 4938 | `https://9tsu.in/douga/38149.html` | `https://9tsu.vip/38149.html` | ❌ | `https://blogspherenews.xyz/embed/670de54d172b884e34dbc22c` |
 
-### `https://ok.ru/videoembed/` (329 record)
+### `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 4941 | `https://9tsu.in/douga/57341.html` | `https://9tsu.vip/57341.html` | ❌ | `https://ok.ru/videoembed/2694591285905` |
-| 4983 | `https://9tsu.in/douga/29871.html` | `https://9tsu.vip/29871.html` | ❌ | `https://ok.ru/videoembed/3289704368887` |
-| 5006 | `https://9tsu.in/douga/53401.html` | `https://9tsu.vip/53401.html` | ❌ | `https://ok.ru/videoembed/2418829888223` |
+| 4986 | `https://9tsu.in/douga/56742.html` | `https://9tsu.vip/56742.html` | ✅ | `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19920 | `https://9tsu.in/douga/56727.html` | `https://9tsu.vip/56727.html` | ✅ | `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+
+### `https://muxalor.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+
+| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
+| :---: | :--- | :--- | :---: | :--- |
+| 5242 | `https://9tsu.in/douga/109591.html` | `https://9tsu.vip/109591.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109591.html)` |
+| 5267 | `https://9tsu.in/douga/109533.html` | `https://9tsu.vip/109533.html` | ❌ | `https://blogspherenews.xyz/embed/67c578f3adfbf7dcb5a6da6c` |
+
+### `https://ok.ru/videoembed/6660443081376` (3 record)
+
+| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
+| :---: | :--- | :--- | :---: | :--- |
+| 5263 | `https://9tsu.in/douga/109578.html` | `https://9tsu.vip/109578.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109578.html)` |
+| 5308 | `https://9tsu.in/douga/109453.html` | `https://9tsu.vip/109453.html` | ❌ | `https://muxalor.guru/embed/1bgTNimyig?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 5337 | `https://9tsu.in/douga/109371.html` | `https://9tsu.vip/109371.html` | ✅ | `https://ok.ru/videoembed/6660443081376` |
+
+### `https://ok.ru/videoembed/8812365089284` (2 record)
+
+| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
+| :---: | :--- | :--- | :---: | :--- |
+| 5334 | `https://9tsu.in/douga/109354.html` | `https://9tsu.vip/109354.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109354.html)` |
+| 5348 | `https://9tsu.in/douga/109326.html` | `https://9tsu.vip/109326.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109326.html)` |
+
+### `https://ok.ru/videoembed/` (318 record)
+
+| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
+| :---: | :--- | :--- | :---: | :--- |
 | 5497 | `https://9tsu.in/douga/41374.html` | `https://9tsu.vip/41374.html` | ⚠️ | `Error: Tidak ditemukan embed` |
-| 6373 | `https://9tsu.in/douga/53292.html` | `https://9tsu.vip/53292.html` | ❌ | `https://ok.ru/videoembed/2502634375905` |
-| 6427 | `https://9tsu.in/douga/79265.html` | `https://9tsu.vip/79265.html` | ❌ | `https://ok.ru/videoembed/4539652246050` |
-| 6527 | `https://9tsu.in/douga/54417.html` | `https://9tsu.vip/54417.html` | ❌ | `https://ok.ru/videoembed/1961224047325` |
-| 6532 | `https://9tsu.in/douga/49378.html` | `https://9tsu.vip/49378.html` | ❌ | `https://ok.ru/videoembed/2772343458461` |
-| 6534 | `https://9tsu.in/douga/48807.html` | `https://9tsu.vip/48807.html` | ❌ | `https://ok.ru/videoembed/2502441372385` |
-| 6535 | `https://9tsu.in/douga/48183.html` | `https://9tsu.vip/48183.html` | ❌ | `https://ok.ru/videoembed/2629305830077` |
-| 6544 | `https://9tsu.in/douga/53723.html` | `https://9tsu.vip/53723.html` | ❌ | `https://ok.ru/videoembed/2561139804859` |
-| 6554 | `https://9tsu.in/douga/55894.html` | `https://9tsu.vip/55894.html` | ❌ | `https://ok.ru/videoembed/2502523751137` |
 | 7065 | `https://9tsu.in/douga/41602.html` | `https://9tsu.vip/41602.html` | ❌ | `https://ok.ru/videoembed/<iframe src=` |
 | 7066 | `https://9tsu.in/douga/41379.html` | `https://9tsu.vip/41379.html` | ❌ | `https://ok.ru/videoembed/<iframe src=` |
 | 7067 | `https://9tsu.in/douga/41485.html` | `https://9tsu.vip/41485.html` | ❌ | `https://ok.ru/videoembed/<iframe src=` |
@@ -468,35 +487,6 @@ _Diperbarui: `2026-08-20 11:38:26 UTC`_
 | 24137 | `https://9tsu.in/douga/35241.html` | `https://9tsu.vip/35241.html` | ❌ | `https://ok.ru/videoembed/<iframe src=` |
 | 24138 | `https://9tsu.in/douga/30680.html` | `https://9tsu.vip/30680.html` | ❌ | `https://ok.ru/videoembed/<iframe src=` |
 | 24139 | `https://9tsu.in/douga/30605.html` | `https://9tsu.vip/30605.html` | ❌ | `https://ok.ru/videoembed/<iframe src=` |
-
-### `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
-
-| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
-| :---: | :--- | :--- | :---: | :--- |
-| 4986 | `https://9tsu.in/douga/56742.html` | `https://9tsu.vip/56742.html` | ✅ | `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19920 | `https://9tsu.in/douga/56727.html` | `https://9tsu.vip/56727.html` | ✅ | `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-
-### `https://muxalor.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
-
-| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
-| :---: | :--- | :--- | :---: | :--- |
-| 5242 | `https://9tsu.in/douga/109591.html` | `https://9tsu.vip/109591.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109591.html)` |
-| 5267 | `https://9tsu.in/douga/109533.html` | `https://9tsu.vip/109533.html` | ❌ | `https://blogspherenews.xyz/embed/67c578f3adfbf7dcb5a6da6c` |
-
-### `https://ok.ru/videoembed/6660443081376` (3 record)
-
-| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
-| :---: | :--- | :--- | :---: | :--- |
-| 5263 | `https://9tsu.in/douga/109578.html` | `https://9tsu.vip/109578.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109578.html)` |
-| 5308 | `https://9tsu.in/douga/109453.html` | `https://9tsu.vip/109453.html` | ❌ | `https://muxalor.guru/embed/1bgTNimyig?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 5337 | `https://9tsu.in/douga/109371.html` | `https://9tsu.vip/109371.html` | ✅ | `https://ok.ru/videoembed/6660443081376` |
-
-### `https://ok.ru/videoembed/8812365089284` (2 record)
-
-| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
-| :---: | :--- | :--- | :---: | :--- |
-| 5334 | `https://9tsu.in/douga/109354.html` | `https://9tsu.vip/109354.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109354.html)` |
-| 5348 | `https://9tsu.in/douga/109326.html` | `https://9tsu.vip/109326.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109326.html)` |
 
 ### `https://ok.ru/videoembed/8187765983947` (2 record)
 
@@ -1200,6 +1190,7 @@ _Diperbarui: `2026-08-20 11:38:26 UTC`_
 | 4904 | `https://9tsu.in/douga/41342.html` | `https://9tsu.vip/41342.html` | `https://www.dailymotion.com/dorama9tsu` | `https://ok.ru/videoembed/<iframe src=` | `duplicate, other_domain` | ❌ |
 | 4929 | `https://9tsu.in/douga/57468.html` | `https://9tsu.vip/57468.html` | `<iframe width=` | `https://ok.ru/videoembed/2195872352989` | `duplicate, other_domain, null_embed_platform` | ❌ |
 | 4931 | `https://9tsu.in/douga/56418.html` | `https://9tsu.vip/56418.html` | `<iframe width=` | `https://ok.ru/videoembed/2094752598749` | `duplicate, other_domain, null_embed_platform` | ❌ |
+| 4941 | `https://9tsu.in/douga/57341.html` | `https://9tsu.vip/57341.html` | `<iframe width=` | `https://ok.ru/videoembed/2694591285905` | `duplicate, other_domain, null_embed_platform` | ❌ |
 | 6447 | `https://9tsu.in/douga/58255.html` | `https://9tsu.vip/58255.html` | `<iframe width=` | `https://ok.ru/videoembed/2268912028381` | `duplicate, other_domain, null_embed_platform` | ❌ |
 | 6530 | `https://9tsu.in/douga/55984.html` | `https://9tsu.vip/55984.html` | `<iframe width=` | `https://ok.ru/videoembed/2056365411037` | `duplicate, other_domain, null_embed_platform` | ❌ |
 | 7776 | `https://9tsu.in/douga/41549.html` | `https://9tsu.vip/41549.html` | `https://www.dailymotion.com/dorama9tsu` | `Error: Tidak ditemukan embed` | `duplicate, other_domain` | ⚠️ |
@@ -1242,7 +1233,7 @@ _Diperbarui: `2026-08-20 11:38:26 UTC`_
 | 6266 | `https://9tsu.vip/106808.html` | `https://ok.ru/videoembed/8425524234881` | `HTTP 404 (URL: https://9tsu.vip/106808.html)` | `duplicate` |
 | 6787 | `https://9tsu.vip/105695.html` | `https://ok.ru/videoembed/9367181724175` | `HTTP 404 (URL: https://9tsu.vip/105695.html)` | `duplicate` |
 | 7776 | `https://9tsu.vip/41549.html` | `https://www.dailymotion.com/dorama9tsu` | `Tidak ditemukan embed` | `duplicate, other_domain` |
-| 11842 | `https://9tsu.vip/69658.html` | `https://muxalor.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/69658.html)` | `duplicate` |
+| 11842 | `https://9tsu.vip/69658.html` | `https://muxalor.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTPSConnectionPool(host='9tsu.vip', port=443): Read timed out. (read timeout=15)` | `duplicate` |
 | 13692 | `https://9tsu.vip/54008.html` | `https://ok.ru/videoembed/` | `Tidak ditemukan embed` | `duplicate` |
 | 14743 | `https://9tsu.vip/78536.html` | `https://ok.ru/videoembed/7627359652442` | `HTTP 404 (URL: https://9tsu.vip/78536.html)` | `duplicate` |
 | 17428 | `https://9tsu.vip/40879.html` | `https://ok.ru/videoembed/` | `Tidak ditemukan embed` | `duplicate` |
@@ -1261,9 +1252,9 @@ _Diperbarui: `2026-08-20 11:38:26 UTC`_
 
 | Metrik | Nilai |
 | :--- | :---: |
-| Total record mencurigakan | `581` |
+| Total record mencurigakan | `571` |
 | Cocok (valid) | `78` |
-| Tidak cocok (tidak valid) | `470` |
+| Tidak cocok (tidak valid) | `460` |
 | Error scraping | `33` |
 
 > ⚠️ **Perhatian:** Terdapat data yang tidak valid. Periksa detail di atas.

@@ -1,7 +1,7 @@
 """
 validate_data2.py (Optimized & Resilient Version)
 Validasi data dengan pendekatan:
-1. Query untuk mencari semua data mencurigakan (duplikat, domain lain, NULL)
+1. Query untuk mencari semua data mencurigakan (duplikat, domain lain, NULL kecuali season & episode)
 2. Filter URL unik agar setiap URL hanya di-scrape 1x meskipun dimiliki banyak record
 3. Verifikasi dengan Multithreading (Auto-retry antrian belakang jika HTTP Error/Timeout max 3x)
 4. Laporan detail hasil verifikasi (reports/05_data_validation_report.md)
@@ -83,8 +83,8 @@ def get_all_suspicious_records():
             suspicious[id_] = {'id': id_, 'url': url, 'embed_url': embed, 'embed_platform': platform, 'issues': []}
         suspicious[id_]['issues'].append('other_domain')
     
-    # 3. NULL values
-    fields = ['url', 'title', 'season', 'episode', 'image', 'description', 'embed_url', 'embed_platform']
+    # 3. NULL values (Pengecualian: season & episode dihapus dari daftar)
+    fields = ['url', 'title', 'image', 'description', 'embed_url', 'embed_platform']
     for field in fields:
         cursor.execute(f"""
             SELECT id, url, embed_url, embed_platform
@@ -122,7 +122,7 @@ def scrape_embed_vip(url, scraper):
             
         for a in soup.find_all('a', href=True):
             href = a['href']
-            if any(x in href for x in ['dailymotion', 'youtube', 'ok.ru', 'vimeo', 'muxalor.guru']):
+            if any(x in href for x in ['dailymotion', 'youtube', 'ok.ru', 'vimeo', 'pulvexa']):
                 return href, None
                 
         return None, "Tidak ditemukan embed"
@@ -153,7 +153,6 @@ def generate_report():
         return
     
     # --- FITUR 1: DEDUPLIKASI URL ---
-    # Ekstrak URL unik untuk diproses agar satu link hanya di-scrape satu kali
     unique_urls = list(set([rec['url'] for rec in suspicious_records]))
     print(f"🎯 Memfilter menjadi {len(unique_urls)} URL Unik yang akan di-scrape.")
     print(f"🚀 Memulai proses dengan {MAX_WORKERS} Threads (Maks {MAX_RETRIES}x retry untuk error)...")
@@ -171,11 +170,9 @@ def generate_report():
     tasks = [{'url': url, 'try_count': 1} for url in unique_urls]
     
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        # Submit semua task unik pertama kali
         futures = {executor.submit(scrape_embed_vip, task['url'], global_scraper): task for task in tasks}
         
         while futures:
-            # Tunggu hingga minimal ada satu future yang selesai
             done, _ = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_COMPLETED)
             
             for future in done:
@@ -188,13 +185,11 @@ def generate_report():
                 except Exception as e:
                     real_embed, error = None, str(e)
                 
-                # Cek jika error adalah error jaringan atau HTTP Error (Bukan sekadar 'Tidak ditemukan embed')
                 is_network_or_http_error = error and error != "Tidak ditemukan embed"
                 
                 if is_network_or_http_error and try_count < MAX_RETRIES:
                     print(f"   ⚠️ [Attempt {try_count}/{MAX_RETRIES}] Gagal: {url} ({error}) -> Dipindah ke akhir antrian...")
                     task['try_count'] += 1
-                    # Submit ulang, otomatis akan diletakkan di antrian terakhir worker pool
                     new_future = executor.submit(scrape_embed_vip, task['url'], global_scraper)
                     futures[new_future] = task
                 else:
@@ -202,7 +197,6 @@ def generate_report():
                     status_msg = f"✅ Sukses" if real_embed else f"❌ Gagal ({error})"
                     print(f"   [{len(url_results)}/{len(unique_urls)}] Selesai: {url} | {status_msg}")
 
-    # Memetakan kembali hasil URL tunggal ke record asli untuk direporting
     results = []
     for rec in suspicious_records:
         url = rec['url']
@@ -224,19 +218,16 @@ def generate_report():
             'status': status
         })
     
-    # Statistik
     total = len(results)
     verified = sum(1 for r in results if r['status'] == 'verified')
     mismatch = sum(1 for r in results if r['status'] == 'mismatch')
     error_count = sum(1 for r in results if r['status'] == 'error')
     
-    # Kategorisasi issues
     issue_counts = {}
     for r in results:
         for issue in r['issues']:
             issue_counts[issue] = issue_counts.get(issue, 0) + 1
     
-    # Buat laporan
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
     md = []
     md.append("# 📋 Laporan Validasi Data (9tsu.vip)\n")

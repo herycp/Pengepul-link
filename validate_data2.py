@@ -1,23 +1,20 @@
 """
-validate_data2.py (Optimized Version)
+validate_data2.py (Optimized & Resilient Version)
 Validasi data dengan pendekatan:
 1. Query untuk mencari semua data mencurigakan (duplikat, domain lain, NULL)
-2. Verifikasi SEMUA record tersebut dengan scraping di domain 9tsu.vip menggunakan Multithreading
-3. Laporan detail hasil verifikasi (reports/05_data_validation_report.md)
-
-Perbedaan dengan validate_data.py:
-- Menggunakan domain 9tsu.vip untuk verifikasi
-- URL ditransformasi: 9tsu.in/douga/* -> 9tsu.vip/*
-- Menggunakan ThreadPoolExecutor untuk proses paralel
+2. Filter URL unik agar setiap URL hanya di-scrape 1x meskipun dimiliki banyak record
+3. Verifikasi dengan Multithreading (Auto-retry antrian belakang jika HTTP Error/Timeout max 3x)
+4. Laporan detail hasil verifikasi (reports/05_data_validation_report.md)
 """
 
 import sqlite3
 import os
 import cloudscraper
 import re
+import concurrent.futures
 from datetime import datetime
 from bs4 import BeautifulSoup
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 
 DB_FILE = "links.db"
 REPORTS_DIR = "reports"
@@ -32,8 +29,10 @@ HEADERS = {
     "Upgrade-Insecure-Requests": "1"
 }
 
-# Tentukan jumlah maksimal request bersamaan (sesuaikan agar tidak terkena limit / blokir)
+# Tentukan jumlah maksimal request bersamaan
 MAX_WORKERS = 10 
+# Tentukan batas maksimal percobaan (retry)
+MAX_RETRIES = 3
 
 def ensure_reports_dir():
     if not os.path.exists(REPORTS_DIR):
@@ -105,10 +104,9 @@ def get_all_suspicious_records():
     return result
 
 def scrape_embed_vip(url, scraper):
-    """Scrape halaman di 9tsu.vip menggunakan sesi scraper yang sudah ada."""
+    """Scrape halaman di 9tsu.vip menggunakan sesi scraper."""
     vip_url = transform_url(url)
     try:
-        # Menurunkan timeout menjadi 15 detik agar tidak menggantung lama
         response = scraper.get(vip_url, timeout=15)
         if response.status_code != 200:
             return None, f"HTTP {response.status_code} (URL: {vip_url})"
@@ -130,23 +128,6 @@ def scrape_embed_vip(url, scraper):
         return None, "Tidak ditemukan embed"
     except Exception as e:
         return None, str(e)
-
-def verify_record(record, scraper):
-    """Verifikasi satu record, dipanggil melalui ThreadPoolExecutor"""
-    real_embed, error = scrape_embed_vip(record['url'], scraper)
-    
-    result = {
-        'id': record['id'],
-        'url': record['url'],
-        'vip_url': transform_url(record['url']),
-        'db_embed': record['embed_url'],
-        'db_platform': record['embed_platform'],
-        'issues': record['issues'],
-        'real_embed': real_embed,
-        'error': error,
-        'status': 'verified' if real_embed == record['embed_url'] else ('mismatch' if real_embed else 'error')
-    }
-    return result
 
 def generate_report():
     """Generate laporan Markdown"""
@@ -171,37 +152,83 @@ def generate_report():
             f.write("# ✅ Laporan Validasi Data (9tsu.vip)\n\n**Tidak ada data mencurigakan ditemukan.**")
         return
     
-    print(f"🔍 Verifikasi {len(suspicious_records)} record dengan {MAX_WORKERS} Threads (9tsu.vip)...")
-    
-    # Inisialisasi Scraper 1 kali saja di sini (Global session reuse)
+    # --- FITUR 1: DEDUPLIKASI URL ---
+    # Ekstrak URL unik untuk diproses agar satu link hanya di-scrape satu kali
+    unique_urls = list(set([rec['url'] for rec in suspicious_records]))
+    print(f"🎯 Memfilter menjadi {len(unique_urls)} URL Unik yang akan di-scrape.")
+    print(f"🚀 Memulai proses dengan {MAX_WORKERS} Threads (Maks {MAX_RETRIES}x retry untuk error)...")
+    print("-" * 60)
+
     global_scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
         interpreter='native'
     )
     global_scraper.headers.update(HEADERS)
     
-    results = []
+    url_results = {}
     
-    # Menggunakan Multithreading untuk memproses list secara paralel
+    # --- FITUR 2: ANTRIAN DAN RETRY ---
+    tasks = [{'url': url, 'try_count': 1} for url in unique_urls]
+    
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        # Membuat dictionary penyimpan referensi eksekusi
-        future_to_rec = {executor.submit(verify_record, rec, global_scraper): rec for rec in suspicious_records}
+        # Submit semua task unik pertama kali
+        futures = {executor.submit(scrape_embed_vip, task['url'], global_scraper): task for task in tasks}
         
-        # as_completed memproses hasil segera setelah sebuah request selesai
-        for i, future in enumerate(as_completed(future_to_rec), 1):
-            try:
-                res = future.result()
-                results.append(res)
-                print(f"   [{i}/{len(suspicious_records)}] Selesai ID {res['id']} | Status: {res['status']}")
-            except Exception as exc:
-                rec = future_to_rec[future]
-                print(f"   [{i}/{len(suspicious_records)}] ID {rec['id']} menghasilkan error: {exc}")
+        while futures:
+            # Tunggu hingga minimal ada satu future yang selesai
+            done, _ = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_COMPLETED)
+            
+            for future in done:
+                task = futures.pop(future)
+                url = task['url']
+                try_count = task['try_count']
+                
+                try:
+                    real_embed, error = future.result()
+                except Exception as e:
+                    real_embed, error = None, str(e)
+                
+                # Cek jika error adalah error jaringan atau HTTP Error (Bukan sekadar 'Tidak ditemukan embed')
+                is_network_or_http_error = error and error != "Tidak ditemukan embed"
+                
+                if is_network_or_http_error and try_count < MAX_RETRIES:
+                    print(f"   ⚠️ [Attempt {try_count}/{MAX_RETRIES}] Gagal: {url} ({error}) -> Dipindah ke akhir antrian...")
+                    task['try_count'] += 1
+                    # Submit ulang, otomatis akan diletakkan di antrian terakhir worker pool
+                    new_future = executor.submit(scrape_embed_vip, task['url'], global_scraper)
+                    futures[new_future] = task
+                else:
+                    url_results[url] = {'real_embed': real_embed, 'error': error}
+                    status_msg = f"✅ Sukses" if real_embed else f"❌ Gagal ({error})"
+                    print(f"   [{len(url_results)}/{len(unique_urls)}] Selesai: {url} | {status_msg}")
+
+    # Memetakan kembali hasil URL tunggal ke record asli untuk direporting
+    results = []
+    for rec in suspicious_records:
+        url = rec['url']
+        res_data = url_results[url]
+        real_embed = res_data['real_embed']
+        error = res_data['error']
+        
+        status = 'verified' if real_embed == rec['embed_url'] else ('mismatch' if real_embed else 'error')
+        
+        results.append({
+            'id': rec['id'],
+            'url': rec['url'],
+            'vip_url': transform_url(rec['url']),
+            'db_embed': rec['embed_url'],
+            'db_platform': rec['embed_platform'],
+            'issues': rec['issues'],
+            'real_embed': real_embed,
+            'error': error,
+            'status': status
+        })
     
     # Statistik
     total = len(results)
     verified = sum(1 for r in results if r['status'] == 'verified')
     mismatch = sum(1 for r in results if r['status'] == 'mismatch')
-    error = sum(1 for r in results if r['status'] == 'error')
+    error_count = sum(1 for r in results if r['status'] == 'error')
     
     # Kategorisasi issues
     issue_counts = {}
@@ -209,13 +236,13 @@ def generate_report():
         for issue in r['issues']:
             issue_counts[issue] = issue_counts.get(issue, 0) + 1
     
-    # Buat laporan (Sama seperti aslinya)
+    # Buat laporan
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
     md = []
     md.append("# 📋 Laporan Validasi Data (9tsu.vip)\n")
     md.append(f"_Diperbarui: `{now}`_\n")
     md.append(f"**Domain yang diverifikasi:** `https://9tsu.vip`\n")
-    md.append(f"**Total record mencurigakan:** `{total}`\n")
+    md.append(f"**Total record mencurigakan:** `{total}` (Terdiri dari `{len(unique_urls)}` URL Unik)\n")
     
     md.append("## 📊 Ringkasan Kategori\n")
     md.append("| Kategori | Jumlah Record |")
@@ -229,7 +256,7 @@ def generate_report():
     md.append("| :--- | :---: | :---: |")
     md.append(f"| ✅ Cocok | `{verified}` | `{verified/total*100:.1f}%` |")
     md.append(f"| ❌ Tidak Cocok | `{mismatch}` | `{mismatch/total*100:.1f}%` |")
-    md.append(f"| ⚠️ Error Scraping | `{error}` | `{error/total*100:.1f}%` |")
+    md.append(f"| ⚠️ Error Scraping | `{error_count}` | `{error_count/total*100:.1f}%` |")
     md.append("")
     
     duplicate_groups = {}
@@ -280,7 +307,7 @@ def generate_report():
     md.append(f"| Total record mencurigakan | `{total}` |")
     md.append(f"| Cocok (valid) | `{verified}` |")
     md.append(f"| Tidak cocok (tidak valid) | `{mismatch}` |")
-    md.append(f"| Error scraping | `{error}` |")
+    md.append(f"| Error scraping | `{error_count}` |")
     if mismatch > 0:
         md.append("\n> ⚠️ **Perhatian:** Terdapat data yang tidak valid. Periksa detail di atas.")
     else:
@@ -294,7 +321,7 @@ def generate_report():
     print(f"📄 Laporan disimpan: {filepath}")
     print(f"   ✅ Cocok: {verified}")
     print(f"   ❌ Tidak cocok: {mismatch}")
-    print(f"   ⚠️ Error: {error}")
+    print(f"   ⚠️ Error: {error_count}")
     print("=" * 60)
 
 if __name__ == "__main__":

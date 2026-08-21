@@ -939,218 +939,218 @@ _Diperbarui: `2026-08-06 20:24:36 UTC`_
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 24019 | `https://9tsu.in/douga/31054.html` | `https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 24029 | `https://9tsu.in/douga/20121.html` | `https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 24019 | `https://9tsu.in/douga/31054.html` | `https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 24029 | `https://9tsu.in/douga/20121.html` | `https://pulvexa.space/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 11062 | `https://9tsu.in/douga/93910.html` | `https://pulvexa.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 11073 | `https://9tsu.in/douga/93847.html` | `https://pulvexa.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 11062 | `https://9tsu.in/douga/93910.html` | `https://pulvexa.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 11073 | `https://9tsu.in/douga/93847.html` | `https://pulvexa.space/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 13910 | `https://9tsu.in/douga/82389.html` | `https://pulvexa.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 13923 | `https://9tsu.in/douga/82346.html` | `https://pulvexa.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 13910 | `https://9tsu.in/douga/82389.html` | `https://pulvexa.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 13923 | `https://9tsu.in/douga/82346.html` | `https://pulvexa.space/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 16422 | `https://9tsu.in/douga/70920.html` | `https://pulvexa.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 16509 | `https://9tsu.in/douga/70521.html` | `https://pulvexa.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 16422 | `https://9tsu.in/douga/70920.html` | `https://pulvexa.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 16509 | `https://9tsu.in/douga/70521.html` | `https://pulvexa.space/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 20409 | `https://9tsu.in/douga/54149.html` | `https://pulvexa.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 20653 | `https://9tsu.in/douga/52321.html` | `https://pulvexa.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 20409 | `https://9tsu.in/douga/54149.html` | `https://pulvexa.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 20653 | `https://9tsu.in/douga/52321.html` | `https://pulvexa.space/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 4986 | `https://9tsu.in/douga/56742.html` | `https://pulvexa.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 19920 | `https://9tsu.in/douga/56727.html` | `https://pulvexa.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 4986 | `https://9tsu.in/douga/56742.html` | `https://pulvexa.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19920 | `https://9tsu.in/douga/56727.html` | `https://pulvexa.space/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 10264 | `https://9tsu.in/douga/74500.html` | `https://pulvexa.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 15632 | `https://9tsu.in/douga/74493.html` | `https://pulvexa.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 10264 | `https://9tsu.in/douga/74500.html` | `https://pulvexa.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 15632 | `https://9tsu.in/douga/74493.html` | `https://pulvexa.space/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 23824 | `https://9tsu.in/douga/28913.html` | `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 23833 | `https://9tsu.in/douga/18567.html` | `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 23824 | `https://9tsu.in/douga/28913.html` | `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 23833 | `https://9tsu.in/douga/18567.html` | `https://pulvexa.space/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 22183 | `https://9tsu.in/douga/42460.html` | `https://pulvexa.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 22290 | `https://9tsu.in/douga/42464.html` | `https://pulvexa.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 22183 | `https://9tsu.in/douga/42460.html` | `https://pulvexa.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 22290 | `https://9tsu.in/douga/42464.html` | `https://pulvexa.space/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 12420 | `https://9tsu.in/douga/89169.html` | `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 12514 | `https://9tsu.in/douga/88780.html` | `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 12420 | `https://9tsu.in/douga/89169.html` | `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 12514 | `https://9tsu.in/douga/88780.html` | `https://pulvexa.space/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 19953 | `https://9tsu.in/douga/56563.html` | `https://pulvexa.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 23760 | `https://9tsu.in/douga/33588.html` | `https://pulvexa.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19953 | `https://9tsu.in/douga/56563.html` | `https://pulvexa.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 23760 | `https://9tsu.in/douga/33588.html` | `https://pulvexa.space/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 18585 | `https://9tsu.in/douga/57555.html` | `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 19191 | `https://9tsu.in/douga/60356.html` | `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 18585 | `https://9tsu.in/douga/57555.html` | `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19191 | `https://9tsu.in/douga/60356.html` | `https://pulvexa.space/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 19194 | `https://9tsu.in/douga/60324.html` | `https://pulvexa.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 19195 | `https://9tsu.in/douga/60322.html` | `https://pulvexa.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19194 | `https://9tsu.in/douga/60324.html` | `https://pulvexa.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19195 | `https://9tsu.in/douga/60322.html` | `https://pulvexa.space/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 18907 | `https://9tsu.in/douga/61268.html` | `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 18921 | `https://9tsu.in/douga/60692.html` | `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 18907 | `https://9tsu.in/douga/61268.html` | `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 18921 | `https://9tsu.in/douga/60692.html` | `https://pulvexa.space/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 21632 | `https://9tsu.in/douga/46633.html` | `https://pulvexa.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 21654 | `https://9tsu.in/douga/46601.html` | `https://pulvexa.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 21632 | `https://9tsu.in/douga/46633.html` | `https://pulvexa.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 21654 | `https://9tsu.in/douga/46601.html` | `https://pulvexa.space/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 15249 | `https://9tsu.in/douga/76258.html` | `https://pulvexa.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 15283 | `https://9tsu.in/douga/75916.html` | `https://pulvexa.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 15249 | `https://9tsu.in/douga/76258.html` | `https://pulvexa.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 15283 | `https://9tsu.in/douga/75916.html` | `https://pulvexa.space/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 13931 | `https://9tsu.in/douga/82252.html` | `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 13980 | `https://9tsu.in/douga/82002.html` | `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 13931 | `https://9tsu.in/douga/82252.html` | `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 13980 | `https://9tsu.in/douga/82002.html` | `https://pulvexa.space/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 4166 | `https://9tsu.in/douga/112568.html` | `https://pulvexa.space/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 4179 | `https://9tsu.in/douga/112526.html` | `https://pulvexa.space/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 4166 | `https://9tsu.in/douga/112568.html` | `https://pulvexa.space/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 4179 | `https://9tsu.in/douga/112526.html` | `https://pulvexa.space/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 22186 | `https://9tsu.in/douga/43506.html` | `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 22302 | `https://9tsu.in/douga/42964.html` | `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 22186 | `https://9tsu.in/douga/43506.html` | `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 22302 | `https://9tsu.in/douga/42964.html` | `https://pulvexa.space/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 6010 | `https://9tsu.in/douga/105463.html` | `https://pulvexa.space/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 7212 | `https://9tsu.in/douga/104448.html` | `https://pulvexa.space/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 6010 | `https://9tsu.in/douga/105463.html` | `https://pulvexa.space/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 7212 | `https://9tsu.in/douga/104448.html` | `https://pulvexa.space/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 23591 | `https://9tsu.in/douga/36109.html` | `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 23606 | `https://9tsu.in/douga/35126.html` | `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 23591 | `https://9tsu.in/douga/36109.html` | `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 23606 | `https://9tsu.in/douga/35126.html` | `https://pulvexa.space/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 5242 | `https://9tsu.in/douga/109591.html` | `https://pulvexa.space/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 5267 | `https://9tsu.in/douga/109533.html` | `https://pulvexa.space/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 5242 | `https://9tsu.in/douga/109591.html` | `https://pulvexa.space/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 5267 | `https://9tsu.in/douga/109533.html` | `https://pulvexa.space/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 1821 | `https://9tsu.in/douga/346584.html` | `https://pulvexa.space/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 11842 | `https://9tsu.in/douga/69658.html` | `https://pulvexa.space/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 1821 | `https://9tsu.in/douga/346584.html` | `https://pulvexa.space/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 11842 | `https://9tsu.in/douga/69658.html` | `https://pulvexa.space/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 12419 | `https://9tsu.in/douga/89167.html` | `https://pulvexa.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 12513 | `https://9tsu.in/douga/88778.html` | `https://pulvexa.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 12419 | `https://9tsu.in/douga/89167.html` | `https://pulvexa.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 12513 | `https://9tsu.in/douga/88778.html` | `https://pulvexa.space/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 19349 | `https://9tsu.in/douga/59560.html` | `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 19350 | `https://9tsu.in/douga/59558.html` | `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19349 | `https://9tsu.in/douga/59560.html` | `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19350 | `https://9tsu.in/douga/59558.html` | `https://pulvexa.space/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 18578 | `https://9tsu.in/douga/59862.html` | `https://pulvexa.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 19292 | `https://9tsu.in/douga/59860.html` | `https://pulvexa.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 18578 | `https://9tsu.in/douga/59862.html` | `https://pulvexa.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 19292 | `https://9tsu.in/douga/59860.html` | `https://pulvexa.space/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 21108 | `https://9tsu.in/douga/49382.html` | `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 21223 | `https://9tsu.in/douga/48875.html` | `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 21108 | `https://9tsu.in/douga/49382.html` | `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 21223 | `https://9tsu.in/douga/48875.html` | `https://pulvexa.space/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 11444 | `https://9tsu.in/douga/92564.html` | `https://pulvexa.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 11456 | `https://9tsu.in/douga/92560.html` | `https://pulvexa.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 11444 | `https://9tsu.in/douga/92564.html` | `https://pulvexa.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 11456 | `https://9tsu.in/douga/92560.html` | `https://pulvexa.space/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 2574 | `https://9tsu.in/douga/117521.html` | `https://pulvexa.space/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 2598 | `https://9tsu.in/douga/117452.html` | `https://pulvexa.space/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 2574 | `https://9tsu.in/douga/117521.html` | `https://pulvexa.space/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 2598 | `https://9tsu.in/douga/117452.html` | `https://pulvexa.space/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 7165 | `https://9tsu.in/douga/43718.html` | `https://pulvexa.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 17065 | `https://9tsu.in/douga/43781.html` | `https://pulvexa.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 7165 | `https://9tsu.in/douga/43718.html` | `https://pulvexa.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 17065 | `https://9tsu.in/douga/43781.html` | `https://pulvexa.space/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` (Total 2 record)
 
 | ID | URL Halaman | DB `embed_url` | Real `embed_url` | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 21916 | `https://9tsu.in/douga/45004.html` | `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
-| 21919 | `https://9tsu.in/douga/44469.html` | `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://muxalor.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 21916 | `https://9tsu.in/douga/45004.html` | `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
+| 21919 | `https://9tsu.in/douga/44469.html` | `https://pulvexa.space/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `https://brinqeo.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` | ❌ Tidak Valid |
 
 ### Kelompok: `https://www.dailymotion.com/dorama9tsu` (Total 12 record)
 

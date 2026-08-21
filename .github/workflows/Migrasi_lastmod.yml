@@ -1,0 +1,62 @@
+name: 🚀 Migrate Lastmod to Database
+
+on:
+  workflow_dispatch: # Hanya dijalankan secara manual melalui tombol di GitHub Actions
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      # Tidak perlu install pip dependencies eksternal karena migrate_lastmod.py 
+      # hanya menggunakan library bawaan Python (os, sqlite3, xml, json, datetime)
+      
+      - name: Run Migration Script
+        env:
+          PYTHONUNBUFFERED: 1
+        run: |
+          echo "🚀 Memulai proses injeksi data lastmod ke links.db..."
+          python migrate_lastmod.py
+          
+      - name: Check output and set vars
+        id: check
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            # Mengambil total links untuk pesan commit
+            TOTAL=$(jq '.total' links.json 2>/dev/null || echo "unknown")
+            echo "TOTAL_LINKS=$TOTAL" >> $GITHUB_ENV
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.check.outputs.changes == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            feat: migrate database to include lastmod from sitemaps [skip ci]
+            
+            - Updated total links: ${{ env.TOTAL_LINKS }}
+          file_pattern: 'links.db links.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          
+      - name: No changes
+        if: steps.check.outputs.changes == 'false'
+        run: echo "✅ Eksekusi selesai. Tidak ada perubahan pada database (mungkin sudah termigrasi semua)."

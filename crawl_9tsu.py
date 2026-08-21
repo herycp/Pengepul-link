@@ -61,14 +61,22 @@ def init_database():
             url TEXT UNIQUE,
             title TEXT,
             season INTEGER,
-            episode INTEGER,
+            episode TEXT,
             image TEXT,
             description TEXT,
             embed_url TEXT,
             embed_platform TEXT,
+            lastmod TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
+    # Memastikan kolom lastmod ada untuk backward compatibility
+    try:
+        cursor.execute('ALTER TABLE links ADD COLUMN lastmod TEXT')
+    except sqlite3.OperationalError:
+        pass # Kolom sudah ada
+
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_url ON links(url)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_title ON links(title)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_season_episode ON links(season, episode)')
@@ -111,9 +119,14 @@ def is_all_sitemaps_processed():
     processed = get_processed_sitemaps()
     return all(f in processed for f in sitemap_files)
 
-def get_existing_urls(url_list):
-    if not url_list:
+# UPDATE: Memproses input list of dict [{'url': '...', 'lastmod': '...'}, ...]
+def get_existing_urls(url_dicts):
+    if not url_dicts:
         return [], []
+    
+    # Ekstrak hanya URL untuk di check ke database
+    url_list = [d['url'] for d in url_dicts]
+    
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     placeholders = ','.join(['?'] * len(url_list))
@@ -121,26 +134,32 @@ def get_existing_urls(url_list):
     cursor.execute(query, url_list)
     existing = {row[0] for row in cursor.fetchall()}
     conn.close()
-    new_urls = [url for url in url_list if url not in existing]
-    return list(existing), new_urls
+    
+    # Kembalikan dictionaries yang URL-nya belum ada di database
+    new_url_dicts = [d for d in url_dicts if d['url'] not in existing]
+    
+    return list(existing), new_url_dicts
 
 def save_to_database(metadata_list):
     if not metadata_list:
         return 0
     urls = [data.get('url') for data in metadata_list if data.get('url')]
-    existing, new_urls = get_existing_urls(urls)
-    if not new_urls:
-        return 0
-        
-    # PROTEKSI: Hanya data dengan judul valid (title tidak None/kosong) yang boleh masuk ke Database
-    new_data = [data for data in metadata_list if data.get('url') in new_urls and data.get('title')]
     
-    if not new_data:
-        return 0
-        
+    # get_existing_urls sebelumnya dirancang untuk mengecek url_dicts, 
+    # karena kita sudah berada di step terakhir dan murni mengekstrak duplikasi string,
+    # kita cek manual saja menggunakan query
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+    placeholders = ','.join(['?'] * len(urls))
+    cursor.execute(f"SELECT url FROM links WHERE url IN ({placeholders})", urls)
+    existing = {row[0] for row in cursor.fetchall()}
     
+    new_data = [data for data in metadata_list if data.get('url') not in existing and data.get('title')]
+    
+    if not new_data:
+        conn.close()
+        return 0
+        
     insert_payload = [
         (
             data.get('url'),
@@ -150,14 +169,15 @@ def save_to_database(metadata_list):
             data.get('image'),
             data.get('description'),
             data.get('embed_url'),
-            data.get('embed_platform')
+            data.get('embed_platform'),
+            data.get('lastmod') # Parameter tambahan baru
         )
         for data in new_data
     ]
     
     cursor.executemany('''
-        INSERT OR IGNORE INTO links (url, title, season, episode, image, description, embed_url, embed_platform)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO links (url, title, season, episode, image, description, embed_url, embed_platform, lastmod)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', insert_payload)
     
     new_count = cursor.rowcount
@@ -168,7 +188,8 @@ def save_to_database(metadata_list):
 def export_to_json():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute('SELECT url, title, season, episode, image, description, embed_url, embed_platform, created_at FROM links')
+    # Menambahkan query ekstraksi lastmod
+    cursor.execute('SELECT url, title, season, episode, image, description, embed_url, embed_platform, lastmod, created_at FROM links')
     rows = cursor.fetchall()
     conn.close()
     links = []
@@ -182,7 +203,8 @@ def export_to_json():
             'description': row[5],
             'embed_url': row[6],
             'embed_platform': row[7],
-            'created_at': row[8]
+            'lastmod': row[8],
+            'created_at': row[9]
         })
     output = {'timestamp': datetime.now().isoformat(), 'total': len(links), 'links': links}
     with open(JSON_FILE, 'w', encoding='utf-8') as f:
@@ -241,6 +263,7 @@ def get_sitemap_files():
     files.sort(key=lambda x: int(re.search(r'(\d+)', x).group(1)) if re.search(r'(\d+)', x) else 0)
     return files
 
+# UPDATE: Membaca loc dan lastmod sekaligus
 def get_urls_from_local_sitemap(sitemap_filename):
     filepath = os.path.join(SITEMAP_DIR, sitemap_filename)
     if not os.path.exists(filepath):
@@ -250,10 +273,15 @@ def get_urls_from_local_sitemap(sitemap_filename):
         root = tree.getroot()
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
         urls = []
-        for loc in root.findall('.//ns:loc', ns):
-            url = loc.text
-            if url and (url.endswith('.html') or '/drama/' in url):
-                urls.append(url)
+        for url_node in root.findall('.//ns:url', ns):
+            loc = url_node.find('ns:loc', ns)
+            lastmod = url_node.find('ns:lastmod', ns)
+            
+            if loc is not None and loc.text:
+                url_str = loc.text
+                lm_str = lastmod.text if lastmod is not None else None
+                if url_str.endswith('.html') or '/drama/' in url_str:
+                    urls.append({'url': url_str, 'lastmod': lm_str})
         return urls
     except Exception:
         return []
@@ -267,8 +295,8 @@ def get_unprocessed_sitemaps():
         if f in processed: continue
         state = get_processing_state(f)
         if state is None:
-            urls = get_urls_from_local_sitemap(f)
-            total = len(urls) if urls else 0
+            url_dicts = get_urls_from_local_sitemap(f)
+            total = len(url_dicts) if url_dicts else 0
             if total > 0:
                 upsert_processing_state(f, 0, total, 'pending')
                 result.append((f, 0, total))
@@ -280,12 +308,12 @@ def get_unprocessed_sitemaps():
     return result
 
 def get_url_batch_from_sitemap(sitemap_file, offset, limit):
-    all_urls = get_urls_from_local_sitemap(sitemap_file)
-    if not all_urls: return [], 0, 0
-    total = len(all_urls)
+    all_url_dicts = get_urls_from_local_sitemap(sitemap_file)
+    if not all_url_dicts: return [], 0, 0
+    total = len(all_url_dicts)
     if offset >= total: return [], total, total
     end = min(offset + limit, total)
-    batch = all_urls[offset:end]
+    batch = all_url_dicts[offset:end]
     return batch, end, total
 
 def verify_sitemap_coverage():
@@ -296,13 +324,16 @@ def verify_sitemap_coverage():
     total_missing = 0
     reset_count = 0
     for f in sitemap_files:
-        urls = get_urls_from_local_sitemap(f)
-        if not urls: continue
+        url_dicts = get_urls_from_local_sitemap(f)
+        if not url_dicts: continue
+        
+        urls = [d['url'] for d in url_dicts]
         placeholders = ','.join(['?'] * len(urls))
         query = f"SELECT COUNT(*) FROM links WHERE url IN ({placeholders})"
         cursor.execute(query, urls)
         db_count = cursor.fetchone()[0]
         missing = len(urls) - db_count
+        
         state = get_processing_state(f)
         is_done = state and state['status'] == 'done'
         if missing > 0:
@@ -430,7 +461,7 @@ def parse_html_page(html_content, url):
     metadata = {
         "url": url, "title": None, "season": None,
         "episode": None, "image": None, "description": None,
-        "embed_url": None, "embed_platform": None
+        "embed_url": None, "embed_platform": None, "lastmod": None
     }
     if not html_content: return metadata
     try: soup = BeautifulSoup(html_content, 'lxml') 
@@ -454,7 +485,6 @@ def parse_html_page(html_content, url):
 
         normalized_title = normalize_zenkaku_to_hankaku(raw_title)
 
-        # 1. Ekstraksi Season
         season_regex = r'(?i)(?:Season|Lesson)\s*(\d+)|第\s*(\d+)\s*(?:シーズン|シリーズ)|(?:シリーズ|シリ－ズ)\s*(\d+)'
         match_s = re.search(season_regex, normalized_title)
         if match_s:
@@ -463,7 +493,6 @@ def parse_html_page(html_content, url):
                 metadata["season"] = int(season_num)
                 season_found = True
 
-        # 2. Ekstraksi Episode
         regex_ep_num = r'(?i)第?\s*([\d.,-]+)\s*(?:話|夜|貫|話・夜)|(?:#|EP)\s*([\d.,-]+)'
         regex_ep_text = r'(前編|後編|中編|前篇|後篇)'
         
@@ -476,18 +505,15 @@ def parse_html_page(html_content, url):
         elif match_e_text:
             metadata["episode"] = str(match_e_text.group(1))
 
-        # 3. Logika Korelasi Season & Episode
         if not season_found:
             if metadata["episode"] is None:
                 metadata["season"] = None
             else:
                 metadata["season"] = 1
 
-        # 4. Membersihkan Judul
         cleaned = re.sub(season_regex, '', normalized_title)
         regex_ep_clean = r'(?i)第?\s*[\d.,-]+\s*(?:話|夜|貫|話・夜)|(?:#|EP)\s*[\d.,-]+|前編|後編|中編|前篇|後篇'
         cleaned = re.sub(regex_ep_clean, '', cleaned)
-        
         cleaned = re.sub(r'(?i)\s*(?:[-|~]\s*)?(?:9tsu|Dailymotion|Miomio|Youtube).*$', '', cleaned)
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
         cleaned = re.sub(r'^[-|~]+\s*|\s*[-|~]+$', '', cleaned).strip()
@@ -497,7 +523,6 @@ def parse_html_page(html_content, url):
     if og_image: metadata["image"] = og_image.get('content', '').strip()
     if body_content: metadata["description"] = body_content.get_text(separator=' ', strip=True)
     
-    # Ekstraksi Embed
     iframe = soup.find('iframe')
     if iframe and iframe.get('src'):
         embed_url = iframe['src'].strip()
@@ -529,13 +554,18 @@ def parse_html_page(html_content, url):
 # ============================================================
 
 def process_single_url(item):
-    url, sitemap_file = item
+    # UPDATE: Sekarang menerima variabel lastmod dari antrian thread
+    url, lastmod, sitemap_file = item
     html_content, status = download_html_page(url)
+    
     if status == 200 and html_content:
-        return parse_html_page(html_content, url), status
+        metadata = parse_html_page(html_content, url)
+        metadata['lastmod'] = lastmod # Menambahkan lastmod ke hasil parser
+        return metadata, status
+        
     return {
         "url": url, "title": None, "season": None, "episode": None,
-        "image": None, "description": None, "embed_url": None, "embed_platform": None
+        "image": None, "description": None, "embed_url": None, "embed_platform": None, "lastmod": lastmod
     }, status
 
 # ============================================================
@@ -551,8 +581,8 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
         reset_processing_state()
         download_all_sitemaps()
         for f in get_sitemap_files():
-            all_urls = get_urls_from_local_sitemap(f)
-            if all_urls: upsert_processing_state(f, 0, len(all_urls), 'pending')
+            url_dicts = get_urls_from_local_sitemap(f)
+            if url_dicts: upsert_processing_state(f, 0, len(url_dicts), 'pending')
     
     unprocessed = get_unprocessed_sitemaps()
     if not unprocessed: return
@@ -565,17 +595,22 @@ def crawl_one_sitemap(force_download=False, reset=False, max_pages=None):
     for sitemap_file, offset, total in unprocessed:
         if remaining <= 0: break
         while offset < total and remaining > 0:
-            batch, new_offset, total_urls = get_url_batch_from_sitemap(sitemap_file, offset, remaining)
-            if not batch:
+            batch_dicts, new_offset, total_urls = get_url_batch_from_sitemap(sitemap_file, offset, remaining)
+            if not batch_dicts:
                 mark_sitemap_processed(sitemap_file)
                 break
-            existing, new_urls = get_existing_urls(batch)
-            if new_urls:
-                for url in new_urls: all_new_urls.append((url, sitemap_file))
-                remaining -= len(new_urls)
+                
+            existing, new_url_dicts = get_existing_urls(batch_dicts)
+            
+            if new_url_dicts:
+                for d in new_url_dicts:
+                    # Append (URL, LASTMOD, SITEMAP_FILE)
+                    all_new_urls.append((d['url'], d['lastmod'], sitemap_file))
+                
+                remaining -= len(new_url_dicts)
                 processed_sitemap_info.append({
                     'sitemap_file': sitemap_file, 'new_offset': new_offset,
-                    'total': total_urls, 'taken': len(new_urls)
+                    'total': total_urls, 'taken': len(new_url_dicts)
                 })
             offset = new_offset
         if offset >= total: mark_sitemap_processed(sitemap_file)

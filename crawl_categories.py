@@ -40,7 +40,6 @@ def init_database():
     conn = sqlite3.connect(OUTPUT_DB)
     cursor = conn.cursor()
     
-    # Menambahkan kolom sitemap_lastmod untuk menyimpan waktu update terakhir dari XML
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS categories (
             category_name TEXT PRIMARY KEY,
@@ -51,7 +50,6 @@ def init_database():
         )
     ''')
     
-    # Jika tabel sudah ada tapi belum punya sitemap_lastmod (Backward compatibility)
     try:
         cursor.execute('ALTER TABLE categories ADD COLUMN sitemap_lastmod TEXT')
     except sqlite3.OperationalError:
@@ -63,16 +61,22 @@ def init_database():
             category_name TEXT,
             episode_title TEXT,
             episode_url TEXT,
+            episode_image TEXT,
             UNIQUE(category_name, episode_url),
             FOREIGN KEY (category_name) REFERENCES categories (category_name)
         )
     ''')
+
+    # Migrasi tabel lama: Menambahkan kolom gambar jika belum ada
+    try:
+        cursor.execute('ALTER TABLE category_episodes ADD COLUMN episode_image TEXT')
+    except sqlite3.OperationalError:
+        pass
     
     conn.commit()
     conn.close()
 
 def get_db_lastmods():
-    """Mengambil riwayat lastmod seluruh kategori dari database."""
     conn = sqlite3.connect(OUTPUT_DB)
     cursor = conn.cursor()
     try:
@@ -84,7 +88,6 @@ def get_db_lastmods():
     return db_lastmods
 
 def get_existing_episodes(category_name):
-    """Mengambil semua URL episode lama dari memori DB (Untuk fungsi DELTA Break)"""
     conn = sqlite3.connect(OUTPUT_DB)
     cursor = conn.cursor()
     try:
@@ -104,7 +107,6 @@ def save_to_database(all_data):
     total_new_episodes = 0
     
     for cat in all_data:
-        # Simpan/Update kategori beserta stempel waktu lastmod terbarunya
         cursor.execute('''
             INSERT INTO categories (category_name, category_title, category_url, sitemap_lastmod, last_updated)
             VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -117,13 +119,13 @@ def save_to_database(all_data):
         
         if cat['episodes']:
             episodes_payload = [
-                (cat['category_name'], ep['title'], ep['url'])
+                (cat['category_name'], ep['title'], ep['url'], ep['image'])
                 for ep in cat['episodes'][::-1]
             ]
             
             cursor.executemany('''
-                INSERT OR IGNORE INTO category_episodes (category_name, episode_title, episode_url)
-                VALUES (?, ?, ?)
+                INSERT OR IGNORE INTO category_episodes (category_name, episode_title, episode_url, episode_image)
+                VALUES (?, ?, ?, ?)
             ''', episodes_payload)
             
             total_new_episodes += cursor.rowcount
@@ -133,7 +135,6 @@ def save_to_database(all_data):
     print(f"💾 Disimpan ke DB: Data kategori diperbarui dan {total_new_episodes} episode BARU ditambahkan.")
 
 def export_db_to_json():
-    """Mengekspor ulang seluruh isi database ke JSON."""
     conn = sqlite3.connect(OUTPUT_DB)
     cursor = conn.cursor()
     
@@ -150,13 +151,14 @@ def export_db_to_json():
             "episodes": []
         }
         
-        cursor.execute('SELECT episode_title, episode_url FROM category_episodes WHERE category_name = ? ORDER BY id DESC', (cat_name,))
+        cursor.execute('SELECT episode_title, episode_url, episode_image FROM category_episodes WHERE category_name = ? ORDER BY id DESC', (cat_name,))
         episodes = cursor.fetchall()
         
-        for ep_title, ep_url in episodes:
+        for ep_title, ep_url, ep_image in episodes:
             cat_dict["episodes"].append({
                 "title": ep_title,
-                "url": ep_url
+                "url": ep_url,
+                "image": ep_image
             })
             
         all_data.append(cat_dict)
@@ -184,7 +186,7 @@ def get_category_urls():
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
         
         valid_categories = []
-        db_lastmods = get_db_lastmods() # Ambil ingatan database lama
+        db_lastmods = get_db_lastmods()
         skipped_count = 0
         
         for url_node in root.findall('.//ns:url', ns):
@@ -199,11 +201,10 @@ def get_category_urls():
                 if category_name in EXCLUDED_CATEGORIES:
                     continue
                     
-                # LOGIKA PENGECEKAN LASTMOD
                 db_time = db_lastmods.get(category_name)
                 if db_time and db_time == lastmod:
                     skipped_count += 1
-                    continue # Abaikan sepenuhnya, tidak masuk daftar crawl!
+                    continue 
                 
                 valid_categories.append({
                     "url": url,
@@ -239,11 +240,16 @@ def scrape_single_category(cat_data):
         res = scraper.get(url, timeout=30)
         if res.status_code == 200:
             soup = BeautifulSoup(res.text, 'lxml')
-            if soup.title:
-                result["category_title"] = soup.title.get_text(strip=True).replace(" - 9tsu", "")
+            
+            # REVISI 1: Mengambil judul dari h1.category-title dan membuang span count[span_1](start_span)[span_1](end_span)
+            h1 = soup.find('h1', class_='category-title')
+            if h1:
+                count_span = h1.find('span', class_='category-post-count')
+                if count_span:
+                    count_span.decompose() # Menghapus elemen span dari h1
+                result["category_title"] = h1.get_text(strip=True)
             else:
-                h1 = soup.find('h1')
-                result["category_title"] = h1.get_text(strip=True) if h1 else category_name
+                result["category_title"] = category_name
         else:
             result["category_title"] = category_name
     except Exception:
@@ -277,6 +283,13 @@ def scrape_single_category(cat_data):
                 title_tag = article.find('h3', class_='cactus-post-title')
                 a_tag = title_tag.find('a') if title_tag else article.find('a')
                 
+                # REVISI 2: Ekstraksi gambar
+                img_tag = article.find('img')
+                ep_image = None
+                if img_tag:
+                    # Ambil data-src terlebih dahulu untuk menembus lazyload
+                    ep_image = img_tag.get('data-src') or img_tag.get('src')
+                
                 if a_tag and a_tag.get('href'):
                     ep_title = a_tag.get('title') or a_tag.get_text(strip=True)
                     ep_url = a_tag.get('href')
@@ -288,7 +301,8 @@ def scrape_single_category(cat_data):
                     
                     result["episodes"].append({
                         "title": ep_title,
-                        "url": ep_url
+                        "url": ep_url,
+                        "image": ep_image
                     })
                     
             if stop_crawling:
@@ -314,7 +328,6 @@ def main():
     
     categories = get_category_urls()
     if not categories:
-        # Tetap jalankan ekspor DB ke JSON walau tidak ada update (jaga-jaga jika JSON terhapus)
         export_db_to_json()
         print(f"🎉 Proses tuntas dalam waktu {time.time() - start_time:.2f} detik!")
         return

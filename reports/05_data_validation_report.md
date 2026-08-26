@@ -38,18 +38,18 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 413 | `https://9tsu.in/douga/124445.html` | `https://9tsu.vip/124445.html` | ✅ | `https://ok.ru/videoembed/9720340089523` |
 | 4172 | `https://9tsu.in/douga/112544.html` | `https://9tsu.vip/112544.html` | ✅ | `https://ok.ru/videoembed/9720340089523` |
 
-### `https://brinqeo.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 1821 | `https://9tsu.in/douga/346584.html` | `https://9tsu.vip/346584.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/346584.html)` |
 | 11842 | `https://9tsu.in/douga/69658.html` | `https://9tsu.vip/69658.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/69658.html)` |
 
-### `https://brinqeo.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/yzNyIUhFbr?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 2574 | `https://9tsu.in/douga/117521.html` | `https://9tsu.vip/117521.html` | ❌ | `https://brinqeo.guru/embed/CQd1TrmBvc?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 2574 | `https://9tsu.in/douga/117521.html` | `https://9tsu.vip/117521.html` | ❌ | `https://zafliron.guru/embed/CQd1TrmBvc?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 2598 | `https://9tsu.in/douga/117452.html` | `https://9tsu.vip/117452.html` | ❌ | `https://ok.ru/videoembed/9891756444229` |
 
 ### `https://ok.ru/videoembed/8784620227076` (2 record)
@@ -73,11 +73,11 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 3496 | `https://9tsu.in/douga/114429.html` | `https://9tsu.vip/114429.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/114429.html)` |
 | 18804 | `https://9tsu.in/douga/61636.html` | `https://9tsu.vip/61636.html` | ❌ | `https://blogspherenews.xyz/embed/670ddd73172b884e34db7fc3` |
 
-### `https://brinqeo.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 4166 | `https://9tsu.in/douga/112568.html` | `https://9tsu.vip/112568.html` | ✅ | `https://brinqeo.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 4166 | `https://9tsu.in/douga/112568.html` | `https://9tsu.vip/112568.html` | ✅ | `https://zafliron.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 4179 | `https://9tsu.in/douga/112526.html` | `https://9tsu.vip/112526.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/112526.html)` |
 
 ### `https://ok.ru/videoembed/9331209538209` (2 record)
@@ -136,14 +136,14 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 4936 | `https://9tsu.in/douga/38944.html` | `https://9tsu.vip/38944.html` | ❌ | `https://blogspherenews.xyz/embed/670de54d172b884e34dbc22c` |
 | 4938 | `https://9tsu.in/douga/38149.html` | `https://9tsu.vip/38149.html` | ❌ | `https://blogspherenews.xyz/embed/670de54d172b884e34dbc22c` |
 
-### `https://brinqeo.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 4986 | `https://9tsu.in/douga/56742.html` | `https://9tsu.vip/56742.html` | ✅ | `https://brinqeo.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19920 | `https://9tsu.in/douga/56727.html` | `https://9tsu.vip/56727.html` | ✅ | `https://brinqeo.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 4986 | `https://9tsu.in/douga/56742.html` | `https://9tsu.vip/56742.html` | ✅ | `https://zafliron.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19920 | `https://9tsu.in/douga/56727.html` | `https://9tsu.vip/56727.html` | ✅ | `https://zafliron.guru/embed/A8d2p8p0s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
@@ -155,7 +155,7 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 5263 | `https://9tsu.in/douga/109578.html` | `https://9tsu.vip/109578.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/109578.html)` |
-| 5308 | `https://9tsu.in/douga/109453.html` | `https://9tsu.vip/109453.html` | ❌ | `https://brinqeo.guru/embed/1bgTNimyig?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 5308 | `https://9tsu.in/douga/109453.html` | `https://9tsu.vip/109453.html` | ❌ | `https://zafliron.guru/embed/1bgTNimyig?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 5337 | `https://9tsu.in/douga/109371.html` | `https://9tsu.vip/109371.html` | ✅ | `https://ok.ru/videoembed/6660443081376` |
 
 ### `https://ok.ru/videoembed/8812365089284` (2 record)
@@ -502,12 +502,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 5718 | `https://9tsu.in/douga/108507.html` | `https://9tsu.vip/108507.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/108507.html)` |
 | 5751 | `https://9tsu.in/douga/108403.html` | `https://9tsu.vip/108403.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/108403.html)` |
 
-### `https://brinqeo.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
 | 6010 | `https://9tsu.in/douga/105463.html` | `https://9tsu.vip/105463.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/105463.html)` |
-| 7212 | `https://9tsu.in/douga/104448.html` | `https://9tsu.vip/104448.html` | ✅ | `https://brinqeo.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 7212 | `https://9tsu.in/douga/104448.html` | `https://9tsu.vip/104448.html` | ✅ | `https://zafliron.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8770697104040` (2 record)
 
@@ -527,7 +527,7 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 6177 | `https://9tsu.in/douga/107041.html` | `https://9tsu.vip/107041.html` | ❌ | `https://brinqeo.guru/embed/y68k0XqWR0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 6177 | `https://9tsu.in/douga/107041.html` | `https://9tsu.vip/107041.html` | ❌ | `https://zafliron.guru/embed/y68k0XqWR0?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 | 6266 | `https://9tsu.in/douga/106808.html` | `https://9tsu.vip/106808.html` | ⚠️ | `Error: HTTP 404 (URL: https://9tsu.vip/106808.html)` |
 
 ### `https://ok.ru/videoembed/8168092731951` (2 record)
@@ -558,12 +558,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 6749 | `https://9tsu.in/douga/105906.html` | `https://9tsu.vip/105906.html` | ❌ | `https://blogspherenews.xyz/embed/67677e4c9af1d7c127a2d571` |
 | 7350 | `https://9tsu.in/douga/105020.html` | `https://9tsu.vip/105020.html` | ❌ | `https://blogspherenews.xyz/embed/67677d419af1d7c127a2cd00` |
 
-### `https://brinqeo.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 7165 | `https://9tsu.in/douga/43718.html` | `https://9tsu.vip/43718.html` | ✅ | `https://brinqeo.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 17065 | `https://9tsu.in/douga/43781.html` | `https://9tsu.vip/43781.html` | ✅ | `https://brinqeo.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 7165 | `https://9tsu.in/douga/43718.html` | `https://9tsu.vip/43718.html` | ✅ | `https://zafliron.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 17065 | `https://9tsu.in/douga/43781.html` | `https://9tsu.vip/43781.html` | ✅ | `https://zafliron.guru/embed/zMm2uZbmqD?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/9095335512777` (2 record)
 
@@ -670,12 +670,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 10094 | `https://9tsu.in/douga/97176.html` | `https://9tsu.vip/97176.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd5562ec7793cc2a887ce` |
 | 11091 | `https://9tsu.in/douga/93789.html` | `https://9tsu.vip/93789.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd5562ec7793cc2a887ce` |
 
-### `https://brinqeo.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 10264 | `https://9tsu.in/douga/74500.html` | `https://9tsu.vip/74500.html` | ✅ | `https://brinqeo.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 15632 | `https://9tsu.in/douga/74493.html` | `https://9tsu.vip/74493.html` | ✅ | `https://brinqeo.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 10264 | `https://9tsu.in/douga/74500.html` | `https://9tsu.vip/74500.html` | ✅ | `https://zafliron.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 15632 | `https://9tsu.in/douga/74493.html` | `https://9tsu.vip/74493.html` | ✅ | `https://zafliron.guru/embed/BSX6uabiCk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7347156093658` (2 record)
 
@@ -698,12 +698,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 10720 | `https://9tsu.in/douga/95134.html` | `https://9tsu.vip/95134.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd3152ec7793cc2a87c0e` |
 | 10867 | `https://9tsu.in/douga/94575.html` | `https://9tsu.vip/94575.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd3152ec7793cc2a87c0e` |
 
-### `https://brinqeo.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 11062 | `https://9tsu.in/douga/93910.html` | `https://9tsu.vip/93910.html` | ✅ | `https://brinqeo.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 11073 | `https://9tsu.in/douga/93847.html` | `https://9tsu.vip/93847.html` | ✅ | `https://brinqeo.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11062 | `https://9tsu.in/douga/93910.html` | `https://9tsu.vip/93910.html` | ✅ | `https://zafliron.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11073 | `https://9tsu.in/douga/93847.html` | `https://9tsu.vip/93847.html` | ✅ | `https://zafliron.guru/embed/618Hz3M1oK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/2507337042653` (2 record)
 
@@ -719,12 +719,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 11297 | `https://9tsu.in/douga/68074.html` | `https://9tsu.vip/68074.html` | ❌ | `https://blogspherenews.xyz/embed/67012cdf172b884e34da5a2e` |
 | 16929 | `https://9tsu.in/douga/68634.html` | `https://9tsu.vip/68634.html` | ❌ | `https://blogspherenews.xyz/embed/67012cdf172b884e34da5a2e` |
 
-### `https://brinqeo.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 11444 | `https://9tsu.in/douga/92564.html` | `https://9tsu.vip/92564.html` | ✅ | `https://brinqeo.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 11456 | `https://9tsu.in/douga/92560.html` | `https://9tsu.vip/92560.html` | ✅ | `https://brinqeo.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11444 | `https://9tsu.in/douga/92564.html` | `https://9tsu.vip/92564.html` | ✅ | `https://zafliron.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 11456 | `https://9tsu.in/douga/92560.html` | `https://9tsu.vip/92560.html` | ✅ | `https://zafliron.guru/embed/yCnibc0pNV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8569014848114` (2 record)
 
@@ -747,19 +747,19 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 12072 | `https://9tsu.in/douga/90464.html` | `https://9tsu.vip/90464.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd4592ec7793cc2a882c1` |
 | 12086 | `https://9tsu.in/douga/90409.html` | `https://9tsu.vip/90409.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd4592ec7793cc2a882c1` |
 
-### `https://brinqeo.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 12419 | `https://9tsu.in/douga/89167.html` | `https://9tsu.vip/89167.html` | ✅ | `https://brinqeo.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 12513 | `https://9tsu.in/douga/88778.html` | `https://9tsu.vip/88778.html` | ✅ | `https://brinqeo.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12419 | `https://9tsu.in/douga/89167.html` | `https://9tsu.vip/89167.html` | ✅ | `https://zafliron.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12513 | `https://9tsu.in/douga/88778.html` | `https://9tsu.vip/88778.html` | ✅ | `https://zafliron.guru/embed/tSKwldXmFV?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 12420 | `https://9tsu.in/douga/89169.html` | `https://9tsu.vip/89169.html` | ✅ | `https://brinqeo.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 12514 | `https://9tsu.in/douga/88780.html` | `https://9tsu.vip/88780.html` | ✅ | `https://brinqeo.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12420 | `https://9tsu.in/douga/89169.html` | `https://9tsu.vip/89169.html` | ✅ | `https://zafliron.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 12514 | `https://9tsu.in/douga/88780.html` | `https://9tsu.vip/88780.html` | ✅ | `https://zafliron.guru/embed/U0W3WOOfcd?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7469682330151` (2 record)
 
@@ -782,19 +782,19 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 13587 | `https://9tsu.in/douga/83987.html` | `https://9tsu.vip/83987.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd2322ec7793cc2a87806` |
 | 13588 | `https://9tsu.in/douga/83978.html` | `https://9tsu.vip/83978.html` | ❌ | `https://blogspherenews.xyz/embed/66fbd2322ec7793cc2a87806` |
 
-### `https://brinqeo.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 13910 | `https://9tsu.in/douga/82389.html` | `https://9tsu.vip/82389.html` | ✅ | `https://brinqeo.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 13923 | `https://9tsu.in/douga/82346.html` | `https://9tsu.vip/82346.html` | ✅ | `https://brinqeo.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13910 | `https://9tsu.in/douga/82389.html` | `https://9tsu.vip/82389.html` | ✅ | `https://zafliron.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13923 | `https://9tsu.in/douga/82346.html` | `https://9tsu.vip/82346.html` | ✅ | `https://zafliron.guru/embed/8WRzMo175X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 13931 | `https://9tsu.in/douga/82252.html` | `https://9tsu.vip/82252.html` | ✅ | `https://brinqeo.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 13980 | `https://9tsu.in/douga/82002.html` | `https://9tsu.vip/82002.html` | ✅ | `https://brinqeo.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13931 | `https://9tsu.in/douga/82252.html` | `https://9tsu.vip/82252.html` | ✅ | `https://zafliron.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 13980 | `https://9tsu.in/douga/82002.html` | `https://9tsu.vip/82002.html` | ✅ | `https://zafliron.guru/embed/knchkSasvN?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7468735859239` (2 record)
 
@@ -852,12 +852,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 15055 | `https://9tsu.in/douga/77094.html` | `https://9tsu.vip/77094.html` | ❌ | `https://blogspherenews.xyz/embed/6701295c172b884e34da42cb` |
 | 15086 | `https://9tsu.in/douga/76970.html` | `https://9tsu.vip/76970.html` | ❌ | `https://blogspherenews.xyz/embed/6701295c172b884e34da42cb` |
 
-### `https://brinqeo.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 15249 | `https://9tsu.in/douga/76258.html` | `https://9tsu.vip/76258.html` | ✅ | `https://brinqeo.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 15283 | `https://9tsu.in/douga/75916.html` | `https://9tsu.vip/75916.html` | ✅ | `https://brinqeo.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 15249 | `https://9tsu.in/douga/76258.html` | `https://9tsu.vip/76258.html` | ✅ | `https://zafliron.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 15283 | `https://9tsu.in/douga/75916.html` | `https://9tsu.vip/75916.html` | ✅ | `https://zafliron.guru/embed/jey0HPkjTe?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8090512525839` (2 record)
 
@@ -930,12 +930,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 16339 | `https://9tsu.in/douga/70819.html` | `https://9tsu.vip/70819.html` | ❌ | `https://blogspherenews.xyz/embed/67012ca7172b884e34da58cd` |
 | 16450 | `https://9tsu.in/douga/70823.html` | `https://9tsu.vip/70823.html` | ❌ | `https://blogspherenews.xyz/embed/67012ca7172b884e34da58cd` |
 
-### `https://brinqeo.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 16422 | `https://9tsu.in/douga/70920.html` | `https://9tsu.vip/70920.html` | ✅ | `https://brinqeo.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 16509 | `https://9tsu.in/douga/70521.html` | `https://9tsu.vip/70521.html` | ✅ | `https://brinqeo.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 16422 | `https://9tsu.in/douga/70920.html` | `https://9tsu.vip/70920.html` | ✅ | `https://zafliron.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 16509 | `https://9tsu.in/douga/70521.html` | `https://9tsu.vip/70521.html` | ✅ | `https://zafliron.guru/embed/94dzEcqJNC?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/7277801638558` (2 record)
 
@@ -1014,26 +1014,26 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 18197 | `https://9tsu.in/douga/63681.html` | `https://9tsu.vip/63681.html` | ❌ | `https://blogspherenews.xyz/embed/670ddd26172b884e34db7d3a` |
 | 18255 | `https://9tsu.in/douga/63481.html` | `https://9tsu.vip/63481.html` | ❌ | `https://blogspherenews.xyz/embed/670ddd26172b884e34db7d3a` |
 
-### `https://brinqeo.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 18578 | `https://9tsu.in/douga/59862.html` | `https://9tsu.vip/59862.html` | ✅ | `https://brinqeo.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19292 | `https://9tsu.in/douga/59860.html` | `https://9tsu.vip/59860.html` | ✅ | `https://brinqeo.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 18578 | `https://9tsu.in/douga/59862.html` | `https://9tsu.vip/59862.html` | ✅ | `https://zafliron.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19292 | `https://9tsu.in/douga/59860.html` | `https://9tsu.vip/59860.html` | ✅ | `https://zafliron.guru/embed/wccnnUdEwK?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
-
-| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
-| :---: | :--- | :--- | :---: | :--- |
-| 18585 | `https://9tsu.in/douga/57555.html` | `https://9tsu.vip/57555.html` | ✅ | `https://brinqeo.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19191 | `https://9tsu.in/douga/60356.html` | `https://9tsu.vip/60356.html` | ✅ | `https://brinqeo.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-
-### `https://brinqeo.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 18907 | `https://9tsu.in/douga/61268.html` | `https://9tsu.vip/61268.html` | ✅ | `https://brinqeo.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 18921 | `https://9tsu.in/douga/60692.html` | `https://9tsu.vip/60692.html` | ✅ | `https://brinqeo.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 18585 | `https://9tsu.in/douga/57555.html` | `https://9tsu.vip/57555.html` | ✅ | `https://zafliron.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19191 | `https://9tsu.in/douga/60356.html` | `https://9tsu.vip/60356.html` | ✅ | `https://zafliron.guru/embed/VdcAN8u90X?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+
+### `https://zafliron.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+
+| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
+| :---: | :--- | :--- | :---: | :--- |
+| 18907 | `https://9tsu.in/douga/61268.html` | `https://9tsu.vip/61268.html` | ✅ | `https://zafliron.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 18921 | `https://9tsu.in/douga/60692.html` | `https://9tsu.vip/60692.html` | ✅ | `https://zafliron.guru/embed/fK71fJcD55?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/9594661767819` (2 record)
 
@@ -1049,19 +1049,19 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 19159 | `https://9tsu.in/douga/60469.html` | `https://9tsu.vip/60469.html` | ❌ | `https://blogspherenews.xyz/embed/670de109172b884e34db9e2f` |
 | 19200 | `https://9tsu.in/douga/60249.html` | `https://9tsu.vip/60249.html` | ❌ | `https://blogspherenews.xyz/embed/670de109172b884e34db9e2f` |
 
-### `https://brinqeo.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 19194 | `https://9tsu.in/douga/60324.html` | `https://9tsu.vip/60324.html` | ✅ | `https://brinqeo.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19195 | `https://9tsu.in/douga/60322.html` | `https://9tsu.vip/60322.html` | ✅ | `https://brinqeo.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19194 | `https://9tsu.in/douga/60324.html` | `https://9tsu.vip/60324.html` | ✅ | `https://zafliron.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19195 | `https://9tsu.in/douga/60322.html` | `https://9tsu.vip/60322.html` | ✅ | `https://zafliron.guru/embed/bSePk1Jwp1?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 19349 | `https://9tsu.in/douga/59560.html` | `https://9tsu.vip/59560.html` | ✅ | `https://brinqeo.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 19350 | `https://9tsu.in/douga/59558.html` | `https://9tsu.vip/59558.html` | ✅ | `https://brinqeo.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19349 | `https://9tsu.in/douga/59560.html` | `https://9tsu.vip/59560.html` | ✅ | `https://zafliron.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19350 | `https://9tsu.in/douga/59558.html` | `https://9tsu.vip/59558.html` | ✅ | `https://zafliron.guru/embed/vDDdCzGxW9?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/8740277258797` (2 record)
 
@@ -1070,12 +1070,12 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 19485 | `https://9tsu.in/douga/58735.html` | `https://9tsu.vip/58735.html` | ❌ | `https://blogspherenews.xyz/embed/670ddfe3172b884e34db9476` |
 | 19486 | `https://9tsu.in/douga/58727.html` | `https://9tsu.vip/58727.html` | ❌ | `https://blogspherenews.xyz/embed/670ddfe3172b884e34db9476` |
 
-### `https://brinqeo.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 19953 | `https://9tsu.in/douga/56563.html` | `https://9tsu.vip/56563.html` | ✅ | `https://brinqeo.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 23760 | `https://9tsu.in/douga/33588.html` | `https://9tsu.vip/33588.html` | ✅ | `https://brinqeo.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 19953 | `https://9tsu.in/douga/56563.html` | `https://9tsu.vip/56563.html` | ✅ | `https://zafliron.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23760 | `https://9tsu.in/douga/33588.html` | `https://9tsu.vip/33588.html` | ✅ | `https://zafliron.guru/embed/UcY2YJjEYw?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://9tsu.in/youtube-baraeti` (9 record)
 
@@ -1091,19 +1091,19 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 21417 | `https://9tsu.in/douga/47740.html` | `https://9tsu.vip/47740.html` | ❌ | `https://9tsu.vip/youtube-baraeti` |
 | 24155 | `https://9tsu.in/douga/34117.html` | `https://9tsu.vip/34117.html` | ❌ | `https://9tsu.vip/youtube-baraeti` |
 
-### `https://brinqeo.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 20409 | `https://9tsu.in/douga/54149.html` | `https://9tsu.vip/54149.html` | ✅ | `https://brinqeo.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 20653 | `https://9tsu.in/douga/52321.html` | `https://9tsu.vip/52321.html` | ✅ | `https://brinqeo.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 20409 | `https://9tsu.in/douga/54149.html` | `https://9tsu.vip/54149.html` | ✅ | `https://zafliron.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 20653 | `https://9tsu.in/douga/52321.html` | `https://9tsu.vip/52321.html` | ✅ | `https://zafliron.guru/embed/9HtwUfWOS8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 21108 | `https://9tsu.in/douga/49382.html` | `https://9tsu.vip/49382.html` | ✅ | `https://brinqeo.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 21223 | `https://9tsu.in/douga/48875.html` | `https://9tsu.vip/48875.html` | ✅ | `https://brinqeo.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21108 | `https://9tsu.in/douga/49382.html` | `https://9tsu.vip/49382.html` | ✅ | `https://zafliron.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21223 | `https://9tsu.in/douga/48875.html` | `https://9tsu.vip/48875.html` | ✅ | `https://zafliron.guru/embed/xKXJK45J9j?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/2683595066009` (2 record)
 
@@ -1112,19 +1112,19 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 21135 | `https://9tsu.in/douga/49576.html` | `https://9tsu.vip/49576.html` | ✅ | `https://ok.ru/videoembed/2683595066009` |
 | 21137 | `https://9tsu.in/douga/49569.html` | `https://9tsu.vip/49569.html` | ✅ | `https://ok.ru/videoembed/2683595066009` |
 
-### `https://brinqeo.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 21632 | `https://9tsu.in/douga/46633.html` | `https://9tsu.vip/46633.html` | ✅ | `https://brinqeo.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 21654 | `https://9tsu.in/douga/46601.html` | `https://9tsu.vip/46601.html` | ✅ | `https://brinqeo.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21632 | `https://9tsu.in/douga/46633.html` | `https://9tsu.vip/46633.html` | ✅ | `https://zafliron.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21654 | `https://9tsu.in/douga/46601.html` | `https://9tsu.vip/46601.html` | ✅ | `https://zafliron.guru/embed/iwyIB0KDVJ?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 21916 | `https://9tsu.in/douga/45004.html` | `https://9tsu.vip/45004.html` | ✅ | `https://brinqeo.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 21919 | `https://9tsu.in/douga/44469.html` | `https://9tsu.vip/44469.html` | ✅ | `https://brinqeo.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21916 | `https://9tsu.in/douga/45004.html` | `https://9tsu.vip/45004.html` | ✅ | `https://zafliron.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 21919 | `https://9tsu.in/douga/44469.html` | `https://9tsu.vip/44469.html` | ✅ | `https://zafliron.guru/embed/zg65JnUamA?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/2513415441149` (2 record)
 
@@ -1140,40 +1140,40 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 | 22088 | `https://9tsu.in/douga/44143.html` | `https://9tsu.vip/44143.html` | ✅ | `https://ok.ru/videoembed/3212219517650` |
 | 22089 | `https://9tsu.in/douga/44140.html` | `https://9tsu.vip/44140.html` | ✅ | `https://ok.ru/videoembed/3212219517650` |
 
-### `https://brinqeo.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 22183 | `https://9tsu.in/douga/42460.html` | `https://9tsu.vip/42460.html` | ✅ | `https://brinqeo.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 22290 | `https://9tsu.in/douga/42464.html` | `https://9tsu.vip/42464.html` | ✅ | `https://brinqeo.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22183 | `https://9tsu.in/douga/42460.html` | `https://9tsu.vip/42460.html` | ✅ | `https://zafliron.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22290 | `https://9tsu.in/douga/42464.html` | `https://9tsu.vip/42464.html` | ✅ | `https://zafliron.guru/embed/NaKGumhM5R?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
-
-| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
-| :---: | :--- | :--- | :---: | :--- |
-| 22186 | `https://9tsu.in/douga/43506.html` | `https://9tsu.vip/43506.html` | ✅ | `https://brinqeo.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 22302 | `https://9tsu.in/douga/42964.html` | `https://9tsu.vip/42964.html` | ✅ | `https://brinqeo.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-
-### `https://brinqeo.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 23591 | `https://9tsu.in/douga/36109.html` | `https://9tsu.vip/36109.html` | ✅ | `https://brinqeo.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 23606 | `https://9tsu.in/douga/35126.html` | `https://9tsu.vip/35126.html` | ✅ | `https://brinqeo.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22186 | `https://9tsu.in/douga/43506.html` | `https://9tsu.vip/43506.html` | ✅ | `https://zafliron.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 22302 | `https://9tsu.in/douga/42964.html` | `https://9tsu.vip/42964.html` | ✅ | `https://zafliron.guru/embed/lsVo4txyW8?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
-### `https://brinqeo.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
-
-| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
-| :---: | :--- | :--- | :---: | :--- |
-| 23824 | `https://9tsu.in/douga/28913.html` | `https://9tsu.vip/28913.html` | ✅ | `https://brinqeo.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 23833 | `https://9tsu.in/douga/18567.html` | `https://9tsu.vip/18567.html` | ✅ | `https://brinqeo.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-
-### `https://brinqeo.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+### `https://zafliron.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
 
 | ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
 | :---: | :--- | :--- | :---: | :--- |
-| 24019 | `https://9tsu.in/douga/31054.html` | `https://9tsu.vip/31054.html` | ✅ | `https://brinqeo.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
-| 24029 | `https://9tsu.in/douga/20121.html` | `https://9tsu.vip/20121.html` | ✅ | `https://brinqeo.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23591 | `https://9tsu.in/douga/36109.html` | `https://9tsu.vip/36109.html` | ✅ | `https://zafliron.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23606 | `https://9tsu.in/douga/35126.html` | `https://9tsu.vip/35126.html` | ✅ | `https://zafliron.guru/embed/o3BYCkPWuB?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+
+### `https://zafliron.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+
+| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
+| :---: | :--- | :--- | :---: | :--- |
+| 23824 | `https://9tsu.in/douga/28913.html` | `https://9tsu.vip/28913.html` | ✅ | `https://zafliron.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 23833 | `https://9tsu.in/douga/18567.html` | `https://9tsu.vip/18567.html` | ✅ | `https://zafliron.guru/embed/GJSuh2KqLk?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+
+### `https://zafliron.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` (2 record)
+
+| ID | URL Asli (9tsu.in) | URL 9tsu.vip | Status | Real Embed |
+| :---: | :--- | :--- | :---: | :--- |
+| 24019 | `https://9tsu.in/douga/31054.html` | `https://9tsu.vip/31054.html` | ✅ | `https://zafliron.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
+| 24029 | `https://9tsu.in/douga/20121.html` | `https://9tsu.vip/20121.html` | ✅ | `https://zafliron.guru/embed/4NpI6f3Tw5?token=5dfbc9b04e576fc6ad1dbe1daf7a` |
 
 ### `https://ok.ru/videoembed/1535947377341` (2 record)
 
@@ -1214,26 +1214,26 @@ _Diperbarui: `2026-08-20 12:17:10 UTC`_
 
 | ID | URL 9tsu.vip | DB `embed_url` | Error | Issues |
 | :---: | :--- | :--- | :--- | :--- |
-| 1821 | `https://9tsu.vip/346584.html` | `https://brinqeo.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/346584.html)` | `duplicate` |
+| 1821 | `https://9tsu.vip/346584.html` | `https://zafliron.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/346584.html)` | `duplicate` |
 | 3239 | `https://9tsu.vip/115459.html` | `https://ok.ru/videoembed/8784620227076` | `HTTP 404 (URL: https://9tsu.vip/115459.html)` | `duplicate` |
 | 3270 | `https://9tsu.vip/115366.html` | `https://ok.ru/videoembed/8745073183236` | `HTTP 404 (URL: https://9tsu.vip/115366.html)` | `duplicate` |
 | 3496 | `https://9tsu.vip/114429.html` | `https://ok.ru/videoembed/7564100635304` | `HTTP 404 (URL: https://9tsu.vip/114429.html)` | `duplicate` |
-| 4179 | `https://9tsu.vip/112526.html` | `https://brinqeo.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/112526.html)` | `duplicate` |
+| 4179 | `https://9tsu.vip/112526.html` | `https://zafliron.guru/embed/l0wzmH7iYN?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/112526.html)` | `duplicate` |
 | 4516 | `https://9tsu.vip/111508.html` | `https://ok.ru/videoembed/9331209538209` | `HTTP 404 (URL: https://9tsu.vip/111508.html)` | `duplicate` |
 | 4517 | `https://9tsu.vip/111512.html` | `https://ok.ru/videoembed/9331209538209` | `HTTP 404 (URL: https://9tsu.vip/111512.html)` | `duplicate` |
 | 4618 | `https://9tsu.vip/111136.html` | `https://ok.ru/videoembed/9297010166433` | `HTTP 404 (URL: https://9tsu.vip/111136.html)` | `duplicate` |
-| 5242 | `https://9tsu.vip/109591.html` | `https://brinqeo.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/109591.html)` | `duplicate` |
+| 5242 | `https://9tsu.vip/109591.html` | `https://zafliron.guru/embed/qJLqx9hvvf?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/109591.html)` | `duplicate` |
 | 5263 | `https://9tsu.vip/109578.html` | `https://ok.ru/videoembed/6660443081376` | `HTTP 404 (URL: https://9tsu.vip/109578.html)` | `duplicate` |
 | 5334 | `https://9tsu.vip/109354.html` | `https://ok.ru/videoembed/8812365089284` | `HTTP 404 (URL: https://9tsu.vip/109354.html)` | `duplicate` |
 | 5348 | `https://9tsu.vip/109326.html` | `https://ok.ru/videoembed/8812365089284` | `HTTP 404 (URL: https://9tsu.vip/109326.html)` | `duplicate` |
 | 5497 | `https://9tsu.vip/41374.html` | `https://ok.ru/videoembed/` | `Tidak ditemukan embed` | `duplicate` |
 | 5718 | `https://9tsu.vip/108507.html` | `https://ok.ru/videoembed/9817850055354` | `HTTP 404 (URL: https://9tsu.vip/108507.html)` | `duplicate` |
 | 5751 | `https://9tsu.vip/108403.html` | `https://ok.ru/videoembed/9817850055354` | `HTTP 404 (URL: https://9tsu.vip/108403.html)` | `duplicate` |
-| 6010 | `https://9tsu.vip/105463.html` | `https://brinqeo.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/105463.html)` | `duplicate` |
+| 6010 | `https://9tsu.vip/105463.html` | `https://zafliron.guru/embed/mmsyKRe6s0?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/105463.html)` | `duplicate` |
 | 6266 | `https://9tsu.vip/106808.html` | `https://ok.ru/videoembed/8425524234881` | `HTTP 404 (URL: https://9tsu.vip/106808.html)` | `duplicate` |
 | 6787 | `https://9tsu.vip/105695.html` | `https://ok.ru/videoembed/9367181724175` | `HTTP 404 (URL: https://9tsu.vip/105695.html)` | `duplicate` |
 | 7776 | `https://9tsu.vip/41549.html` | `https://www.dailymotion.com/dorama9tsu` | `Tidak ditemukan embed` | `duplicate, other_domain` |
-| 11842 | `https://9tsu.vip/69658.html` | `https://brinqeo.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/69658.html)` | `duplicate` |
+| 11842 | `https://9tsu.vip/69658.html` | `https://zafliron.guru/embed/t2L5YeEDht?token=5dfbc9b04e576fc6ad1dbe1daf7a` | `HTTP 404 (URL: https://9tsu.vip/69658.html)` | `duplicate` |
 | 13692 | `https://9tsu.vip/54008.html` | `https://ok.ru/videoembed/` | `Tidak ditemukan embed` | `duplicate` |
 | 14743 | `https://9tsu.vip/78536.html` | `https://ok.ru/videoembed/7627359652442` | `HTTP 404 (URL: https://9tsu.vip/78536.html)` | `duplicate` |
 | 17428 | `https://9tsu.vip/40879.html` | `https://ok.ru/videoembed/` | `Tidak ditemukan embed` | `duplicate` |

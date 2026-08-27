@@ -1,6 +1,6 @@
 # 🔄 Laporan Content Sync DB vs JSON
 
-_Diperbarui secara otomatis pada: `2026-08-26 06:51:22 UTC`_
+_Diperbarui secara otomatis pada: `2026-08-27 17:30:16 UTC`_
 
 ## 📌 Status Perbandingan Konten
 
@@ -8,7 +8,7 @@ _Diperbarui secara otomatis pada: `2026-08-26 06:51:22 UTC`_
 
 | Indikator Pengecekan | Database (`links.db`) | JSON (`links.json`) | Status Perbandingan |
 | :--- | :---: | :---: | :---: |
-| **Jumlah Total Record** | `27420` | `27420` | ✅ Jumlah Cocok |
+| **Jumlah Total Record** | `31383` | `31383` | ✅ Jumlah Cocok |
 | **Perbedaan Isi Field** | `0` beda | `0` beda | ✅ Isi Identik |
 | **Hilang di JSON** | - | `0` record | ✅ Tidak ada |
 | **Hilang di DB** | `0` record | - | ✅ Tidak ada |

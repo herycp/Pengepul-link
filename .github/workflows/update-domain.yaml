@@ -1,4 +1,4 @@
-name: Update Domain (pulvexa.space -> zafliron.guru)
+name: Update Domain (pulvexa.space -> korxime.guru)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
@@ -16,7 +16,7 @@ on:
       new_domain:
         description: 'Domain baru pengganti'
         required: false
-        default: 'zafliron.guru'
+        default: 'korxime.guru'
         type: string
 
 permissions:

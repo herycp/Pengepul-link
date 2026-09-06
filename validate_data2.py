@@ -69,13 +69,13 @@ def get_all_suspicious_records():
             suspicious[id_] = {'id': id_, 'url': url, 'embed_url': embed, 'embed_platform': platform, 'issues': []}
         suspicious[id_]['issues'].append('duplicate')
     
-    # 2. Domain di luar ok.ru dan korxime.guru
+    # 2. Domain di luar ok.ru dan yundevo.guru
     cursor.execute("""
         SELECT id, url, embed_url, embed_platform
         FROM links
         WHERE embed_url IS NOT NULL AND embed_url != ''
         AND embed_url NOT LIKE '%ok.ru%'
-        AND embed_url NOT LIKE '%korxime.guru%'
+        AND embed_url NOT LIKE '%yundevo.guru%'
     """)
     for row in cursor.fetchall():
         id_, url, embed, platform = row

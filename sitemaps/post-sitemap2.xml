@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="//9tsu.in/main-sitemap.xsl"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
+		<loc>https://9tsu.in/douga/120725.html</loc>
+		<lastmod>2026-02-16T02:40:11+00:00</lastmod>
+	</url>
+	<url>
+		<loc>https://9tsu.in/douga/120727.html</loc>
+		<lastmod>2026-02-16T02:40:01+00:00</lastmod>
+	</url>
+	<url>
 		<loc>https://9tsu.in/douga/120735.html</loc>
 		<lastmod>2026-02-16T02:39:48+00:00</lastmod>
 	</url>
@@ -5125,11 +5133,11 @@
 		<lastmod>2025-10-01T09:20:42+00:00</lastmod>
 	</url>
 	<url>
-		<loc>https://9tsu.in/douga/116590.html</loc>
+		<loc>https://9tsu.in/douga/116591.html</loc>
 		<lastmod>2025-10-01T09:20:41+00:00</lastmod>
 	</url>
 	<url>
-		<loc>https://9tsu.in/douga/116591.html</loc>
+		<loc>https://9tsu.in/douga/116590.html</loc>
 		<lastmod>2025-10-01T09:20:41+00:00</lastmod>
 	</url>
 	<url>
@@ -7961,6 +7969,10 @@
 		<lastmod>2025-07-25T09:57:16+00:00</lastmod>
 	</url>
 	<url>
+		<loc>https://9tsu.in/douga/114433.html</loc>
+		<lastmod>2025-07-25T09:54:50+00:00</lastmod>
+	</url>
+	<url>
 		<loc>https://9tsu.in/douga/114434.html</loc>
 		<lastmod>2025-07-25T09:54:50+00:00</lastmod>
 	</url>
@@ -7977,14 +7989,6 @@
 		<lastmod>2025-07-25T09:54:50+00:00</lastmod>
 	</url>
 	<url>
-		<loc>https://9tsu.in/douga/114433.html</loc>
-		<lastmod>2025-07-25T09:54:50+00:00</lastmod>
-	</url>
-	<url>
-		<loc>https://9tsu.in/douga/114438.html</loc>
-		<lastmod>2025-07-25T09:54:49+00:00</lastmod>
-	</url>
-	<url>
 		<loc>https://9tsu.in/douga/114439.html</loc>
 		<lastmod>2025-07-25T09:54:49+00:00</lastmod>
 	</url>
@@ -7994,10 +7998,6 @@
 	</url>
 	<url>
 		<loc>https://9tsu.in/douga/114441.html</loc>
-		<lastmod>2025-07-25T09:54:49+00:00</lastmod>
-	</url>
-	<url>
-		<loc>https://9tsu.in/douga/114442.html</loc>
 		<lastmod>2025-07-25T09:54:49+00:00</lastmod>
 	</url>
 </urlset>

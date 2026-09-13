@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="//9tsu.in/main-sitemap.xsl"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
+		<loc>https://9tsu.in/douga/347159.html</loc>
+		<lastmod>2026-02-17T02:23:57+00:00</lastmod>
+	</url>
+	<url>
 		<loc>https://9tsu.in/douga/120729.html</loc>
 		<lastmod>2026-02-16T12:15:42+00:00</lastmod>
 	</url>
@@ -5197,11 +5201,11 @@
 		<lastmod>2025-10-01T04:28:28+00:00</lastmod>
 	</url>
 	<url>
-		<loc>https://9tsu.in/douga/116478.html</loc>
+		<loc>https://9tsu.in/douga/116564.html</loc>
 		<lastmod>2025-10-01T04:28:28+00:00</lastmod>
 	</url>
 	<url>
-		<loc>https://9tsu.in/douga/116564.html</loc>
+		<loc>https://9tsu.in/douga/116478.html</loc>
 		<lastmod>2025-10-01T04:28:28+00:00</lastmod>
 	</url>
 	<url>
@@ -7994,10 +7998,6 @@
 	</url>
 	<url>
 		<loc>https://9tsu.in/douga/114436.html</loc>
-		<lastmod>2025-07-25T09:54:50+00:00</lastmod>
-	</url>
-	<url>
-		<loc>https://9tsu.in/douga/114437.html</loc>
 		<lastmod>2025-07-25T09:54:50+00:00</lastmod>
 	</url>
 </urlset>

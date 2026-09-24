@@ -1,4 +1,4 @@
-name: Update Domain (pulvexa.space -> joqtiva.today)
+name: Update Domain (pulvexa.space -> cerluno.today)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
@@ -16,7 +16,7 @@ on:
       new_domain:
         description: 'Domain baru pengganti'
         required: false
-        default: 'joqtiva.today'
+        default: 'cerluno.today'
         type: string
 
 permissions:

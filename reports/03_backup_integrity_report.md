@@ -1,26 +1,26 @@
 # 📦 Laporan Integrity Backup & Rollback
 
-_Diperbarui secara otomatis pada: `2026-09-25 11:21:44 UTC`_
+_Diperbarui secara otomatis pada: `2026-09-26 10:57:58 UTC`_
 
 ## 🗄️ Daftar Backup Database SQLite (`links.db`)
 
 | Nama File Backup | Ukuran File | Tanggal Dibuat |
 | :--- | :---: | :---: |
-| `db_links.db.backup_20260803_175714` | `28212.0 KB` | `2026-09-25 11:21:40` |
-| `db_links.db.backup_20260803_175557` | `28212.0 KB` | `2026-09-25 11:21:40` |
-| `db_links.db.backup_20260803_175326` | `28212.0 KB` | `2026-09-25 11:21:40` |
-| `db_links.db.backup_20260803_175047` | `28212.0 KB` | `2026-09-25 11:21:40` |
-| `db_links.db.backup_20260803_174818` | `28212.0 KB` | `2026-09-25 11:21:40` |
+| `db_links.db.backup_20260803_175714` | `28212.0 KB` | `2026-09-26 10:57:53` |
+| `db_links.db.backup_20260803_175557` | `28212.0 KB` | `2026-09-26 10:57:53` |
+| `db_links.db.backup_20260803_175326` | `28212.0 KB` | `2026-09-26 10:57:53` |
+| `db_links.db.backup_20260803_175047` | `28212.0 KB` | `2026-09-26 10:57:53` |
+| `db_links.db.backup_20260803_174818` | `28212.0 KB` | `2026-09-26 10:57:53` |
 
 ## 📄 Daftar Backup JSON (`links.json`)
 
 | Nama File Backup | Ukuran File | Tanggal Dibuat |
 | :--- | :---: | :---: |
-| `json_links.json.backup_20260803_175557` | `24833.0 KB` | `2026-09-25 11:21:40` |
-| `json_links.json.backup_20260803_175047` | `24848.5 KB` | `2026-09-25 11:21:40` |
-| `json_links.json.backup_20260803_174541` | `24864.1 KB` | `2026-09-25 11:21:40` |
-| `json_links.json.backup_20260803_173850` | `24879.6 KB` | `2026-09-25 11:21:40` |
-| `json_links.json.backup_20260803_172928` | `24895.2 KB` | `2026-09-25 11:21:40` |
+| `json_links.json.backup_20260803_175557` | `24833.0 KB` | `2026-09-26 10:57:53` |
+| `json_links.json.backup_20260803_175047` | `24848.5 KB` | `2026-09-26 10:57:53` |
+| `json_links.json.backup_20260803_174541` | `24864.1 KB` | `2026-09-26 10:57:53` |
+| `json_links.json.backup_20260803_173850` | `24879.6 KB` | `2026-09-26 10:57:53` |
+| `json_links.json.backup_20260803_172928` | `24895.2 KB` | `2026-09-26 10:57:53` |
 
 ## ⏪ Petunjuk Rollback Manual
 Untuk mengembalikan database ke versi backup tertentu, jalankan script berikut:

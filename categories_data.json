@@ -11169,8 +11169,13 @@
         "category_url": "https://9tsu.in/blacktrick",
         "category_name": "blacktrick",
         "category_title": "ブラックトリック〜裁きを操る弁護人〜",
-        "lastmod": "2026-09-21T13:36:19+00:00",
+        "lastmod": "2026-09-28T14:57:31+00:00",
         "episodes": [
+            {
+                "title": "ブラックトリック〜裁きを操る弁護人〜　第11話",
+                "url": "https://9tsu.in/douga/127341.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/07/ブラックトリック〜裁きを操る弁護人〜.jpg"
+            },
             {
                 "title": "ブラックトリック〜裁きを操る弁護人〜　第10話",
                 "url": "https://9tsu.in/douga/127236.html",
@@ -11326,6 +11331,24 @@
                 "title": "BLOOD ＆ SWEAT　第1話",
                 "url": "https://9tsu.in/douga/121990.html",
                 "image": "https://9tsu.in/wp-content/uploads/2026/04/BLOOD-＆-SWEAT.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/blossom",
+        "category_name": "blossom",
+        "category_title": "ブラッサム",
+        "lastmod": "2026-09-28T23:32:15+00:00",
+        "episodes": [
+            {
+                "title": "ブラッサム 　第2話",
+                "url": "https://9tsu.in/douga/351120.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/09/ブラッサム-.jpg"
+            },
+            {
+                "title": "ブラッサム 　第1話",
+                "url": "https://9tsu.in/douga/351103.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/09/ブラッサム-.jpg"
             }
         ]
     },
@@ -22835,8 +22858,13 @@
         "category_url": "https://9tsu.in/evening-mystery",
         "category_name": "evening-mystery",
         "category_title": "夕方ミステリー",
-        "lastmod": "2026-09-25T06:37:52+00:00",
+        "lastmod": "2026-09-28T23:46:34+00:00",
         "episodes": [
+            {
+                "title": "夕方ミステリー『検事 近松茂道3 銀山温泉の殺人報告』主演・高橋英樹",
+                "url": "https://9tsu.in/douga/351127.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            },
             {
                 "title": "夕方ミステリー『検事 近松茂道1 グズ茂検事の犯罪捜査』主演・高橋英樹",
                 "url": "https://9tsu.in/douga/127304.html",
@@ -26963,8 +26991,13 @@
         "category_url": "https://9tsu.in/gto2026",
         "category_name": "gto2026",
         "category_title": "GTO(2026年版)",
-        "lastmod": "2026-09-21T14:19:29+00:00",
+        "lastmod": "2026-09-28T14:57:38+00:00",
         "episodes": [
+            {
+                "title": "GTO(2026年版)　第11話",
+                "url": "https://9tsu.in/douga/127343.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/07/GTO2026年版.jpg"
+            },
             {
                 "title": "GTO(2026年版)　第10話",
                 "url": "https://9tsu.in/douga/127238.html",
@@ -46766,8 +46799,13 @@
         "category_url": "https://9tsu.in/korohazu",
         "category_name": "korohazu",
         "category_title": "夫を殺したはずなのに",
-        "lastmod": "2026-09-22T00:05:07+00:00",
+        "lastmod": "2026-09-28T23:32:57+00:00",
         "episodes": [
+            {
+                "title": "夫を殺したはずなのに　第13話",
+                "url": "https://9tsu.in/douga/127345.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/07/夫を殺したはずなのに.jpg"
+            },
             {
                 "title": "夫を殺したはずなのに　第12話",
                 "url": "https://9tsu.in/douga/127240.html",
@@ -94717,8 +94755,13 @@
         "category_url": "https://9tsu.in/zeikindekattahon",
         "category_name": "zeikindekattahon",
         "category_title": "税金で買った本",
-        "lastmod": "2026-09-25T06:37:41+00:00",
+        "lastmod": "2026-09-28T14:57:51+00:00",
         "episodes": [
+            {
+                "title": "税金で買った本　第21話",
+                "url": "https://9tsu.in/douga/127351.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/08/税金で買った本.jpg"
+            },
             {
                 "title": "税金で買った本　第20話",
                 "url": "https://9tsu.in/douga/127302.html",

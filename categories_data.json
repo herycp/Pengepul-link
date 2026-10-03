@@ -10126,8 +10126,13 @@
         "category_url": "https://9tsu.in/banshaku5",
         "category_name": "banshaku5",
         "category_title": "晩酌の流儀５ 〜夏編〜",
-        "lastmod": "2026-09-05T10:38:52+00:00",
+        "lastmod": "2026-10-03T00:57:21+00:00",
         "episodes": [
+            {
+                "title": "晩酌の流儀５ 〜秋冬編〜　第1話",
+                "url": "https://9tsu.in/douga/351181.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/07/晩酌の流儀５-〜夏編〜.jpg"
+            },
             {
                 "title": "晩酌の流儀５ 〜夏編〜　第10話",
                 "url": "https://9tsu.in/douga/126840.html",
@@ -11338,7 +11343,7 @@
         "category_url": "https://9tsu.in/blossom",
         "category_name": "blossom",
         "category_title": "ブラッサム",
-        "lastmod": "2026-10-01T23:11:35+00:00",
+        "lastmod": "2026-10-02T11:02:11+00:00",
         "episodes": [
             {
                 "title": "ブラッサム　第5話",
@@ -21415,6 +21420,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/doubt",
+        "category_name": "doubt",
+        "category_title": "ダウト -15年目の復讐-",
+        "lastmod": "2026-10-03T01:05:08+00:00",
+        "episodes": [
+            {
+                "title": "ダウト -15年目の復讐-　第1話",
+                "url": "https://9tsu.in/douga/351166.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/douseimade",
         "category_name": "douseimade",
         "category_title": "親友の「同棲して」に「うん」て言うまで",
@@ -22873,7 +22891,7 @@
         "category_url": "https://9tsu.in/evening-mystery",
         "category_name": "evening-mystery",
         "category_title": "夕方ミステリー",
-        "lastmod": "2026-10-01T04:39:37+00:00",
+        "lastmod": "2026-10-02T11:03:04+00:00",
         "episodes": [
             {
                 "title": "夕方ミステリー『捜査検事 近松茂道5 自白』主演・高橋英樹",
@@ -50404,6 +50422,19 @@
                 "title": "ドラマパラビ　だから私はメイクする　１話 動画　2020年10月7日　",
                 "url": "https://9tsu.in/douga/48600.html",
                 "image": "https://9tsu.in/wp-content/uploads/2020/10/2020-10-07_10-38-41.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/mamemugi",
+        "category_name": "mamemugi",
+        "category_title": "まめとむぎ",
+        "lastmod": "2026-10-03T01:05:00+00:00",
+        "episodes": [
+            {
+                "title": "まめとむぎ　第1話",
+                "url": "https://9tsu.in/douga/351179.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
             }
         ]
     },
@@ -82887,6 +82918,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/tenguskitchen3",
+        "category_name": "tenguskitchen3",
+        "category_title": "天狗の台所 Season3",
+        "lastmod": "2026-10-03T01:05:13+00:00",
+        "episodes": [
+            {
+                "title": "天狗の台所 Season3　第1話",
+                "url": "https://9tsu.in/douga/351162.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/tenshi",
         "category_name": "tenshi",
         "category_title": "天使にリクエストを～人生最後の願い～",
@@ -92024,6 +92068,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/worstfirstlove",
+        "category_name": "worstfirstlove",
+        "category_title": "ワースト・ファーストラブ",
+        "lastmod": "2026-10-03T01:05:18+00:00",
+        "episodes": [
+            {
+                "title": "ワースト・ファーストラブ　第1話",
+                "url": "https://9tsu.in/douga/127349.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/yabusen",
         "category_name": "yabusen",
         "category_title": "やぶさかではございません",
@@ -94785,7 +94842,7 @@
         "category_url": "https://9tsu.in/zeikindekattahon",
         "category_name": "zeikindekattahon",
         "category_title": "税金で買った本",
-        "lastmod": "2026-10-01T14:26:17+00:00",
+        "lastmod": "2026-10-02T11:02:54+00:00",
         "episodes": [
             {
                 "title": "税金で買った本　第24話",

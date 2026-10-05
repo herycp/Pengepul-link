@@ -11343,8 +11343,13 @@
         "category_url": "https://9tsu.in/blossom",
         "category_name": "blossom",
         "category_title": "ブラッサム",
-        "lastmod": "2026-10-02T11:02:11+00:00",
+        "lastmod": "2026-10-05T00:52:02+00:00",
         "episodes": [
+            {
+                "title": "ブラッサム　第6話",
+                "url": "https://9tsu.in/douga/351204.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/09/ブラッサム-.jpg"
+            },
             {
                 "title": "ブラッサム　第5話",
                 "url": "https://9tsu.in/douga/351169.html",
@@ -27507,6 +27512,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/hadakanboutachi",
+        "category_name": "hadakanboutachi",
+        "category_title": "はだかんぼうたち",
+        "lastmod": "2026-10-05T04:43:29+00:00",
+        "episodes": [
+            {
+                "title": "はだかんぼうたち 　第1話",
+                "url": "https://9tsu.in/douga/127433.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/はだかんぼうたち.jpg"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/haguregumo",
         "category_name": "haguregumo",
         "category_title": "浮浪雲",
@@ -29281,6 +29299,19 @@
                 "title": "ひだまりが聴こえる　第1話",
                 "url": "https://9tsu.in/douga/101038.html",
                 "image": "https://9tsu.in/wp-content/uploads/2024/07/ひだまりが聴こえる　.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/hideseek",
+        "category_name": "hideseek",
+        "category_title": "ハイド＆シーク 0秒前の彼女",
+        "lastmod": "2026-10-05T04:43:04+00:00",
+        "episodes": [
+            {
+                "title": "ハイド＆シーク 0秒前の彼女　第1話",
+                "url": "https://9tsu.in/douga/127450.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/ハイド＆シーク-0秒前の彼女.jpg"
             }
         ]
     },
@@ -55423,6 +55454,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/moupapa",
+        "category_name": "moupapa",
+        "category_title": "もうパパ！",
+        "lastmod": "2026-10-05T04:43:02+00:00",
+        "episodes": [
+            {
+                "title": "もうパパ！ 　第1話",
+                "url": "https://9tsu.in/douga/127448.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/もうパパ！.jpg"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/moyori-no-utopia",
         "category_name": "moyori-no-utopia",
         "category_title": "最寄りのユートピア",
@@ -55432,6 +55476,19 @@
                 "title": "最寄りのユートピア　第1話",
                 "url": "https://9tsu.in/douga/104134.html",
                 "image": "https://9tsu.in/wp-content/uploads/2024/09/最寄りのユートピア.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/mrwowow",
+        "category_name": "mrwowow",
+        "category_title": "MR －医薬情報担当者－",
+        "lastmod": "2026-10-05T04:43:17+00:00",
+        "episodes": [
+            {
+                "title": "MR －医薬情報担当者－  　第1話",
+                "url": "https://9tsu.in/douga/127444.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/MR-－医薬情報担当者－.jpg"
             }
         ]
     },
@@ -72059,6 +72116,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/saiseinouzume",
+        "category_name": "saiseinouzume",
+        "category_title": "再生のウズメ",
+        "lastmod": "2026-10-05T04:43:27+00:00",
+        "episodes": [
+            {
+                "title": "再生のウズメ 　第1話",
+                "url": "https://9tsu.in/douga/127436.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/再生のウズメ.jpg"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/saitamanohost_tbs",
         "category_name": "saitamanohost_tbs",
         "category_title": "埼玉のホスト",
@@ -87692,8 +87762,13 @@
         "category_url": "https://9tsu.in/toyotomikyoudai",
         "category_name": "toyotomikyoudai",
         "category_title": "豊臣兄弟！",
-        "lastmod": "2026-09-27T14:39:34+00:00",
+        "lastmod": "2026-10-05T01:41:57+00:00",
         "episodes": [
+            {
+                "title": "豊臣兄弟！　第38話",
+                "url": "https://9tsu.in/douga/127438.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/01/豊臣兄弟！.jpg"
+            },
             {
                 "title": "豊臣兄弟！　第37話",
                 "url": "https://9tsu.in/douga/127311.html",
@@ -90316,8 +90391,13 @@
         "category_url": "https://9tsu.in/vivant-tbs",
         "category_name": "vivant-tbs",
         "category_title": "ＶＩＶＡＮＴ",
-        "lastmod": "2026-09-13T13:49:36+00:00",
+        "lastmod": "2026-10-05T01:42:02+00:00",
         "episodes": [
+            {
+                "title": "日曜劇場「VIVANT」 　第19話",
+                "url": "https://9tsu.in/douga/127442.html",
+                "image": "https://9tsu.in/wp-content/uploads/2023/07/2023-07-16_18-13-28.png"
+            },
             {
                 "title": "日曜劇場「VIVANT」 　第18話",
                 "url": "https://9tsu.in/douga/127043.html",

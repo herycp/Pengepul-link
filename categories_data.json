@@ -7447,6 +7447,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/aotomidori",
+        "category_name": "aotomidori",
+        "category_title": "青と碧",
+        "lastmod": "2026-10-07T11:53:27+00:00",
+        "episodes": [
+            {
+                "title": "青と碧　第1話",
+                "url": "https://9tsu.in/douga/351233.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/青と碧.jpg"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/aozorabeer",
         "category_name": "aozorabeer",
         "category_title": "あおぞらビール",
@@ -11343,8 +11356,13 @@
         "category_url": "https://9tsu.in/blossom",
         "category_name": "blossom",
         "category_title": "ブラッサム",
-        "lastmod": "2026-10-06T23:57:47+00:00",
+        "lastmod": "2026-10-08T00:08:06+00:00",
         "episodes": [
+            {
+                "title": "ブラッサム　第9話",
+                "url": "https://9tsu.in/douga/351261.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/09/ブラッサム-.jpg"
+            },
             {
                 "title": "ブラッサム　第8話",
                 "url": "https://9tsu.in/douga/351245.html",
@@ -27114,6 +27132,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/guam10days",
+        "category_name": "guam10days",
+        "category_title": "私があなたといる理由2",
+        "lastmod": "2026-10-08T00:15:59+00:00",
+        "episodes": [
+            {
+                "title": "私があなたといる理由2〜グアムを訪れた8人の男女の10日間〜　第1話",
+                "url": "https://9tsu.in/douga/127520.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/guam1week",
         "category_name": "guam1week",
         "category_title": "私があなたといる理由〜グアムを訪れた3組の男女の1週間",
@@ -38209,6 +38240,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/kamenkyoushi",
+        "category_name": "kamenkyoushi",
+        "category_title": "仮面教師",
+        "lastmod": "2026-10-08T00:16:03+00:00",
+        "episodes": [
+            {
+                "title": "仮面教師〜妻を亡くしたその日から　第1話",
+                "url": "https://9tsu.in/douga/127516.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/kamihitohibi",
         "category_name": "kamihitohibi",
         "category_title": "ギリシャ神話劇場 神々と人々の日々",
@@ -41279,6 +41323,19 @@
                 "title": "希望の勇者たち　1貫 動画　2021年6月13日",
                 "url": "https://9tsu.in/douga/58418.html",
                 "image": "https://9tsu.in/wp-content/uploads/2021/06/2021-06-13_22-03-12.png"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/kidnapgame",
+        "category_name": "kidnapgame",
+        "category_title": "kiDnap GAME",
+        "lastmod": "2026-10-07T11:53:25+00:00",
+        "episodes": [
+            {
+                "title": "kiDnap GAME　第1話",
+                "url": "https://9tsu.in/douga/127500.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/kiDnap-GAME.jpg"
             }
         ]
     },
@@ -45997,7 +46054,7 @@
         "category_url": "https://9tsu.in/koinido2",
         "category_name": "koinido2",
         "category_title": "恋をするなら二度目が上等 season2",
-        "lastmod": "2026-10-06T23:58:01+00:00",
+        "lastmod": "2026-10-07T08:52:52+00:00",
         "episodes": [
             {
                 "title": "恋をするなら二度目が上等 season2　第6話",
@@ -46412,6 +46469,19 @@
                 "title": "こむぎの満腹記　第1話",
                 "url": "https://9tsu.in/douga/89272.html",
                 "image": "https://9tsu.in/wp-content/uploads/2023/09/2023-09-29_22-36-26.png"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/komugitobutter",
+        "category_name": "komugitobutter",
+        "category_title": "小麦とバターと復讐と",
+        "lastmod": "2026-10-08T00:16:09+00:00",
+        "episodes": [
+            {
+                "title": "小麦とバターと復讐と　第1話",
+                "url": "https://9tsu.in/douga/127512.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
             }
         ]
     },
@@ -52925,6 +52995,19 @@
                 "title": "波うららかに、めおと日和　第1話",
                 "url": "https://9tsu.in/douga/111406.html",
                 "image": "https://9tsu.in/wp-content/uploads/2025/06/波うららかに、めおと日和.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/merryberrylove",
+        "category_name": "merryberrylove",
+        "category_title": "メリーベリーラブ",
+        "lastmod": "2026-10-08T00:16:17+00:00",
+        "episodes": [
+            {
+                "title": "メリーベリーラブ　第1話",
+                "url": "https://9tsu.in/douga/127514.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
             }
         ]
     },
@@ -67390,6 +67473,19 @@
                 "title": "ポケットに冒険をつめこんで　第1話",
                 "url": "https://9tsu.in/douga/90151.html",
                 "image": "https://9tsu.in/wp-content/uploads/2023/10/2023-10-19_23-19-57.png"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/politicalupin",
+        "category_name": "politicalupin",
+        "category_title": "ポリティカルパン",
+        "lastmod": "2026-10-08T00:16:13+00:00",
+        "episodes": [
+            {
+                "title": "ポリティカルパン　第1話",
+                "url": "https://9tsu.in/douga/127510.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
             }
         ]
     },
@@ -88897,6 +88993,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/tsumaintai",
+        "category_name": "tsumaintai",
+        "category_title": "妻を引退します",
+        "lastmod": "2026-10-07T11:53:29+00:00",
+        "episodes": [
+            {
+                "title": "妻を引退します　第1話",
+                "url": "https://9tsu.in/douga/127474.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/妻を引退します.jpg"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/tx_95",
         "category_name": "tx_95",
         "category_title": "開局60周年連続ドラマ『95』",
@@ -88974,6 +89083,19 @@
                 "title": "金曜８時のドラマ　機捜２３５×強行犯係　第5話",
                 "url": "https://9tsu.in/douga/80934.html",
                 "image": "https://9tsu.in/wp-content/uploads/2023/02/2023-02-17_15-53-47.png"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/txdekiaikareshi",
+        "category_name": "txdekiaikareshi",
+        "category_title": "溺愛カレシの作り方",
+        "lastmod": "2026-10-08T00:15:54+00:00",
+        "episodes": [
+            {
+                "title": "溺愛カレシの作り方 〜セから本命になる女の子の話〜　第1話",
+                "url": "https://9tsu.in/douga/127518.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
             }
         ]
     },
@@ -94942,8 +95064,13 @@
         "category_url": "https://9tsu.in/zeikindekattahon",
         "category_name": "zeikindekattahon",
         "category_title": "税金で買った本",
-        "lastmod": "2026-10-06T14:28:28+00:00",
+        "lastmod": "2026-10-07T14:58:38+00:00",
         "episodes": [
+            {
+                "title": "税金で買った本　第27話",
+                "url": "https://9tsu.in/douga/127522.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/08/税金で買った本.jpg"
+            },
             {
                 "title": "税金で買った本　第26話",
                 "url": "https://9tsu.in/douga/127504.html",

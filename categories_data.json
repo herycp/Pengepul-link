@@ -10139,8 +10139,13 @@
         "category_url": "https://9tsu.in/banshaku5",
         "category_name": "banshaku5",
         "category_title": "晩酌の流儀５ 〜夏編〜",
-        "lastmod": "2026-10-03T00:57:21+00:00",
+        "lastmod": "2026-10-10T01:17:23+00:00",
         "episodes": [
+            {
+                "title": "晩酌の流儀５ 〜秋冬編〜　第2話",
+                "url": "https://9tsu.in/douga/351300.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/07/晩酌の流儀５-〜夏編〜.jpg"
+            },
             {
                 "title": "晩酌の流儀５ 〜秋冬編〜　第1話",
                 "url": "https://9tsu.in/douga/351181.html",
@@ -42571,8 +42576,13 @@
         "category_url": "https://9tsu.in/kinro-ntv",
         "category_name": "kinro-ntv",
         "category_title": "金曜ロードショー",
-        "lastmod": "2026-09-25T23:38:01+00:00",
+        "lastmod": "2026-10-09T14:52:17+00:00",
         "episodes": [
+            {
+                "title": "金曜ロードショー 動画　2026年10月9日「インサイド・ヘッド」",
+                "url": "https://9tsu.in/douga/351296.html",
+                "image": "https://9tsu.in/wp-content/uploads/2024/02/2024-02-16_22-21-19.png"
+            },
             {
                 "title": "金曜ロードショー  動画　2026年9月25日",
                 "url": "https://9tsu.in/douga/127293.html",
@@ -49254,6 +49264,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/lifetrade",
+        "category_name": "lifetrade",
+        "category_title": "ライフトレード",
+        "lastmod": "2026-10-09T14:22:00+00:00",
+        "episodes": [
+            {
+                "title": "ライフトレード　第1話",
+                "url": "https://9tsu.in/douga/127544.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/lilakemonomichi2",
         "category_name": "lilakemonomichi2",
         "category_title": "リラの花咲くけものみち2",
@@ -50560,8 +50583,13 @@
         "category_url": "https://9tsu.in/mamemugi",
         "category_name": "mamemugi",
         "category_title": "まめとむぎ",
-        "lastmod": "2026-10-03T10:10:27+00:00",
+        "lastmod": "2026-10-10T01:17:16+00:00",
         "episodes": [
+            {
+                "title": "まめとむぎ　第2話",
+                "url": "https://9tsu.in/douga/351298.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/まめとむぎ.jpg"
+            },
             {
                 "title": "まめとむぎ　第1話",
                 "url": "https://9tsu.in/douga/351179.html",
@@ -74062,6 +74090,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/sekitoelegy",
+        "category_name": "sekitoelegy",
+        "category_title": "赤灯えれじい",
+        "lastmod": "2026-10-09T14:22:08+00:00",
+        "episodes": [
+            {
+                "title": "赤灯えれじい　第1話",
+                "url": "https://9tsu.in/douga/127542.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/sennyu",
         "category_name": "sennyu",
         "category_title": "潜入兄妹 特殊詐欺特命捜査官",
@@ -90274,6 +90315,19 @@
                 "title": "嘘解きレトリック　第1話",
                 "url": "https://9tsu.in/douga/104478.html",
                 "image": "https://9tsu.in/wp-content/uploads/2024/10/嘘解きレトリック.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/usowata",
+        "category_name": "usowata",
+        "category_title": "嘘をついた私たち",
+        "lastmod": "2026-10-09T14:22:04+00:00",
+        "episodes": [
+            {
+                "title": "嘘をついた私たち　第1話",
+                "url": "https://9tsu.in/douga/127546.html",
+                "image": "https://9tsu.in/wp-content/uploads/2019/08/thum-default-9tsu-in.png"
             }
         ]
     },

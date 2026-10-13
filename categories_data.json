@@ -7450,8 +7450,13 @@
         "category_url": "https://9tsu.in/aotomidori",
         "category_name": "aotomidori",
         "category_title": "青と碧",
-        "lastmod": "2026-10-07T11:53:27+00:00",
+        "lastmod": "2026-10-13T06:11:33+00:00",
         "episodes": [
+            {
+                "title": "青と碧　第2話",
+                "url": "https://9tsu.in/douga/127643.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/青と碧.jpg"
+            },
             {
                 "title": "青と碧　第1話",
                 "url": "https://9tsu.in/douga/351233.html",
@@ -11361,8 +11366,13 @@
         "category_url": "https://9tsu.in/blossom",
         "category_name": "blossom",
         "category_title": "ブラッサム",
-        "lastmod": "2026-10-11T22:57:14+00:00",
+        "lastmod": "2026-10-13T00:51:09+00:00",
         "episodes": [
+            {
+                "title": "ブラッサム　第12話",
+                "url": "https://9tsu.in/douga/351352.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/09/ブラッサム-.jpg"
+            },
             {
                 "title": "ブラッサム　第11話",
                 "url": "https://9tsu.in/douga/351333.html",
@@ -36029,6 +36039,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/izayoizenbo",
+        "category_name": "izayoizenbo",
+        "category_title": "十六夜膳房",
+        "lastmod": "2026-10-13T06:11:28+00:00",
+        "episodes": [
+            {
+                "title": "十六夜膳房　第1話",
+                "url": "https://9tsu.in/douga/127649.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/十六夜膳房.jpg"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/jackfrost",
         "category_name": "jackfrost",
         "category_title": "ジャックフロスト",
@@ -48929,6 +48952,19 @@
                 "title": "救命病棟24時　第１シリーズ　第1話",
                 "url": "https://9tsu.in/douga/95198.html",
                 "image": "https://9tsu.in/wp-content/uploads/2022/12/thum-9tsu.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/kyumei24ss6th",
+        "category_name": "kyumei24ss6th",
+        "category_title": "救命病棟24時 第6シリーズ",
+        "lastmod": "2026-10-13T06:11:51+00:00",
+        "episodes": [
+            {
+                "title": "救命病棟24時　第6シリーズ　第1話",
+                "url": "https://9tsu.in/douga/351344.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/救命病棟24時-第6シリーズ.jpg"
             }
         ]
     },
@@ -64915,6 +64951,19 @@
                 "title": "俺の美女化が止まらない!?　第1話",
                 "url": "https://9tsu.in/douga/82947.html",
                 "image": "https://9tsu.in/wp-content/uploads/2023/04/2023-04-19_20-34-58.png"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/orehako",
+        "category_name": "orehako",
+        "category_title": "俺たちの箱根駅伝",
+        "lastmod": "2026-10-13T06:11:54+00:00",
+        "episodes": [
+            {
+                "title": "俺たちの箱根駅伝　第1話",
+                "url": "https://9tsu.in/douga/127587.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/俺たちの箱根駅伝.jpg"
             }
         ]
     },
@@ -89092,8 +89141,13 @@
         "category_url": "https://9tsu.in/tsumaintai",
         "category_name": "tsumaintai",
         "category_title": "妻を引退します",
-        "lastmod": "2026-10-07T11:53:29+00:00",
+        "lastmod": "2026-10-13T00:50:44+00:00",
         "episodes": [
+            {
+                "title": "妻を引退します　第2話",
+                "url": "https://9tsu.in/douga/127645.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/妻を引退します.jpg"
+            },
             {
                 "title": "妻を引退します　第1話",
                 "url": "https://9tsu.in/douga/127474.html",
@@ -95178,8 +95232,13 @@
         "category_url": "https://9tsu.in/zeikindekattahon",
         "category_name": "zeikindekattahon",
         "category_title": "税金で買った本",
-        "lastmod": "2026-10-09T01:18:33+00:00",
+        "lastmod": "2026-10-13T00:50:25+00:00",
         "episodes": [
+            {
+                "title": "税金で買った本　第29話",
+                "url": "https://9tsu.in/douga/127653.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/08/税金で買った本.jpg"
+            },
             {
                 "title": "税金で買った本　第28話",
                 "url": "https://9tsu.in/douga/127548.html",

@@ -6080,6 +6080,19 @@
         ]
     },
     {
+        "category_url": "https://9tsu.in/aniimouto",
+        "category_name": "aniimouto",
+        "category_title": "あにいもうと",
+        "lastmod": "2026-10-19T07:43:13+00:00",
+        "episodes": [
+            {
+                "title": "あにいもうと 　第1話",
+                "url": "https://9tsu.in/douga/127791.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/あにいもうと.jpg"
+            }
+        ]
+    },
+    {
         "category_url": "https://9tsu.in/anlyric",
         "category_name": "anlyric",
         "category_title": "あんのリリック -桜木杏、俳句はじめてみました-",
@@ -7450,8 +7463,13 @@
         "category_url": "https://9tsu.in/aotomidori",
         "category_name": "aotomidori",
         "category_title": "青と碧",
-        "lastmod": "2026-10-13T06:11:33+00:00",
+        "lastmod": "2026-10-19T15:26:55+00:00",
         "episodes": [
+            {
+                "title": "青と碧　第3話",
+                "url": "https://9tsu.in/douga/127829.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/青と碧.jpg"
+            },
             {
                 "title": "青と碧　第2話",
                 "url": "https://9tsu.in/douga/127643.html",
@@ -11371,8 +11389,13 @@
         "category_url": "https://9tsu.in/blossom",
         "category_name": "blossom",
         "category_title": "ブラッサム",
-        "lastmod": "2026-10-18T23:01:32+00:00",
+        "lastmod": "2026-10-19T23:10:09+00:00",
         "episodes": [
+            {
+                "title": "ブラッサム　第16話",
+                "url": "https://9tsu.in/douga/351503.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/09/ブラッサム-.jpg"
+            },
             {
                 "title": "ブラッサム　第16話",
                 "url": "https://9tsu.in/douga/351477.html",
@@ -12050,6 +12073,19 @@
                 "title": "ボーダレス〜広域移動捜査隊〜　第1話",
                 "url": "https://9tsu.in/douga/348054.html",
                 "image": "https://9tsu.in/wp-content/uploads/2026/04/ボーダレス〜広域移動捜査隊〜.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/borders",
+        "category_name": "borders",
+        "category_title": "ボーダーズ 警視庁特殊事件対策班",
+        "lastmod": "2026-10-19T07:43:09+00:00",
+        "episodes": [
+            {
+                "title": "ボーダーズ 警視庁特殊事件対策班　第1話",
+                "url": "https://9tsu.in/douga/127749.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/ボーダーズ-警視庁特殊事件対策班.jpg"
             }
         ]
     },
@@ -36092,8 +36128,13 @@
         "category_url": "https://9tsu.in/izayoizenbo",
         "category_name": "izayoizenbo",
         "category_title": "十六夜膳房",
-        "lastmod": "2026-10-13T06:11:28+00:00",
+        "lastmod": "2026-10-19T16:04:59+00:00",
         "episodes": [
+            {
+                "title": "十六夜膳房　第2話",
+                "url": "https://9tsu.in/douga/127835.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/十六夜膳房.jpg"
+            },
             {
                 "title": "十六夜膳房　第1話",
                 "url": "https://9tsu.in/douga/127649.html",
@@ -49060,8 +49101,13 @@
         "category_url": "https://9tsu.in/kyumei24ss6th",
         "category_name": "kyumei24ss6th",
         "category_title": "救命病棟24時 第6シリーズ",
-        "lastmod": "2026-10-13T06:11:51+00:00",
+        "lastmod": "2026-10-19T14:05:40+00:00",
         "episodes": [
+            {
+                "title": "救命病棟24時　第6シリーズ　第2話",
+                "url": "https://9tsu.in/douga/127827.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/救命病棟24時-第6シリーズ.jpg"
+            },
             {
                 "title": "救命病棟24時　第6シリーズ　第1話",
                 "url": "https://9tsu.in/douga/351344.html",
@@ -49584,6 +49630,19 @@
                 "title": "ライオンの隠れ家　第1話",
                 "url": "https://9tsu.in/douga/104606.html",
                 "image": "https://9tsu.in/wp-content/uploads/2024/10/ライオンの隠れ家.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/lost10",
+        "category_name": "lost10",
+        "category_title": "LOST10",
+        "lastmod": "2026-10-19T07:43:05+00:00",
+        "episodes": [
+            {
+                "title": "LOST10　第1話",
+                "url": "https://9tsu.in/douga/351444.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/LOST10.jpg"
             }
         ]
     },
@@ -73575,8 +73634,13 @@
         "category_url": "https://9tsu.in/schooltrip",
         "category_name": "schooltrip",
         "category_title": "修学旅行で仲良くないグループに入りました",
-        "lastmod": "2025-12-23T11:33:50+00:00",
+        "lastmod": "2026-10-19T07:34:01+00:00",
         "episodes": [
+            {
+                "title": "修学旅行で仲良くないグループに入りました2 　第1話",
+                "url": "https://9tsu.in/douga/351462.html",
+                "image": "https://9tsu.in/wp-content/uploads/2025/10/修学旅行で仲良くないグループに入りました.jpg"
+            },
             {
                 "title": "修学旅行で仲良くないグループに入りました　第10話",
                 "url": "https://9tsu.in/douga/119118.html",
@@ -78962,6 +79026,19 @@
                 "title": "スピナーベイト　第1話",
                 "url": "https://9tsu.in/douga/124636.html",
                 "image": "https://9tsu.in/wp-content/uploads/2026/07/スピナーベイト.jpg"
+            }
+        ]
+    },
+    {
+        "category_url": "https://9tsu.in/squall",
+        "category_name": "squall",
+        "category_title": "SQUALL",
+        "lastmod": "2026-10-19T07:45:45+00:00",
+        "episodes": [
+            {
+                "title": "SQUALL　第1話",
+                "url": "https://9tsu.in/douga/351487.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/SQUALL.jpg"
             }
         ]
     },
@@ -89297,8 +89374,13 @@
         "category_url": "https://9tsu.in/tsumaintai",
         "category_name": "tsumaintai",
         "category_title": "妻を引退します",
-        "lastmod": "2026-10-13T00:50:44+00:00",
+        "lastmod": "2026-10-19T15:27:00+00:00",
         "episodes": [
+            {
+                "title": "妻を引退します　第3話",
+                "url": "https://9tsu.in/douga/127831.html",
+                "image": "https://9tsu.in/wp-content/uploads/2026/10/妻を引退します.jpg"
+            },
             {
                 "title": "妻を引退します　第2話",
                 "url": "https://9tsu.in/douga/127645.html",

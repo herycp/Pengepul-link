@@ -1,4 +1,4 @@
-name: Update Domain (pulvexa.space -> bravenu.today)
+name: Update Domain (pulvexa.space -> tolvixa.today)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
@@ -16,7 +16,7 @@ on:
       new_domain:
         description: 'Domain baru pengganti'
         required: false
-        default: 'bravenu.today'
+        default: 'tolvixa.today'
         type: string
 
 permissions:

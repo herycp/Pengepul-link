@@ -1,4 +1,4 @@
-name: Update Domain (pulvexa.space -> tolvixa.today)
+name: Update Domain (pulvexa.space -> yorqemi.digital)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
@@ -16,7 +16,7 @@ on:
       new_domain:
         description: 'Domain baru pengganti'
         required: false
-        default: 'tolvixa.today'
+        default: 'yorqemi.digital'
         type: string
 
 permissions:

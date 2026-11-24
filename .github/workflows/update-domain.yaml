@@ -1,4 +1,4 @@
-name: Update Domain (pulvexa.space -> nixvaro.digital)
+name: Update Domain (pulvexa.space -> qavunexi.xyz)
 
 on:
   # 🔄 Jadwal: setiap hari jam 02:00 UTC (untuk update otomatis)
@@ -16,7 +16,7 @@ on:
       new_domain:
         description: 'Domain baru pengganti'
         required: false
-        default: 'nixvaro.digital'
+        default: 'qavunexi.xyz'
         type: string
 
 permissions:
